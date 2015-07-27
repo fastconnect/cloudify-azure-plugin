@@ -1,21 +1,18 @@
-# Azure Cloudify 3 Driver 
+cloudify-plugin-template
+========================
 
-* **Description**: Cloudify 3 Driver for Azure
-* **Compatible OS**:
- * ...
+* Master Branch [![Build Status](https://travis-ci.org/cloudify-cosmo/cloudify-plugin-template.svg?branch=master)](https://travis-ci.org/cloudify-cosmo/cloudify-plugin-template)
 
-Features
---
-...
+Cloudify plugin project template.
 
-Limitations
---
-* ...
+## Usage
 
-Tested on
---
- * ...
+See [Plugin Authoring Guide](http://getcloudify.org/guide/3.2/plugins-authoring.html)
 
-Utilisation
---
-...
+## Tests
+
+To run the example plugin tests, the included `dev-requirements.txt` should be installed.
+
+```
+pip install -r dev-requirements.txt
+```
