@@ -1,4 +1,4 @@
-########
+﻿########
 # Copyright (c) 2014 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +21,12 @@ from setuptools import setup
 setup(
 
     # Do not use underscores in the plugin name.
-    name='ENTER-PLUGIN-NAME-HERE',
+    name='cloudify-azure-plugin',
 
     version='0.1',
-    author='ENTER-AUTHOR-HERE',
+    author='fastconnect',
     author_email='ENTER-AUTHOR-EMAIL-HERE',
-    description='ENTER-DESCRIPTION-HERE',
+    description='The plugin designed to execute Cloudify 3 on Azure',
 
     # This must correspond to the actual packages in the plugin.
     packages=['plugin'],
@@ -36,9 +36,11 @@ setup(
     install_requires=[
         # Necessary dependency for developing plugins, do not remove!
         "cloudify-plugins-common>=3.2"
+        "azure"
     ],
     test_requires=[
         "cloudify-dsl-parser>=3.2"
         "nose"
+        "azure"
     ]
 )

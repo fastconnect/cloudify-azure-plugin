@@ -1,13 +1,40 @@
-plugins:
-  # Name could be anything, this name is what appears on the beginning of operation
-  # mappings.
-  plugin_name:
-    # Could be 'central_deployment_agent' or 'host_agent'.
-    # If 'central_deployment_agent', this plugin will be executed on the
-    # deployment dedicated agent, other wise it will be executed on the host agent.
-    executor: host_agent
+##################################################################################
+# Cloudify Azure built in types and plugins definitions.
+##################################################################################
 
-    # URL to archive containing the plugin or name of directory containing
-    # the plugin if it is included in the the blueprint directory under the
-    # "plugins" directory.
+plugins:
+  azure:
+    executor: central_deployment_agent
     source: https://github.com/cloudify-cosmo/cloudify-plugin-template/archive/3.2.zip
+
+node_types:
+    cloudify.azure.nodes.Instance:
+        derived_from: cloudify.nodes.Compute
+        properties:
+            subscription_id:
+                description: The ID of the Azure subscription.
+                type: string
+            certificate:
+                description: The certificate to use to connect to the subscription.
+                type: string
+            image_id:
+                description: >
+                    The ID of the image to use on Azure.
+                type: string
+            instance_type:
+                description: >
+                    The instance's size.
+                type: string
+        interfaces:
+              cloudify.interfaces.lifecycle:
+                create:
+                  implementation: azure.instance.run_instances
+                start:
+                  implementation: azure.instance.start
+                stop:
+                  implementation: azure.instance.stop
+                delete:
+                  implementation: azure.instance.terminate
+          #cloudify.interfaces.validation:
+          #      creation:
+          #        implementation: aws.ec2.instance.creation_validation
