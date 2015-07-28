@@ -1,5 +1,5 @@
-from plugin import utils
-from azure import servicemanagement
+﻿from plugin import utils
+from azure.servicemanagement import ServiceManagementService
 
 class AzureConnectionClient():
     """Provides functions for getting the Azure Service Management Service

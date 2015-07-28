@@ -1,4 +1,4 @@
-########
+﻿########
 # Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 import os
 
 # Cloudify Imports
-from ec2 import constants
+from plugin import constants
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 

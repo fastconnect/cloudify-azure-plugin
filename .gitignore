@@ -42,3 +42,9 @@ nosetests.xml
 .noseids
 
 .pyproj
+*.suo
+/src
+/.rnd
+*.pyproj
+*.user
+*.sln
