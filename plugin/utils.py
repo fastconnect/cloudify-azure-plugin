@@ -46,8 +46,8 @@ def log_available_resources(list_of_resources):
 
 
 def get_external_resource_id_or_raise(operation, ctx_instance):
-    """
-    Checks if the EXTERNAL_RESOURCE_ID runtime_property is set and returns it.
+    """Checks if the EXTERNAL_RESOURCE_ID runtime_property is set,
+    and returns it.
 
     :param operation: A string representing what is happening.
     :param ctx_instance: The CTX Node-Instance Context.
