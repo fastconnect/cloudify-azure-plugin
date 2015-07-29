@@ -2,6 +2,10 @@
 from plugin import utils
 from plugin import constants
 from plugin import connection
+from azure.servicemanagement import (ServiceManagementService,
+                                     LinuxConfigurationSet,
+                                     OSVirtualHardDisk
+                                     )
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 from cloudify.decorators import operation
@@ -14,7 +18,7 @@ def creation_validation(**_):
         utils.validate_node_property(property_key, ctx.node.properties)
 
 @operation
-def run_instances(**_):
+def start(**_):
     
     azure_client = connection.AzureConnectionClient().client()
 
@@ -26,9 +30,9 @@ def run_instances(**_):
     )
 
     os_hd = OSVirtualHardDisk(ctx.node.properties['image_id'], 
-                              ctx.node.properties['storage_account_URL'])
+                              ctx.node.properties['storage_account_url'])
 
-    azure_client.create_deployment(
+    azure_client.create_virtual_machine_deployment(
         service_name=ctx.node.properties['cloud_service'],
         deployment_name=ctx.node.properties['name'],
         deployment_slot='production',

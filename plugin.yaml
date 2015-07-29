@@ -31,8 +31,6 @@ node_types:
                     the machine should be stored.
         interfaces:
               cloudify.interfaces.lifecycle:
-                create:
-                  implementation: azure.instance.run_instances
                 start:
                   implementation: azure.instance.start
                 stop:

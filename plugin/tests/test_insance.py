@@ -5,13 +5,12 @@ from plugin import constants
 from plugin import connection
 from plugin import instance
 
-from cloudify import ctx
+from cloudify.state import current_ctx
+from cloudify.mocks import MockCloudifyContext
 from cloudify.exceptions import NonRecoverableError
-from cloudify.decorators import operation
 
 TEST_LINUX_IMAGE_ID = \
-    'b39f27a8b8c64d52b05eac6a62ebad85__\
-    Ubuntu-14_10-amd64-server-20150723-en-us-30GB'
+    'b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-14_04_2_LTS-amd64-server-20150309-en-us-30GB'
 SUBSCRIPTION = '3121df85-fac7-48ec-bd49-08c2570686d0'
 
 class TestInstance(testtools.TestCase):
@@ -24,20 +23,17 @@ class TestInstance(testtools.TestCase):
         test_properties = {
             'subscription': SUBSCRIPTION,
             'certificate' : './azure.pem',
-            'name': 'TEST_LINUX',
+            'name': 'testLinuxPython',
             'image_id': TEST_LINUX_IMAGE_ID,
             'storage_account_url': 'https://pythonstorage.blob.core.windows.net/pythonlinuxvhd/test_linux.vhd',
             'cloud_service': 'linuxPythonTest'
         }
 
-        ctx = MockCloudifyContext(
-            properties=test_properties,
-            operation=operation
-        )
+        return MockCloudifyContext(node_id='test',
+                                   properties=test_properties)
 
-        return ctx
 
-    def test_create_instance(self):
+    def test_start(self):
         ctx = self.mock_ctx()
         current_ctx.set(ctx=ctx)
-        self.assertEqual('Deploying', instance.run_instances(ctx=ctx))
+        self.assertEqual('Deploying', instance.start(ctx=ctx))
