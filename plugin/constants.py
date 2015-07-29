@@ -19,7 +19,10 @@ INSTANCE_STATE_STARTED = 16
 INSTANCE_STATE_TERMINATED = 48
 INSTANCE_STATE_STOPPED = 80
 
-INSTANCE_REQUIRED_PROPERTIES = ['subscription', 'certificate']
+INSTANCE_REQUIRED_PROPERTIES = [
+    'image_id', 'instance_type', 'cloud_service',
+    'affinity_group', 'storage_account_url'
+]
 
 INSTANCE_INTERNAL_ATTRIBUTES = \
     ['private_dns_name', 'public_dns_name', 'public_ip_address', 'ip']

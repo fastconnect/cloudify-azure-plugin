@@ -11,11 +11,8 @@ node_types:
     cloudify.azure.nodes.Instance:
         derived_from: cloudify.nodes.Compute
         properties:
-            subscription_id:
-                description: The ID of the Azure subscription.
-                type: string
-            certificate:
-                description: The certificate to use to connect to the subscription.
+            name:
+                description: The name of the machine
                 type: string
             image_id:
                 description: >
@@ -25,16 +22,21 @@ node_types:
                 description: >
                     The instance's size.
                 type: string
+            cloud_service:
+                description: The cloud service where the machine should be deployed.
+                type: string
+            storage_account_url:
+                description: > 
+                    The URL of the storage account where the OS hard disk of 
+                    the machine should be stored.
         interfaces:
               cloudify.interfaces.lifecycle:
-                create:
-                  implementation: azure.instance.run_instances
                 start:
                   implementation: azure.instance.start
                 stop:
                   implementation: azure.instance.stop
                 delete:
                   implementation: azure.instance.terminate
-          #cloudify.interfaces.validation:
-          #      creation:
-          #        implementation: aws.ec2.instance.creation_validation
+        cloudify.interfaces.validation:
+            creation:
+                implementation: azure.instance.creation_validation
