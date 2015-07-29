@@ -16,7 +16,7 @@ class TestConnection(testtools.TestCase):
             node_id=test_name,
             properties={
                 'subscription': '3121df85-fac7-48ec-bd49-08c2570686d0',
-                'certificate' : 'C:\\Users\\devandie\\azure.pem'
+                'certificate' : './azure.pem'
             }
         )
 
