@@ -7,6 +7,7 @@ from azure.servicemanagement import ServiceManagementService
 from plugin import connection
 from plugin import constants
 
+
 class TestConnection(testtools.TestCase):
 
     def get_mock_context(self, test_name):
@@ -16,7 +17,7 @@ class TestConnection(testtools.TestCase):
             node_id=test_name,
             properties={
                 'subscription': '3121df85-fac7-48ec-bd49-08c2570686d0',
-                'certificate' : './azure.pem'
+                'certificate': './azure.pem'
             }
         )
 
