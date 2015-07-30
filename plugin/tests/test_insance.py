@@ -1,4 +1,4 @@
-import testtools
+﻿import testtools
 
 from plugin import utils
 from plugin import constants
@@ -37,3 +37,8 @@ class TestInstance(testtools.TestCase):
         ctx = self.mock_ctx()
         current_ctx.set(ctx=ctx)
         self.assertEqual('Deploying', instance.start(ctx=ctx))
+
+    def test_conflict(self):
+        ctx = self.mock_ctx()
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(NonRecoverableError, instance.start, ctx=ctx)

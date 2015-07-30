@@ -6,6 +6,9 @@ from azure.servicemanagement import (ServiceManagementService,
                                      LinuxConfigurationSet,
                                      OSVirtualHardDisk
                                      )
+from azure import (WindowsAzureConflictError,
+                   WindowsAzureError
+                   )
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 from cloudify.decorators import operation
@@ -34,16 +37,23 @@ def start(**_):
     os_hd = OSVirtualHardDisk(ctx.node.properties['image_id'],
                               ctx.node.properties['storage_account_url'])
 
-    azure_client.create_virtual_machine_deployment(
-        service_name=ctx.node.properties['cloud_service'],
-        deployment_name=ctx.node.properties['name'],
-        deployment_slot='production',
-        label=ctx.node.properties['name'],
-        role_name=ctx.node.properties['name'],
-        system_config=linux_config,
-        os_virtual_hard_disk=os_hd,
-        role_size='Small'
-        )
+    try:
+        azure_client.create_virtual_machine_deployment(
+            service_name=ctx.node.properties['cloud_service'],
+            deployment_name=ctx.node.properties['name'],
+            deployment_slot='production',
+            label=ctx.node.properties['name'],
+            role_name=ctx.node.properties['name'],
+            system_config=linux_config,
+            os_virtual_hard_disk=os_hd,
+            role_size='Small'
+            )
+    except WindowsAzureConflictError as e:
+        raise NonRecoverableError.message('ERROR: Conflict error,\
+                                           already used name'
+                                         )
+    except WindowsAzureError as e:
+        raise NonRecoverableError.message('ERROR: {0}'.format(e))
 
     status = azure_client.get_deployment_by_name(
                             ctx.node.properties['cloud_service'],

@@ -41,14 +41,9 @@ RUN_INSTANCE_PARAMETERS = {
     'network_interfaces': None, 'dry_run': False
 }
 
-#INSTANCE_SECURITY_GROUP_RELATIONSHIP = 'instance_connected_to_security_group'
-#INSTANCE_KEYPAIR_RELATIONSHIP = 'instance_connected_to_keypair'
-
-# securitygroup module constants
-SECURITY_GROUP_REQUIRED_PROPERTIES = ['description', 'rules']
-
-# keypair module constants
-KEYPAIR_REQUIRED_PROPERTIES = ['private_key_path']
+REQUEST_SUCCEEDED = 'Succeeded'
+REQUEST_IN_PROGRESS = 'InProgress'
+REQUEST_FAILED = 'Failed'
 
 # config
 NODE_INSTANCE = 'node-instance'
