@@ -8,7 +8,7 @@ from azure.servicemanagement import (ServiceManagementService,
                                      LinuxConfigurationSet,
                                      OSVirtualHardDisk,
                                      )
-from azure.storage import BlobService
+from azure.storage.blobservice import BlobService
 from azure import (WindowsAzureConflictError,
                    WindowsAzureError
                    )
@@ -31,24 +31,33 @@ def start(**_):
 
     azure_client = connection.AzureConnectionClient().client()
 
-    linux_config = LinuxConfigurationSet(ctx.node.properties['name'],
-        'administrateur',
-        'Azerty@01',
-        disable_ssh_password_authentication=False)
+    linux_config = LinuxConfigurationSet(
+                        ctx.node.properties['name'],
+                        'administrateur',
+                        'Azerty@01',
+                        disable_ssh_password_authentication=False
+                        )
 
     blob_service = connection.AzureConnectionClient().storageClient()
 
-    blob_url = blob_service.make_blob_url(ctx.node.properties['storage_container'],
+    blob_url = blob_service.make_blob_url(
+                    ctx.node.properties['storage_container'],
                     '{0}.vhd'.format(ctx.node.properties['name']),
-                    ctx.node.properties['storage_account'])
+                    ctx.node.properties['storage_account']
+                    )
 
     os_hd = OSVirtualHardDisk(ctx.node.properties['image_id'],
-                              blob_url)
+                              blob_url
+                              )
 
-    ctx.logger.info('Trying to deploy {0} {1} {2}'
-                    .format(ctx.node.properties['cloud_service'],
-                        ctx.node.properties['name'],
-                        blob_url))
+    ctx.logger.info(
+            'Trying to deploy {0} {1} {2}'.format(
+                    ctx.node.properties['cloud_service'],
+                    ctx.node.properties['name'],
+                    blob_url
+                    )
+            )
+
     utils.azure_request(ctx,azure_client, 'create_virtual_machine_deployment',
                         service_name=ctx.node.properties['cloud_service'],
                         deployment_name=ctx.node.properties['name'], 
@@ -60,12 +69,16 @@ def start(**_):
                         role_size='Small'
                         )
    
-    status = azure_client.get_deployment_by_name(ctx.node.properties['cloud_service'],
-                            ctx.node.properties['name']).status
+    status = azure_client.get_deployment_by_name(
+                            ctx.node.properties['cloud_service'],
+                            ctx.node.properties['name']
+                            ).status
 
     ctx.logger.info('{0} instance is {1}'
                     .format(ctx.node.properties['name'],
-                        status))
+                            status
+                            )
+                    )
     return status
 
 

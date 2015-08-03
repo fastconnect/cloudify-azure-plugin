@@ -1,6 +1,6 @@
 ﻿from plugin import utils
 from azure.servicemanagement import ServiceManagementService
-from azure.storage import BlobService
+from azure.storage.blobservice import BlobService
 
 
 class AzureConnectionClient():
@@ -21,8 +21,8 @@ class AzureConnectionClient():
                                         azure_certificate)
 
     def storageClient(self):
-        '''Represents the AzureConnection to storage Service from Azure
-        '''
+        """Represents the AzureConnection to storage Service from Azure
+        """
         keys_storage = (self.client()).get_storage_account_keys(
                                      self._get_storage_account())
 
