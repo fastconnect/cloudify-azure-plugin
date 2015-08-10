@@ -1,6 +1,8 @@
-﻿from plugin import utils
-from azure.servicemanagement import ServiceManagementService
-from azure.storage.blobservice import BlobService
+﻿import constants
+import utils
+import requests
+from cloudify import ctx
+from plugin import utils
 
 
 class AzureConnectionClient():
@@ -9,39 +11,73 @@ class AzureConnectionClient():
 
     def __init__(self):
         self.connection = None
+        self.token = None
+        self._get_token()
 
-    def client(self):
-        """Represents the AzureConnection Client
-        """
+    def azure_get(self, ctx, path, header={}):
+        path = '{}/{}?api-version={}'.format(constants.AZURE_API_URL, path,
+                                             constants.AZURE_API_VERSION
+                                             )
+        header.update({'Content-Type':'application/json', 
+                       'Authorization':'Bearer {}'.format(self.token)
+                       })
+        ctx.logger.debug('Requests get: {} with header {}'.format(path, header))
+        return self._azure_response(requests.get(path,headers=header))
 
-        azure_subscription = self._get_azure_subscription()
-        azure_certificate = self._get_azure_certificate()
 
-        return ServiceManagementService(azure_subscription,
-                                        azure_certificate)
+    def azure_post(self, ctx, path, data, header={}):
+         path = '{}/{}?api-version={}'.format(constants.AZURE_API_URL, path,
+                                              constants.AZURE_API_VERSION
+                                              )
+         header.update({'Content-Type':'application/json', 
+                       'Authorization':'Bearer {}'.format(self.token)
+                       })
+         return self._azure_response(requests.post(path,headers=header,json=data))
 
-    def storageClient(self):
-        """Represents the AzureConnection to storage Service from Azure
-        """
-        keys_storage = (self.client()).get_storage_account_keys(
-                                     self._get_storage_account())
 
-        return BlobService(
-                    account_name= self._get_storage_account(),
-                    account_key=keys_storage.storage_service_keys.primary
+    def _get_token(self):
+        if self.token is None:
+            payload = {
+                'grant_type': 'password',
+                'client_id': constants.APPLICATION_ID,
+                'username': ctx.node.properties['username'],
+                'password': ctx.node.properties['password'],
+                'resource': constants.RESOURCE_CONNECTION_URL,
+            }
+            ctx.logger.info('Getting token from Azure...')
+            json = self._azure_response(requests.post(constants.TOKEN_URL,
+                                                 data=payload
+                                                 )
+                                   )
+            ctx.logger.info('Token\'s been successfully taken from Azure')
+            self.token = json['access_token']
+        else:
+            ctx.logger.debug('Token\'s been already taken. Reusing it.')
+
+
+    def _azure_response(self, response):
+        json = response.json()
+        ctx.logger.debug('Request : {}'.format(response.request.body))
+        if response.status_code != 200:
+            ctx.logger.debug('Raise WindowsAzureError: {}'.format(json))
+            if json.get('error_description'):
+                message = 'Error {}: {}'.format(
+                    response.status_code,
+                    json['error_description']
                     )
-
-    def _get_azure_subscription(self):
-        node_properties = \
-            utils.get_instance_or_source_node_properties()
-        return node_properties["subscription"]
-
-    def _get_azure_certificate(self):
-        node_properties = \
-            utils.get_instance_or_source_node_properties()
-        return node_properties["certificate"]
-
-    def _get_storage_account(self):
-        node_properties = \
-            utils.get_instance_or_source_node_properties()
-        return node_properties["storage_account"]
+            elif json.get('error'):
+                message = 'Error {}: {}, {}'.format(
+                    response.status_code,
+                    json['error']['code'],
+                    json['error']['message']
+                    )
+            else:
+                message = 'Error {}: Unknwn error.'.format(
+                                        response.status_code
+                                        )
+            raise utils.WindowsAzureError(
+                    response.status_code,
+                    message
+                    )
+        else:
+            return json

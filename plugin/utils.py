@@ -20,7 +20,6 @@ import os
 from plugin import constants
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
-from azure import WindowsAzureError
 
 
 def validate_node_property(key, ctx_node_properties):
@@ -105,3 +104,11 @@ def azure_request(ctx, service_management, request, *args,**kwargs):
     except WindowsAzureError as e:
         ctx.logger.info('WindowsAzureError: {0}'.format(e.message))
         raise NonRecoverableError()
+
+class WindowsAzureError(Exception):
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
+
+    def __str__(self):
+        return 'Error {}: {}.'.format(self.code, self.message)
