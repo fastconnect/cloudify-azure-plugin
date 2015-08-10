@@ -1,6 +1,7 @@
 ﻿import constants
 import utils
 import requests
+import re
 from cloudify import ctx
 from plugin import utils
 
@@ -35,6 +36,26 @@ class AzureConnectionClient():
          return self._azure_response(requests.post(path,headers=header,json=data))
 
 
+    def azure_put(self, ctx, path, data={}, header={}):
+         path = '{}/{}?api-version={}'.format(constants.AZURE_API_URL, path,
+                                              constants.AZURE_API_VERSION
+                                              )
+         header.update({'Content-Type':'application/json', 
+                       'Authorization':'Bearer {}'.format(self.token)
+                       })
+         return self._azure_response(requests.put(path,headers=header,json=data))
+
+
+    def azure_delete(self, ctx, path, header={}):
+         path = '{}/{}?api-version={}'.format(constants.AZURE_API_URL, path,
+                                              constants.AZURE_API_VERSION
+                                              )
+         header.update({'Content-Type':'application/json', 
+                       'Authorization':'Bearer {}'.format(self.token)
+                       })
+         return self._azure_response(requests.delete(path,headers=header))
+
+
     def _get_token(self):
         if self.token is None:
             payload = {
@@ -48,7 +69,7 @@ class AzureConnectionClient():
             json = self._azure_response(requests.post(constants.TOKEN_URL,
                                                  data=payload
                                                  )
-                                   )
+                                   ).json()
             ctx.logger.info('Token\'s been successfully taken from Azure')
             self.token = json['access_token']
         else:
@@ -56,9 +77,10 @@ class AzureConnectionClient():
 
 
     def _azure_response(self, response):
-        json = response.json()
-        ctx.logger.debug('Request : {}'.format(response.request.body))
-        if response.status_code != 200:
+        ctx.logger.debug('Request : {}'.format(response.headers))
+
+        if not re.match(r'(^2+)', '{}'.format(response.status_code)):
+            json = response.json()
             ctx.logger.debug('Raise WindowsAzureError: {}'.format(json))
             if json.get('error_description'):
                 message = 'Error {}: {}'.format(
@@ -80,4 +102,4 @@ class AzureConnectionClient():
                     message
                     )
         else:
-            return json
+            return response

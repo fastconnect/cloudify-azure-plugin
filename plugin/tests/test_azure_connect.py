@@ -1,4 +1,5 @@
 ﻿import testtools
+import requests
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
@@ -18,9 +19,11 @@ class TestConnection(testtools.TestCase):
             node_id=test_name,
             properties={
                 'username': 'api@louisdevandierefastconnect.onmicrosoft.com',
-                'password': 'Azerty@01'
+                'password': 'Azerty@01',
+                'subscription_id': '3121df85-fac7-48ec-bd49-08c2570686d0'
             }
         )
+
 
     def test_connect(self):
         """ this tests that a the correct region endpoint
@@ -50,12 +53,14 @@ class TestConnection(testtools.TestCase):
         azure_connection = connection.AzureConnectionClient()
         json = azure_connection.azure_get(
                 ctx, 
-                'subscriptions/3121df85-fac7-48ec-bd49-08c2570686d0'
-                )
+                'subscriptions/{}'.format(
+                    ctx.node.properties['subscription_id']
+                    )
+                ).json()
         ctx.logger.debug(json)
         self.assertIsNotNone(json)
         self.assertEqual(json['subscriptionId'], 
-                         '3121df85-fac7-48ec-bd49-08c2570686d0'
+                         ctx.node.properties['subscription_id']
                          )
 
 
@@ -64,12 +69,11 @@ class TestConnection(testtools.TestCase):
         current_ctx.set(ctx=ctx)
 
         azure_connection = connection.AzureConnectionClient()
-        self.assertRaises(
-            WindowsAzureError,
-            azure_connection.azure_get,
-                ctx, 
-                'subscriptions/3121df85-fac7-48ec-bd49-08c257068650'
-            )
+        self.assertRaises(WindowsAzureError,
+                          azure_connection.azure_get,
+                          ctx, 
+                          'subscriptions/3121df85-fac7-48ec-bd49-08c257068600'
+                          )
 
     def test_azure_post(self):
         ctx = self.get_mock_context('test_connect')
@@ -84,7 +88,7 @@ class TestConnection(testtools.TestCase):
             ctx, 
             'providers/microsoft.resources/checkresourcename',
             data
-            )
+            ).json()
 
         self.assertEqual(json['status'], 'Allowed')
 
@@ -104,3 +108,63 @@ class TestConnection(testtools.TestCase):
                           data
                           )
 
+    def test_azure_put(self):
+        ctx = self.get_mock_context('test_connect')
+        current_ctx.set(ctx=ctx)
+
+        azure_connection = connection.AzureConnectionClient()
+
+        json = azure_connection.azure_put(
+                ctx,
+                'subscriptions/{}/tagNames/test_tag'.format(
+                        ctx.node.properties['subscription_id']
+                        )
+                 ).json()
+
+        self.assertEqual(json['tagName'], 'test_tag')
+
+
+    def test_azure_put_fails(self):
+        ctx = self.get_mock_context('test_connect')
+        current_ctx.set(ctx=ctx)
+
+        azure_connection = connection.AzureConnectionClient()
+
+        self.assertRaises(WindowsAzureError,
+                          azure_connection.azure_put,
+                          ctx, 
+                          'subscriptions/{}/tagName/test tag'.format(
+                                ctx.node.properties['subscription_id']
+                                )
+                          )
+
+
+    def test_azure_delete(self):
+        ctx = self.get_mock_context('test_connect')
+        current_ctx.set(ctx=ctx)
+
+        azure_connection = connection.AzureConnectionClient()
+        response = azure_connection.azure_delete(
+                    ctx,
+                    'subscriptions/{}/tagNames/{}'.format(
+                        ctx.node.properties['subscription_id'],
+                        'test_tag'
+                        )
+                    )
+
+        self.assertEqual(response.status_code, requests.codes.ok)
+
+
+    def test_azure_delete_fails(self):
+        ctx = self.get_mock_context('test_connect')
+        current_ctx.set(ctx=ctx)
+
+        azure_connection = connection.AzureConnectionClient()
+
+        self.assertRaises(WindowsAzureError,
+                          azure_connection.azure_delete,
+                          ctx, 
+                          'subscriptions/{}/tagName/test tag'.format(
+                                ctx.node.properties['subscription_id']
+                                )
+                          )
