@@ -1,4 +1,4 @@
-﻿import testtools
+import testtools
 import time
 
 from plugin import utils
@@ -25,13 +25,25 @@ class TestInstance(testtools.TestCase):
         """
 
         test_properties = {
-            'subscription': SUBSCRIPTION,
-            'certificate' : './azure.pem',
-            'name': test_name,
-            'image_id': TEST_LINUX_IMAGE_ID,
-            'storage_account': 'pythonstorage',
-            'storage_container': 'pythonlinuxvhd',
-            'cloud_service': 'linuxPythonTest'
+            'subscription_id': '3121df85-fac7-48ec-bd49-08c2570686d0',
+            'username': 'api@louisdevandierefastconnect.onmicrosoft.com', 
+            'password': 'Azerty@01',
+            'location': 'westeurope',
+            'publisherName': 'Canonical',
+            'offer': 'UbuntuServer',
+            'sku': '12.04.5-LTS',
+            'version': 'latest',
+            'flavor_id': 'Standard_A1',
+            'compute_name': 'cloudifycompute',
+            'compute_user': 'administrateur',
+            'compute_password': 'Cloud?db',
+            'resources_prefix': 'boulay',
+            'network_interface_name': 'cloudifynic',
+            'os_disk_name': 'cloudifystorageaccount',
+            'create_option':'FormImage',
+            'resource_group_name': 'cloudifygroup',
+            'management_network_name': 'cloudifynetwork',
+            'management_subnet_name': 'cloudifysubnet'
         }
 
         return MockCloudifyContext(node_id='test',
@@ -45,12 +57,18 @@ class TestInstance(testtools.TestCase):
     def tearDown(self):
         super(TestInstance, self).tearDown()
 
+
+    def test_create(self):
+        ctx = self.mock_ctx('teststart')
+        current_ctx.set(ctx=ctx)
+        self.assertTrue(True)
+        instance.create()
 '''
-    def test_start(self):
+    def test_delete(self):
         ctx = self.mock_ctx('teststart')
         current_ctx.set(ctx=ctx)
         assertTrue(True)
-
+        instance.delete()
 
     def test_conflict(self):
         ctx = self.mock_ctx('testconflict')

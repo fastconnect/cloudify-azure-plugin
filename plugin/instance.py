@@ -3,94 +3,101 @@
 from plugin import utils
 from plugin import constants
 from plugin import connection
-#Azure imports
-from azure.servicemanagement import (ServiceManagementService,
-                                     LinuxConfigurationSet,
-                                     OSVirtualHardDisk,
-                                     )
-from azure.storage.blobservice import BlobService
-from azure import (WindowsAzureConflictError,
-                   WindowsAzureError
-                   )
+
 #Cloudify imports
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 from cloudify.decorators import operation
 
+def create(**_):
+   	utils.validate_node_property('subscription_id',ctx.node.properties)
+   	utils.validate_node_property('resource_group_name',ctx.node.properties)
+   	utils.validate_node_property('compute_name',ctx.node.properties)
+	utils.validate_node_property('location',ctx.node.properties)
+	utils.validate_node_property('flavor_id',ctx.node.properties)
+	utils.validate_node_property('publisherName',ctx.node.properties)
+	utils.validate_node_property('offer',ctx.node.properties)
+	utils.validate_node_property('sku',ctx.node.properties)
+	utils.validate_node_property('version',ctx.node.properties)
+	utils.validate_node_property('network_interface_name',ctx.node.properties)
+	utils.validate_node_property('os_disk_name',ctx.node.properties)
+	utils.validate_node_property('create_option',ctx.node.properties)
+	utils.validate_node_property('compute_user',ctx.node.properties)
+	utils.validate_node_property('compute_password',ctx.node.properties)
 
-@operation
-def creation_validation(**_):
-    """ This checks that all user supplied info is valid """
+	subscription_id = ctx.node.properties['subscription_id']
+	api_version = constants.AZURE_API_VERSION
+	vm_name = ctx.node.properties['compute_name']
+	resource_group_name = ctx.node.properties['resource_group_name']
+	vm_type = "Microsoft.Compute/virtualMachines"
+	location = ctx.node.properties['location']
+	vm_size= ctx.node.properties['flavor_id']
+	publisher=ctx.node.properties['publisherName']
+	offer=ctx.node.properties['offer']
+	sku=ctx.node.properties['sku']
+	distro_version=ctx.node.properties['version']
+	network_interface_name=ctx.node.properties['network_interface_name']
+	os_disk_name=ctx.node.properties['os_disk_name']
+	create_option=ctx.node.properties['create_option']
+	os_disk_vhd="https://{0}.blob.core.windows.net/vhds/{0}.vhd".format(os_disk_name)
+	computer_name=ctx.node.properties['compute_name']
+	network_interface=ctx.node.properties['network_interface_name']
+	admin_username=ctx.node.properties['compute_user']
+	admin_password=ctx.node.properties['compute_password']
 
-    for property_key in constants.INSTANCE_REQUIRED_PROPERTIES:
-        utils.validate_node_property(property_key, ctx.node.properties)
+	json = {
+	    'id':'/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}'.format(subscription_id, resource_group_name, vm_name),
+	    'name':str(vm_name),
+	    'type':'Microsoft.Compute/virtualMachines',
+	    'location': str(location),
+	    'properties':{
+	        'hardwareProfile':{
+	            'vmSize': str(vm_size)
+	         },
+	        'osProfile':{
+	            'computerName': str(computer_name),
+	            'adminUsername': str(admin_username),
+	            'adminPassword': str(admin_password),
+	            'linuxConfiguration':{'disablePasswordAuthentication': 'false'}
+	        },
+	        'storageProfile':{
+	            'imageReference':{
+	                'publisher': str(publisher),
+	                'offer': str(offer),
+	                'sku': str(sku),
+	                'version': str(distro_version)
+	            },
+	            'osDisk':{
+	                'vhd':{
+	                    'uri': str(os_disk_vhd)
+	                },
+	                "caching":"ReadWrite",
+	                'name': str(os_disk_name),
+	                'createOption': str(create_option)
+	            }
+	        },
+	        'networkProfile':{
+	            'networkInterfaces':
+	            [
+	            {
+	                'id':'/subscriptions/{}/resourcegroups/{}/providers/Microsoft.Network/networkInterfaces/{}'.format(subscription_id, resource_group_name, network_interface)
+	            }
+	            ]
+	        }
+	    }
+	}
 
+	connection.AzureConnectionClient().azure_put(ctx, "subscriptions/{}/resourcegroups/{}/providers/Microsoft.Compute/virtualMachines/{}?validating=true&api-version={}".format(subscription_id, resource_group_name, vm_name, api_version) , json=json)
 
-@operation
-def start(**_):
+def delete(**_):
+    utils.validate_node_property('subscription_id',ctx.node.properties)
+    utils.validate_node_property('compute_name',ctx.node.properties)
+    utils.validate_node_property('resource_group_name',ctx.node.properties)
 
-    azure_client = connection.AzureConnectionClient().client()
+    subscription_id = ctx.node.properties['subscription_id']
+    api_version = constants.AZURE_API_VERSION
+    vm_name = ctx.node.properties['compute_name']
+    resource_group_name = ctx.node.properties['resource_group_name']
 
-    linux_config = LinuxConfigurationSet(
-                        ctx.node.properties['name'],
-                        'administrateur',
-                        'Azerty@01',
-                        disable_ssh_password_authentication=False
-                        )
-
-    blob_service = connection.AzureConnectionClient().storageClient()
-
-    blob_url = blob_service.make_blob_url(
-                    ctx.node.properties['storage_container'],
-                    '{0}.vhd'.format(ctx.node.properties['name']),
-                    ctx.node.properties['storage_account']
-                    )
-
-    os_hd = OSVirtualHardDisk(ctx.node.properties['image_id'],
-                              blob_url
-                              )
-
-    ctx.logger.info(
-            'Trying to deploy {0} {1} {2}'.format(
-                    ctx.node.properties['cloud_service'],
-                    ctx.node.properties['name'],
-                    blob_url
-                    )
-            )
-
-    utils.azure_request(ctx,azure_client, 'create_virtual_machine_deployment',
-                        service_name=ctx.node.properties['cloud_service'],
-                        deployment_name=ctx.node.properties['name'], 
-                        deployment_slot='production',
-                        label=ctx.node.properties['name'],
-                        role_name=ctx.node.properties['name'],
-                        system_config=linux_config,
-                        os_virtual_hard_disk=os_hd,
-                        role_size='Small'
-                        )
-   
-    status = azure_client.get_deployment_by_name(
-                            ctx.node.properties['cloud_service'],
-                            ctx.node.properties['name']
-                            ).status
-
-    ctx.logger.info('{0} instance is {1}'
-                    .format(ctx.node.properties['name'],
-                            status
-                            )
-                    )
-    return status
-
-
-@operation
-def stop(**_):
-
-    azure_client = connection.AzureConnectionClient().client()
-
-    utils.azure_request(ctx, azure_client, 'delete_deployment',
-                        ctx.node.properties['cloud_service'],
-                        ctx.node.properties['name'], 
-                        True
-                        )
-
-    return constants.REQUEST_SUCCEEDED
+    connection.AzureConnectionClient().azure_delete(ctx, "subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}?api-version={}".format(subscription_id, resource_group_name, vm_name, api_version))
+	
