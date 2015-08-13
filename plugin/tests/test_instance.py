@@ -40,7 +40,7 @@ class TestInstance(testtools.TestCase):
             'resources_prefix': 'boulay',
             'network_interface_name': 'cloudifynic',
             'storage_account': 'cloudifystorageaccount',
-            'create_option':'FormImage',
+            'create_option':'FromImage',
             'resource_group_name': 'cloudifygroup',
             'management_network_name': 'cloudifynetwork',
             'management_subnet_name': 'cloudifysubnet'
@@ -57,24 +57,34 @@ class TestInstance(testtools.TestCase):
     def tearDown(self):
         super(TestInstance, self).tearDown()
 
-
     def test_create(self):
         ctx = self.mock_ctx('teststart')
         current_ctx.set(ctx=ctx)
-        self.assertTrue(True)
-        instance.create(ctx=ctx)
-'''
+        instance.create(ctx=ctx) 
+
+        current_ctx.set(ctx=ctx)
+        status_vm = constants.CREATING
+        while status_vm == constants.CREATING :
+            status_vm = instance.check_vm_status(ctx=ctx)
+            time.sleep(20)     
+        self.assertEqual( constants.SUCCEEDED, status_vm)
+
     def test_delete(self):
         ctx = self.mock_ctx('teststart')
         current_ctx.set(ctx=ctx)
-        assertTrue(True)
         instance.delete()
 
+        time.sleep(20)
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(
+            utils.WindowsAzureError,
+            instance.check_vm_status,
+            ctx=ctx)
+'''
     def test_conflict(self):
         ctx = self.mock_ctx('testconflict')
         current_ctx.set(ctx=ctx)
         assertTrue(True)
-
 
     def test_stop(self):
         ctx = self.mock_ctx('teststop')

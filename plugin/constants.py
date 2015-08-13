@@ -41,6 +41,12 @@ RUN_INSTANCE_PARAMETERS = {
     'network_interfaces': None, 'dry_run': False
 }
 
+CREATING = 'Creating'
+UPDATING = 'Updating'
+FAILED = 'Failed'
+SUCCEEDED = 'Succeeded'
+DELETING = 'Deleting'
+
 REQUEST_SUCCEEDED = 'Succeeded'
 REQUEST_IN_PROGRESS = 'InProgress'
 REQUEST_FAILED = 'Failed'

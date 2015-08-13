@@ -10,9 +10,32 @@ from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 from cloudify.decorators import operation
 
+def check_vm_status(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('compute_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    api_version = constants.AZURE_API_VERSION_06
+    vm_name = ctx.node.properties['compute_name']
+    resource_group_name = ctx.node.properties['resource_group_name']
+
+    response = connection.AzureConnectionClient().azure_get(
+            ctx, 
+            ("subscriptions/{}/resourcegroups/{}/"+
+            "providers/Microsoft.Compute/virtualMachines"+
+            "/{}?InstanceView&api-version={}").format(
+                subscription_id, 
+                resource_group_name, 
+                vm_name, api_version
+            )
+        )
+    jsonGet = response.json()
+    status_vm = jsonGet['properties']['provisioningState']
+    return status_vm
+
 @operation
 def create(**_):
-    print ctx.task_name
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
     utils.validate_node_property('compute_name', ctx.node.properties)
@@ -134,11 +157,11 @@ def delete(**_):
     resource_group_name = ctx.node.properties['resource_group_name']
 
     connection.AzureConnectionClient().azure_delete(
-            ctx, 
-            ("subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute" + 
-            "/virtualMachines/{}?api-version={}").format(
-                subscription_id, 
-                resource_group_name, 
-                vm_name, api_version
-                )
+        ctx, 
+        ("subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute" + 
+        "/virtualMachines/{}?api-version={}").format(
+            subscription_id, 
+            resource_group_name, 
+            vm_name, api_version
             )
+        )
