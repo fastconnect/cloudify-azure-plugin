@@ -1,4 +1,4 @@
-import testtools
+﻿import testtools
 import time
 
 from plugin import utils
@@ -39,7 +39,7 @@ class TestInstance(testtools.TestCase):
             'compute_password': 'Cloud?db',
             'resources_prefix': 'boulay',
             'network_interface_name': 'cloudifynic',
-            'os_disk_name': 'cloudifystorageaccount',
+            'storage_account': 'cloudifystorageaccount',
             'create_option':'FormImage',
             'resource_group_name': 'cloudifygroup',
             'management_network_name': 'cloudifynetwork',
@@ -62,7 +62,7 @@ class TestInstance(testtools.TestCase):
         ctx = self.mock_ctx('teststart')
         current_ctx.set(ctx=ctx)
         self.assertTrue(True)
-        instance.create()
+        instance.create(ctx=ctx)
 '''
     def test_delete(self):
         ctx = self.mock_ctx('teststart')

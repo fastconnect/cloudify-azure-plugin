@@ -56,8 +56,8 @@ def create(**_):
     admin_password = ctx.node.properties['compute_password']
 
     json = {
-	    'id':'/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute' +
-             '/virtualMachines/{}'.format(subscription_id,
+	    'id':('/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute' +
+             '/virtualMachines/{}').format(subscription_id,
                                          resource_group_name,
                                          vm_name
                                          ),
@@ -96,8 +96,8 @@ def create(**_):
 	            'networkInterfaces':
 	            [
 	            {
-	                'id':'/subscriptions/{}/resourcegroups/{}' + 
-                        '/providers/Microsoft.Network/networkInterfaces/{}'.
+	                'id':('/subscriptions/{}/resourcegroups/{}' + 
+                        '/providers/Microsoft.Network/networkInterfaces/{}').
                         format(
                             subscription_id,
                             resource_group_name, 
@@ -111,8 +111,8 @@ def create(**_):
 
     connection.AzureConnectionClient().azure_put(
         ctx,
-        "subscriptions/{}/resourcegroups/{}/providers/Microsoft.Compute" +
-        "/virtualMachines/{}?validating=true&api-version={}".format(
+        ("subscriptions/{}/resourcegroups/{}/providers/Microsoft.Compute" +
+        "/virtualMachines/{}?validating=true&api-version={}").format(
                     subscription_id, 
                     resource_group_name, 
                     vm_name, 
@@ -135,8 +135,8 @@ def delete(**_):
 
     connection.AzureConnectionClient().azure_delete(
             ctx, 
-            "subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute" + 
-            "/virtualMachines/{}?api-version={}".format(
+            ("subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute" + 
+            "/virtualMachines/{}?api-version={}").format(
                 subscription_id, 
                 resource_group_name, 
                 vm_name, api_version

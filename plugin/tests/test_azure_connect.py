@@ -157,7 +157,7 @@ class TestConnection(testtools.TestCase):
                         )
                     )
 
-        self.assertEqual(response.status_code, requests.codes.ok)
+        self.assertRegexpMatches(str(response.status_code), r'(^2+)')
 
 
     def test_azure_delete_fails(self):

@@ -9,31 +9,58 @@ imports:
     # instead.
     - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
     # relative import of plugin.yaml that resides in the blueprint directory
-    - test_plugin.yaml
+    - ../../../plugin.yaml
 
 inputs:
-    # example input that could be injected by test
-    test_input:
-        description: an input for the test
-        default: default_test_input
+   subscription_id:
+    default: '3121df85-fac7-48ec-bd49-08c2570686d0'
+    type: string
+
+  username:
+    default: 'api@louisdevandierefastconnect.onmicrosoft.com'
+    type: string
+
+  password:
+    default: 'Azerty@01'
+    type: string
+
+  location:
+    default: 'westeurope'
+    type: string
+
+  publisherName:
+    default: 'Canonical'
+    type: string
+
+  offer:
+    default: 'UbuntuServer'
+    type: string
+
+  sku:
+    default: 12.04.5-LTS
+    type: string
+
+  version:
+    default: 'latest'
+    type: string
+
+  flavor_id:
+    default: 'Standard_A1'
+    type: string
 
 node_templates:
-    # defining a single node template that will serve as our test node
-    test_node_template:
-        # using base cloudify type
-        type: cloudify.nodes.Root
-        interfaces:
-            cloudify.interfaces.lifecycle:
-                start:
-                    # here we map the single plugin task to the start operation
-                    # of the cloudify.interfaces.lifecycle interface
-                    implementation: plugin_name.plugin.tasks.my_task
-                    inputs:
-                        # my_task accepts a single property named
-                        # some property. Here we inject this property
-                        # from the input provided by the test
-                        # (or 'default_test_input' if no input was provided)
-                        some_property: { get_input: test_input }
+    agent_server:
+        type: cloudify.azure.nodes.Instance
+     properties:
+        subscription_id: { get_input: subscription_id }
+        username: { get_input: username }
+        password: { get_input: password }
+        location: { get_input: location }
+        publisherName: { get_input: publisherName }
+        offer: { get_input: offer }
+        sku: { get_input: sku }
+        version: { get_input: version }
+        flavor_id: { get_input: flavor_id }
 
 outputs:
     # example output the could be used to simplify assertions by test

@@ -34,11 +34,11 @@ node_types:
         interfaces:
               cloudify.interfaces.lifecycle:
                 create:
-                  implementation: azure.instance.create
+                  implementation: azure.plugin.instance.create
                 stop:
-                  implementation: azure.instance.stop
+                  implementation: azure.plugin.instance.stop
                 delete:
-                  implementation: azure.instance.terminate
+                  implementation: azure.plugin.instance.terminate
         cloudify.interfaces.validation:
             creation:
                 implementation: azure.instance.creation_validation

@@ -17,31 +17,35 @@ class AzureConnectionClient():
 
     def azure_get(self, ctx, path, header={}):
         path = '{}/{}'.format(constants.AZURE_API_URL, path)
+        ctx.logger.debug(path)
         header.update({'Content-Type':'application/json', 
-                       'Authorization':'Bearer {}'.format(self.token)
-                       })
+                        'Authorization':'Bearer {}'.format(self.token)
+                        })
         ctx.logger.debug('Requests get: {} with header {}'.format(path, header))
         return self._azure_response(requests.get(path,headers=header))
 
 
-    def azure_post(self, ctx, path, data, header={}):
-         path = '{}/{}'.format(constants.AZURE_API_URL, path)
-         header.update({'Content-Type':'application/json', 
-                       'Authorization':'Bearer {}'.format(self.token)
-                       })
-         return self._azure_response(requests.post(path,headers=header,json=data))
+    def azure_post(self, ctx, path, json, header={}):
+        path = '{}/{}'.format(constants.AZURE_API_URL, path)
+        ctx.logger.debug(path)
+        header.update({'Content-Type':'application/json', 
+                    'Authorization':'Bearer {}'.format(self.token)
+                    })
+        return self._azure_response(requests.post(path,headers=header,json=json))
 
 
-    def azure_put(self, ctx, path, data={}, header={}):
-         path = '{}/{}'.format(constants.AZURE_API_URL, path)
-         header.update({'Content-Type':'application/json', 
+    def azure_put(self, ctx, path, json={}, header={}):
+        path = '{}/{}'.format(constants.AZURE_API_URL, path)
+        ctx.logger.debug(path)
+        header.update({'Content-Type':'application/json', 
                        'Authorization':'Bearer {}'.format(self.token)
                        })
-         return self._azure_response(requests.put(path,headers=header,json=data))
+        return self._azure_response(requests.put(path,headers=header,json=json))
 
 
     def azure_delete(self, ctx, path, header={}):
          path = '{}/{}'.format(constants.AZURE_API_URL, path)
+         ctx.logger.debug(path)
          header.update({'Content-Type':'application/json', 
                        'Authorization':'Bearer {}'.format(self.token)
                        })
