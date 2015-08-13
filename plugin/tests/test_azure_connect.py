@@ -53,8 +53,9 @@ class TestConnection(testtools.TestCase):
         azure_connection = connection.AzureConnectionClient()
         json = azure_connection.azure_get(
                 ctx, 
-                'subscriptions/{}'.format(
-                    ctx.node.properties['subscription_id']
+                'subscriptions/{}?api-version={}'.format(
+                    ctx.node.properties['subscription_id'],
+                    constants.AZURE_API_VERSION_01
                     )
                 ).json()
         ctx.logger.debug(json)
@@ -86,7 +87,8 @@ class TestConnection(testtools.TestCase):
 
         json = azure_connection.azure_post(
             ctx, 
-            'providers/microsoft.resources/checkresourcename',
+            'providers/microsoft.resources/checkresourcename?api-version={}'.\
+                format(constants.AZURE_API_VERSION_01),
             data
             ).json()
 
@@ -116,8 +118,10 @@ class TestConnection(testtools.TestCase):
 
         json = azure_connection.azure_put(
                 ctx,
-                'subscriptions/{}/tagNames/test_tag'.format(
-                        ctx.node.properties['subscription_id']
+                'subscriptions/{}/tagNames/{}?api-version={}'.format(
+                        ctx.node.properties['subscription_id'],
+                        'test_tag',
+                        constants.AZURE_API_VERSION_01
                         )
                  ).json()
 
@@ -146,9 +150,10 @@ class TestConnection(testtools.TestCase):
         azure_connection = connection.AzureConnectionClient()
         response = azure_connection.azure_delete(
                     ctx,
-                    'subscriptions/{}/tagNames/{}'.format(
+                    'subscriptions/{}/tagNames/{}?api-version={}'.format(
                         ctx.node.properties['subscription_id'],
-                        'test_tag'
+                        'test_tag',
+                        constants.AZURE_API_VERSION_01
                         )
                     )
 

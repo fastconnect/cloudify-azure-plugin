@@ -16,9 +16,7 @@ class AzureConnectionClient():
         self._get_token()
 
     def azure_get(self, ctx, path, header={}):
-        path = '{}/{}?api-version={}'.format(constants.AZURE_API_URL, path,
-                                             constants.AZURE_API_VERSION
-                                             )
+        path = '{}/{}'.format(constants.AZURE_API_URL, path)
         header.update({'Content-Type':'application/json', 
                        'Authorization':'Bearer {}'.format(self.token)
                        })
@@ -27,9 +25,7 @@ class AzureConnectionClient():
 
 
     def azure_post(self, ctx, path, data, header={}):
-         path = '{}/{}?api-version={}'.format(constants.AZURE_API_URL, path,
-                                              constants.AZURE_API_VERSION
-                                              )
+         path = '{}/{}'.format(constants.AZURE_API_URL, path)
          header.update({'Content-Type':'application/json', 
                        'Authorization':'Bearer {}'.format(self.token)
                        })
@@ -37,9 +33,7 @@ class AzureConnectionClient():
 
 
     def azure_put(self, ctx, path, data={}, header={}):
-         path = '{}/{}?api-version={}'.format(constants.AZURE_API_URL, path,
-                                              constants.AZURE_API_VERSION
-                                              )
+         path = '{}/{}'.format(constants.AZURE_API_URL, path)
          header.update({'Content-Type':'application/json', 
                        'Authorization':'Bearer {}'.format(self.token)
                        })
@@ -47,9 +41,7 @@ class AzureConnectionClient():
 
 
     def azure_delete(self, ctx, path, header={}):
-         path = '{}/{}?api-version={}'.format(constants.AZURE_API_URL, path,
-                                              constants.AZURE_API_VERSION
-                                              )
+         path = '{}/{}'.format(constants.AZURE_API_URL, path)
          header.update({'Content-Type':'application/json', 
                        'Authorization':'Bearer {}'.format(self.token)
                        })

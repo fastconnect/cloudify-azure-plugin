@@ -31,15 +31,10 @@ node_types:
                     The URL of the storage account where the OS hard disk of 
                     the machine should be stored.
                 type: string
-            storage_container:
-                description: >
-                    The container present in the storage account where blobs
-                    (OS disk) will be created.
-                type: string
         interfaces:
               cloudify.interfaces.lifecycle:
-                start:
-                  implementation: azure.instance.start
+                create:
+                  implementation: azure.instance.create
                 stop:
                   implementation: azure.instance.stop
                 delete:
