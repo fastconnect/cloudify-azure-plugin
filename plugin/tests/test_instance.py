@@ -34,7 +34,7 @@ class TestInstance(testtools.TestCase):
             'sku': '12.04.5-LTS',
             'version': 'latest',
             'flavor_id': 'Standard_A1',
-            'compute_name': 'cloudifycompute',
+            'compute_name': test_name,
             'compute_user': 'administrateur',
             'compute_password': 'Cloud?db',
             'resources_prefix': 'boulay',
@@ -56,9 +56,11 @@ class TestInstance(testtools.TestCase):
 
     def tearDown(self):
         super(TestInstance, self).tearDown()
+        time.sleep(30)
+
 
     def test_create(self):
-        ctx = self.mock_ctx('teststart')
+        ctx = self.mock_ctx('testcreate')
         current_ctx.set(ctx=ctx)
         instance.create(ctx=ctx) 
 
@@ -67,19 +69,33 @@ class TestInstance(testtools.TestCase):
         while status_vm == constants.CREATING :
             status_vm = instance.check_vm_status(ctx=ctx)
             time.sleep(20)     
+        
         self.assertEqual( constants.SUCCEEDED, status_vm)
+        instance.delete(ctx=ctx)
+
 
     def test_delete(self):
-        ctx = self.mock_ctx('teststart')
+        ctx = self.mock_ctx('testdelete')
         current_ctx.set(ctx=ctx)
-        instance.delete()
+
+        instance.create(ctx=ctx) 
+
+        current_ctx.set(ctx=ctx)
+        status_vm = constants.CREATING
+        while status_vm == constants.CREATING :
+            status_vm = instance.check_vm_status(ctx=ctx)
+            time.sleep(20)
+        
+        instance.delete(ctx=ctx)
 
         time.sleep(20)
         current_ctx.set(ctx=ctx)
-        self.assertRaises(
-            utils.WindowsAzureError,
-            instance.check_vm_status,
-            ctx=ctx)
+        self.assertRaises(utils.WindowsAzureError,
+                          instance.check_vm_status,
+                          ctx=ctx
+                          )
+
+
 '''
     def test_conflict(self):
         ctx = self.mock_ctx('testconflict')

@@ -152,16 +152,15 @@ def delete(**_):
     utils.validate_node_property('resource_group_name',ctx.node.properties)
 
     subscription_id = ctx.node.properties['subscription_id']
-    api_version = constants.AZURE_API_VERSION
+    api_version = constants.AZURE_API_VERSION_06
     vm_name = ctx.node.properties['compute_name']
     resource_group_name = ctx.node.properties['resource_group_name']
 
     connection.AzureConnectionClient().azure_delete(
         ctx, 
         ("subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute" + 
-        "/virtualMachines/{}?api-version={}").format(
-            subscription_id, 
-            resource_group_name, 
-            vm_name, api_version
-            )
+        "/virtualMachines/{}?api-version={}").format(subscription_id, 
+                                                     resource_group_name, 
+                                                     vm_name, api_version
+                                                     )
         )
