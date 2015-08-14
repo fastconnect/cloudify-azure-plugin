@@ -32,15 +32,13 @@ setup(
     packages=['plugin'],
 
     license='LICENSE',
-    zip_safe=False,
+    zip_safe=True,
     install_requires=[
         # Necessary dependency for developing plugins, do not remove!
         "cloudify-plugins-common>=3.2"
-        "azure"
     ],
     test_requires=[
         "cloudify-dsl-parser>=3.2"
         "nose"
-        "azure"
     ]
 )

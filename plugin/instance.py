@@ -164,3 +164,4 @@ def delete(**_):
                                                      vm_name, api_version
                                                      )
         )
+
