@@ -6,39 +6,49 @@
 plugins:
   azure:
     executor: central_deployment_agent
-    source: https://github.com/cloudify-cosmo/cloudify-plugin-template/archive/3.2.zip
+    source: C:\Users\devandie\Source\Repos\cloudify-azure-plugin\cloudify-azure-plugin.zip
 
 node_types:
     cloudify.azure.nodes.Instance:
         derived_from: cloudify.nodes.Compute
         properties:
-            name:
-                description: The name of the machine
+            subscription_id:
                 type: string
-            image_id:
-                description: >
-                    The ID of the image to use on Azure.
+            username:
                 type: string
-            instance_type:
-                description: >
-                    The instance's size.
+            password:
                 type: string
-            cloud_service:
-                description: The cloud service where the machine should be deployed.
+            location:   
+                type: string
+            publisherName:
+                type: string
+            offer:
+                type: string
+            sku:
+                type: string
+            version:
+                type: string
+            flavor_id:
+                type: string
+            compute_name:
+                type: string
+            network_interface_name:
                 type: string
             storage_account:
-                description: > 
-                    The URL of the storage account where the OS hard disk of 
-                    the machine should be stored.
+                type: string
+            create_option:
+                type: string
+            compute_user:
+                type: string
+            compute_password:
+                type: string
+            resource_group_name:
                 type: string
         interfaces:
-              cloudify.interfaces.lifecycle:
+            cloudify.interfaces.lifecycle:
                 create:
                   implementation: azure.plugin.instance.create
-                stop:
-                  implementation: azure.plugin.instance.stop
-                delete:
-                  implementation: azure.plugin.instance.terminate
-        cloudify.interfaces.validation:
-            creation:
-                implementation: azure.instance.creation_validation
+                #stop:
+                #  implementation: azure.plugin.instance.stop
+                #delete:
+                #  implementation: azure.plugin.instance.terminate

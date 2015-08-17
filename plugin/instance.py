@@ -142,7 +142,6 @@ def delete(**_):
                                                      )
         )
 
-
 def get_vm_provisioning_state(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
@@ -194,3 +193,4 @@ def get_nic_virtual_machine_id(**_):
         vm_id =  None
         
     return vm_id
+

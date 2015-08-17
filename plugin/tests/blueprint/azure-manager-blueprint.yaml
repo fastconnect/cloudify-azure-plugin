@@ -1,0 +1,125 @@
+# DSL version, should appear in the main blueprint.yaml
+# and may appear in other imports. In such case, the versions must match
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+    # importing cloudify related types, plugins, workflow, etc...
+    # to speed things up, it is possible downloading this file,
+    # including it in the blueprint directory and importing it
+    # instead.
+    - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
+    - http://www.getcloudify.org/spec/fabric-plugin/1.2rc1/plugin.yaml
+    # relative import of plugin.yaml that resides in the blueprint directory
+    - ./plugin.yaml
+
+inputs:
+    subscription_id:
+        default: '3121df85-fac7-48ec-bd49-08c2570686d0'
+        type: string
+    username:
+        default: 'api@louisdevandierefastconnect.onmicrosoft.com'
+        type: string
+    password:
+        default: 'Azerty@01'
+        type: string
+    location:   
+        default: 'westeurope'
+        type: string
+    publisherName:
+        default: 'Canonical'
+        type: string
+    offer:
+        default: 'UbuntuServer'
+        type: string
+    sku:
+        default: 12.04.5-LTS
+        type: string
+    version:
+        default: 'latest'
+        type: string
+    flavor_id:
+        default: 'Standard_A1'
+        type: string
+    compute_name:
+        default: 'manager-azure'
+        type: string
+    network_interface_name:
+        default: 'fcnic'
+        type: string
+    storage_account:
+        default: 'fcteststorage'
+        type: string
+    create_option:
+        default: 'FromImage'
+        type: string
+    compute_user:
+        default: 'administrateur'
+        type: string
+    compute_password:
+        default: 'Azerty@01'
+        type: string
+    resource_group_name:
+        default: 'FCtest'
+        type: string
+
+node_templates:
+    manager_server:
+        type: cloudify.azure.nodes.Instance
+        properties:
+            subscription_id: { get_input: subscription_id }
+            username: { get_input: username }
+            password: { get_input: password }
+            location: { get_input: location }
+            publisherName: { get_input: publisherName }
+            offer: { get_input: offer }
+            sku: { get_input: sku }
+            version: { get_input: version }
+            flavor_id: { get_input: flavor_id }
+            compute_name: {get_input: compute_name}
+            network_interface_name: {get_input: network_interface_name}
+            storage_account: {get_input: storage_account}
+            create_option: {get_input: create_option}
+            compute_user: {get_input: compute_user}
+            compute_password: {get_input: compute_password}
+            resource_group_name: {get_input: resource_group_name}
+            install_agent: false
+
+    manager:
+        type: cloudify.nodes.CloudifyManager
+        properties:
+            cloudify_packages:
+                agents:
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-ubuntu-agent_3.2.0-rc1-b179_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-centos-final-agent_3.2.0-rc1-b179_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-windows-agent_3.2.0-rc1-b179_amd64.deb
+                docker:
+                    docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.0/rc1-RELEASE/cloudify-docker_3.2.0-rc1-b179.tar
+
+            cloudify:
+                cloudify_agent:
+                    min_workers: 0
+                    max_workers: 5
+                    remote_execution_port: 22
+                    user: ubuntu
+
+                workflows:
+                    task_retries: -1  # this means forever
+                    task_retry_interval: 30
+
+                policy_engine:
+                    start_timeout: 30
+
+        relationships:
+          - target: manager_server
+            type: cloudify.relationships.contained_in
+
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                create:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
+                        task_properties:
+                            cloudify_packages: { get_property: [manager, cloudify_packages] }
+                            provider_context: { get_attribute: [manager, provider_context] }
+   
