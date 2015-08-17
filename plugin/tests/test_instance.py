@@ -21,9 +21,9 @@ class TestInstance(testtools.TestCase):
         """
 
         test_properties = {
-            'subscription_id': SUBSCRIPTION_ID,
-            'username': AZURE_USERNAME, 
-            'password': AZURE_PASSWORD,
+            'subscription_id': test_utils.SUBSCRIPTION_ID,
+            'username': test_utils.AZURE_USERNAME, 
+            'password': test_utils.AZURE_PASSWORD,
             'location': 'westeurope',
             'publisherName': 'Canonical',
             'offer': 'UbuntuServer',
@@ -31,8 +31,8 @@ class TestInstance(testtools.TestCase):
             'version': 'latest',
             'flavor_id': 'Standard_A1',
             'compute_name': test_name,
-            'compute_user': COMPUTE_USER,
-            'compute_password': COMPUTE_PASSWORD,
+            'compute_user': test_utils.COMPUTE_USER,
+            'compute_password': test_utils.COMPUTE_PASSWORD,
             'resources_prefix': 'boulay',
             'network_interface_name': 'cloudifynic',
             'storage_account': 'cloudifystorageaccount',

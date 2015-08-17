@@ -19,9 +19,9 @@ class TestConnection(testtools.TestCase):
         return MockCloudifyContext(
             node_id=test_name,
             properties={
-                'username': AZURE_USERNAME,
-                'password': AZURE_PASSWORD,
-                'subscription_id': SUBSCRIPTION_ID
+                'username': test_utils.AZURE_USERNAME,
+                'password': test_utils.AZURE_PASSWORD,
+                'subscription_id': test_utils.SUBSCRIPTION_ID
             }
         )
 
