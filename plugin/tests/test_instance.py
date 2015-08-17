@@ -1,5 +1,6 @@
 ﻿import testtools
 import time
+import test_utils
 
 from plugin import utils
 from plugin import constants
@@ -10,11 +11,6 @@ from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 from cloudify.exceptions import NonRecoverableError
 
-from azure import WindowsAzureError
-
-TEST_LINUX_IMAGE_ID = \
-    'b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-14_04_2_LTS-amd64-server-20150309-en-us-30GB'
-SUBSCRIPTION = '3121df85-fac7-48ec-bd49-08c2570686d0'
 TIME_DELAY = 30
 
 class TestInstance(testtools.TestCase):
@@ -25,9 +21,9 @@ class TestInstance(testtools.TestCase):
         """
 
         test_properties = {
-            'subscription_id': '3121df85-fac7-48ec-bd49-08c2570686d0',
-            'username': 'api@louisdevandierefastconnect.onmicrosoft.com', 
-            'password': 'Azerty@01',
+            'subscription_id': SUBSCRIPTION_ID,
+            'username': AZURE_USERNAME, 
+            'password': AZURE_PASSWORD,
             'location': 'westeurope',
             'publisherName': 'Canonical',
             'offer': 'UbuntuServer',
@@ -35,8 +31,8 @@ class TestInstance(testtools.TestCase):
             'version': 'latest',
             'flavor_id': 'Standard_A1',
             'compute_name': test_name,
-            'compute_user': 'administrateur',
-            'compute_password': 'Cloud?db',
+            'compute_user': COMPUTE_USER,
+            'compute_password': COMPUTE_PASSWORD,
             'resources_prefix': 'boulay',
             'network_interface_name': 'cloudifynic',
             'storage_account': 'cloudifystorageaccount',

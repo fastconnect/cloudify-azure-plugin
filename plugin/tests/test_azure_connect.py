@@ -1,5 +1,6 @@
 ﻿import testtools
 import requests
+import test_utils
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
@@ -18,9 +19,9 @@ class TestConnection(testtools.TestCase):
         return MockCloudifyContext(
             node_id=test_name,
             properties={
-                'username': 'api@louisdevandierefastconnect.onmicrosoft.com',
-                'password': 'Azerty@01',
-                'subscription_id': '3121df85-fac7-48ec-bd49-08c2570686d0'
+                'username': AZURE_USERNAME,
+                'password': AZURE_PASSWORD,
+                'subscription_id': SUBSCRIPTION_ID
             }
         )
 
