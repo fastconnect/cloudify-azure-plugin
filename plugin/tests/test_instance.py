@@ -57,46 +57,94 @@ class TestInstance(testtools.TestCase):
 
     def test_create(self):
         ctx = self.mock_ctx('testcreate')
+        
         current_ctx.set(ctx=ctx)
         instance.create(ctx=ctx) 
 
         current_ctx.set(ctx=ctx)
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
-            status_vm = instance.check_vm_status(ctx=ctx)
+            status_vm = instance.get_vm_provisioning_state(ctx=ctx)
             time.sleep(20)     
         
+        current_ctx.set(ctx=ctx)
         self.assertEqual( constants.SUCCEEDED, status_vm)
+        
+        current_ctx.set(ctx=ctx)
         instance.delete(ctx=ctx)
 
-
+        current_ctx.set(ctx=ctx)
+        nic_machine_id = "nicmachineName"
+        while nic_machine_id != "":
+            nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
+            time.sleep(20)
+'''
+   
     def test_delete(self):
         ctx = self.mock_ctx('testdelete')
+ 
         current_ctx.set(ctx=ctx)
-
         instance.create(ctx=ctx) 
 
-        current_ctx.set(ctx=ctx)
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
-            status_vm = instance.check_vm_status(ctx=ctx)
+            current_ctx.set(ctx=ctx)
+            status_vm = instance.get_vm_provisioning_state(ctx=ctx)
             time.sleep(20)
         
+        current_ctx.set(ctx=ctx)
         instance.delete(ctx=ctx)
 
-        time.sleep(20)
+        nic_machine_id = "nicmachineName"
+        while nic_machine_id is not None:
+            current_ctx.set(ctx=ctx)
+            nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
+            time.sleep(20)
+    
         current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
-                          instance.check_vm_status,
+                          instance.get_vm_provisioning_state,
                           ctx=ctx
                           )
 
-
-'''
     def test_conflict(self):
         ctx = self.mock_ctx('testconflict')
+
         current_ctx.set(ctx=ctx)
-        assertTrue(True)
+        instance.create(ctx=ctx)
+        
+        status_vm = constants.CREATING
+        while status_vm == constants.CREATING :
+            current_ctx.set(ctx=ctx)
+            status_vm = instance.get_vm_status(ctx=ctx)
+            time.sleep(20)
+
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(utils.WindowsAzureError,
+                         instance.create,
+                         ctx=ctx
+                         )
+
+        current_ctx.set(ctx=ctx)
+        instance.delete(ctx=ctx)
+
+        nic_machine_id = "nicmachineName"
+        while nic_machine_id is not None:
+            current_ctx.set(ctx=ctx)
+            nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
+            time.sleep(20)
+
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(utils.WindowsAzureError,
+                          instance.get_vm_status,
+                          ctx=ctx
+                          )
+
+        current_ctx.set(ctx=ctx) 
+        self.assertRaises(utils.WindowsAzureError,
+                          instance.delete,
+                          ctx=ctx
+                          )
 
     def test_stop(self):
         ctx = self.mock_ctx('teststop')

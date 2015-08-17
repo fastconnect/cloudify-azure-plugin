@@ -10,29 +10,6 @@ from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 from cloudify.decorators import operation
 
-def check_vm_status(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('compute_name', ctx.node.properties)
-
-    subscription_id = ctx.node.properties['subscription_id']
-    api_version = constants.AZURE_API_VERSION_06
-    vm_name = ctx.node.properties['compute_name']
-    resource_group_name = ctx.node.properties['resource_group_name']
-
-    response = connection.AzureConnectionClient().azure_get(
-            ctx, 
-            ("subscriptions/{}/resourcegroups/{}/"+
-            "providers/Microsoft.Compute/virtualMachines"+
-            "/{}?InstanceView&api-version={}").format(
-                subscription_id, 
-                resource_group_name, 
-                vm_name, api_version
-            )
-        )
-    jsonGet = response.json()
-    status_vm = jsonGet['properties']['provisioningState']
-    return status_vm
 
 @operation
 def create(**_):
@@ -164,4 +141,56 @@ def delete(**_):
                                                      vm_name, api_version
                                                      )
         )
+
+def get_vm_provisioning_state(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('compute_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    api_version = constants.AZURE_API_VERSION_06
+    vm_name = ctx.node.properties['compute_name']
+    resource_group_name = ctx.node.properties['resource_group_name']
+
+    response = connection.AzureConnectionClient().azure_get(
+            ctx, 
+            ("subscriptions/{}/resourcegroups/{}/"+
+            "providers/Microsoft.Compute/virtualMachines"+
+            "/{}?InstanceView&api-version={}").format(
+                subscription_id, 
+                resource_group_name, 
+                vm_name, api_version
+            )
+        )
+    jsonGet = response.json()
+    status_vm = jsonGet['properties']['provisioningState']
+    return status_vm
+
+
+def get_nic_virtual_machine_id(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    api_version = constants.AZURE_API_VERSION_06
+    resource_group_name = ctx.node.properties['resource_group_name']
+
+    response = connection.AzureConnectionClient().azure_get(
+            ctx, 
+            ("subscriptions/{}/resourcegroups/{}/"+
+            "providers/microsoft.network/networkInterfaces"+
+            "/?api-version={}").format(
+                subscription_id, 
+                resource_group_name, 
+                api_version
+            )
+        )
+    jsonGet = response.json()
+    ctx.logger.debug(jsonGet)
+    try:
+        vm_id = jsonGet['properties']['virtualMachine']['id']
+    except KeyError :
+        vm_id =  None
+        
+    return vm_id
 
