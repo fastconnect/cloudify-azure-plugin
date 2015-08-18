@@ -1,6 +1,11 @@
 ﻿from cloudify.exceptions import NonRecoverableError
 import connection
 import constants
+import utils
+
+from cloudify import ctx
+from cloudify.exceptions import NonRecoverableError
+from cloudify.decorators import operation
 
 def _get_vm_public_ip(ctx):
     ''' 
@@ -31,10 +36,10 @@ def _get_vm_public_ip(ctx):
     elif vm_name is not None:
         response = azure_connection.azure_get(
                             ctx,
-						    ("subscriptions/{}" +
-						    "/resourceGroups/{}/providers" + 
-						    "/Microsoft.Compute/virtualMachines/{}?" + 
-						    "api-version={}").format(subscription_id,
+                ("subscriptions/{}" +
+                "/resourceGroups/{}/providers" + 
+                "/Microsoft.Compute/virtualMachines/{}?" + 
+                "api-version={}").format(subscription_id,
                                                      resource_group, 
                                                      vm_name,
                                                      api_version
@@ -54,8 +59,99 @@ def _get_vm_public_ip(ctx):
     pip = (response.json())['properties']['ipConfigurations'][0]['properties']['publicIPAddress']['id']
 
     response = azure_connection.azure_get(
-                            ctx,
-                            "{}?api-version={}".format(pip, api_version)
-                            )
+                                        ctx,
+                                        "{}?api-version={}"
+                                                        .format(pip,
+                                                                api_version
+                                                                )
+                                        )
 
     return (response.json())['properties']['ipAddress']
+
+def create(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('location', ctx.node.properties)
+    utils.validate_node_property('management_network_name', ctx.node.properties)
+    utils.validate_node_property('management_subnet_name', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.node.properties)
+    utils.validate_node_property('sku', ctx.node.properties)
+    utils.validate_node_property('version', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.node.properties)
+    utils.validate_node_property('ip_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    api_version = constants.AZURE_API_VERSION_06
+    resource_group_name = ctx.node.properties['resource_group_name']
+    location = ctx.node.properties['location']
+    management_network_name = ctx.node.properties['management_network_name']
+    management_subnet_name = ctx.node.properties['management_subnet_name']
+    network_interface_name = ctx.node.properties['network_interface_name']
+    ip_name = ctx.node.properties['ip_name']
+    private_ip_allocation_method = "Dynamic"
+
+    json ={
+        "location": str(location),
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": str(ip_name),
+                    "properties": {
+                        "subnet": {
+                            "id": "/subscriptions/{}/resourceGroups/{}/providers/microsoft.network/virtualNetworks/{}/subnets/{}"
+                                .format(subscription_id, 
+                                        resource_group_name, 
+                                        network_interface_name, 
+                                        management_subnet_name)
+                        },
+                        "privateIPAllocationMethod": str(private_ip_allocation_method),
+                        "publicIPAddress": {
+                            "id": "/subscriptions/{}/resourceGroups/{}/providers/microsoft.network/publicIPAddresses/{}"
+                                .format(subscription_id, 
+                                        resource_group_name, 
+                                        network_interface_name, 
+                                        ip_name)
+
+                        }
+                    }
+                }
+            ]
+        }
+    }
+
+    ctx.logger.info('Beginning nic creation')
+    cntn = connection.AzureConnectionClient()
+    cntn.azure_put(ctx, 
+                   ("subscriptions/{}/resourcegroups/{}/" +
+                    "providers/microsoft.network" +
+                    "/networkInterfaces/{}" +
+                    "?api-version={}").format(
+                                            subscription_id, 
+                                            resource_group_name, 
+                                            network_interface_name, 
+                                            api_version
+                                            ),
+                    json=json
+                    )
+
+
+def delete(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    api_version = constants.AZURE_API_VERSION_06
+    resource_group_name = ctx.node.properties['resource_group_name']
+    network_interface_name = ctx.node.properties['network_interface_name']
+
+    response = connection.AzureConnectionClient().azure_delete(
+      ctx, 
+      ("subscriptions/{}/resourceGroups/{}/providers/microsoft.network" + 
+      "/networkInterfaces/{}?api-version={}").format(subscription_id, 
+                                                    resource_group_name, 
+                                                    network_interface_name, 
+                                                    api_version
+                                                    )
+      )
+    return response.status_code
