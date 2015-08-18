@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import random
+import time
 #Local import
 from plugin import utils
 from plugin import constants
 from plugin import connection
+from plugin import nic
 
 #Cloudify imports
 from cloudify import ctx
@@ -109,17 +111,37 @@ def create(**_):
 	    }
 	}
 
-    connection.AzureConnectionClient().azure_put(
-        ctx,
-        ("subscriptions/{}/resourcegroups/{}/providers/Microsoft.Compute" +
-        "/virtualMachines/{}?validating=true&api-version={}").format(
-                    subscription_id, 
-                    resource_group_name, 
-                    vm_name, 
-                    api_version
-                    ),
-        json=json
-        )
+    ctx.logger.info('Beginning vm creation')
+    cntn = connection.AzureConnectionClient()
+    cntn.azure_put(ctx, 
+                   ("subscriptions/{}/resourcegroups/{}/" +
+                    "providers/Microsoft.Compute" +
+                    "/virtualMachines/{}" +
+                    "?validating=true&api-version={}").format(
+                                                    subscription_id, 
+                                                    resource_group_name, 
+                                                    vm_name, 
+                                                    api_version
+                                                    ),
+                    json=json
+                    )
+
+    status = get_vm_provisioning_state()
+
+    while status == constants.CREATING:
+        time.sleep(20)
+        ctx.logger.info('{} is still {}'.format(vm_name, status))
+        status = get_vm_provisioning_state()
+
+    if status != constants.SUCCEEDED:
+        raise NonRecoverableError('Provisionning: {}.'.format(status))
+    else:
+        ctx.logger.info('{} {}'.format(vm_name, status))
+        ip = nic._get_vm_public_ip(ctx)
+        ctx.logger.info(
+                'Machine is running at {}.'.format(ip)
+                )
+        ctx.instance.runtime_properties['ip'] = ip
 
 
 @operation
@@ -141,6 +163,7 @@ def delete(**_):
                                                      vm_name, api_version
                                                      )
         )
+
 
 def get_vm_provisioning_state(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
