@@ -54,100 +54,129 @@ class TestInstance(testtools.TestCase):
         super(TestInstance, self).tearDown()
         time.sleep(30)
 
-
+    """
     def test_create(self):
         ctx = self.mock_ctx('testcreate')
-        
+        ctx.logger.info("BEGIN create VM test")
+
+        ctx.logger.info("create VM")    
         current_ctx.set(ctx=ctx)
         instance.create(ctx=ctx) 
-
+        
+        ctx.logger.info("check VM status")
         current_ctx.set(ctx=ctx)
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
             status_vm = instance.get_vm_provisioning_state(ctx=ctx)
-            time.sleep(20)     
+            time.sleep(20)    
         
+        ctx.logger.info("check VM creation success")
+        current_ctx.set(ctx=ctx)
+        self.assertEqual( constants.SUCCEEDED, status_vm)
+
+        ctx.logger.info("delete VM")
+        current_ctx.set(ctx=ctx)
+        instance.delete(ctx=ctx)
+
+        ctx.logger.info("check if NIC is release")
+        nic_machine_id = "nicmachineName"
+        while nic_machine_id is not None :
+            current_ctx.set(ctx=ctx)
+            nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
+            time.sleep(20)
+        ctx.logger.info("END create VM test")
+
+    def test_delete(self):
+    
+        ctx = self.mock_ctx('testdelete')
+        ctx.logger.info("BEGIN delete VM test")
+    
+        ctx.logger.info("create VM")    
+        current_ctx.set(ctx=ctx)
+        instance.create(ctx=ctx) 
+
+        ctx.logger.info("check VM status")
+        status_vm = constants.CREATING
+        while status_vm == constants.CREATING :
+            current_ctx.set(ctx=ctx)
+            status_vm = instance.get_vm_provisioning_state(ctx=ctx)
+            time.sleep(20)
+        
+        ctx.logger.info("check VM creation success")
         current_ctx.set(ctx=ctx)
         self.assertEqual( constants.SUCCEEDED, status_vm)
         
+        ctx.logger.info("delete VM")
         current_ctx.set(ctx=ctx)
         instance.delete(ctx=ctx)
 
-        current_ctx.set(ctx=ctx)
-        nic_machine_id = "nicmachineName"
-        while nic_machine_id != "":
-            nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
-            time.sleep(20)
-'''
-   
-    def test_delete(self):
-        ctx = self.mock_ctx('testdelete')
- 
-        current_ctx.set(ctx=ctx)
-        instance.create(ctx=ctx) 
-
-        status_vm = constants.CREATING
-        while status_vm == constants.CREATING :
-            current_ctx.set(ctx=ctx)
-            status_vm = instance.get_vm_provisioning_state(ctx=ctx)
-            time.sleep(20)
-        
-        current_ctx.set(ctx=ctx)
-        instance.delete(ctx=ctx)
-
+        ctx.logger.info("check if NIC is release")
         nic_machine_id = "nicmachineName"
         while nic_machine_id is not None:
             current_ctx.set(ctx=ctx)
-            nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
-            time.sleep(20)
-    
-        current_ctx.set(ctx=ctx)
-        self.assertRaises(utils.WindowsAzureError,
-                          instance.get_vm_provisioning_state,
-                          ctx=ctx
-                          )
+            nic_machine_id = instance.get_nic_virtual_machine_id(
+                                    ctx=ctx
+                                )
 
+            time.sleep(20)
+        ctx.logger.info("END delete VM test")
+    """
     def test_conflict(self):
         ctx = self.mock_ctx('testconflict')
 
+        ctx.logger.info("BEGIN conflict VM test")
+
+        ctx.logger.info("create VM")
         current_ctx.set(ctx=ctx)
         instance.create(ctx=ctx)
         
+        ctx.logger.info("check VM creation success")
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_vm = instance.get_vm_status(ctx=ctx)
+            status_vm = instance.get_vm_provisioning_state(
+                            ctx=ctx
+                        )
             time.sleep(20)
 
+        ctx.logger.info("check VM creation conflict")
         current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
                          instance.create,
                          ctx=ctx
                          )
 
+        ctx.logger.info("delete VM")
         current_ctx.set(ctx=ctx)
         instance.delete(ctx=ctx)
 
+        ctx.logger.info("check if NIC is release")
         nic_machine_id = "nicmachineName"
         while nic_machine_id is not None:
             current_ctx.set(ctx=ctx)
-            nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
+            nic_machine_id = instance.get_nic_virtual_machine_id(
+                                ctx=ctx
+                            )
             time.sleep(20)
-
+        
+        ctx.logger.info("check vm provisionning state in a deleted machine")
         current_ctx.set(ctx=ctx)
-        self.assertRaises(utils.WindowsAzureError,
-                          instance.get_vm_status,
+        self.assertRaises(
+                          utils.WindowsAzureError,
+                          instance.get_vm_provisioning_state,
                           ctx=ctx
                           )
+        ctx.logger.debug(instance.get_disks_statuses)
+        self.assertTrue(False)
 
+        """
+        ctx.logger.info("delete VM conflict")
         current_ctx.set(ctx=ctx) 
         self.assertRaises(utils.WindowsAzureError,
                           instance.delete,
                           ctx=ctx
                           )
-
+        """
     def test_stop(self):
         ctx = self.mock_ctx('teststop')
         current_ctx.set(ctx=ctx)
-        assertTrue(True)
-'''
