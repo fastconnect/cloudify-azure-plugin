@@ -54,7 +54,6 @@ class TestInstance(testtools.TestCase):
         super(TestInstance, self).tearDown()
         time.sleep(30)
 
-    """
     def test_create(self):
         ctx = self.mock_ctx('testcreate')
         ctx.logger.info("BEGIN create VM test")
@@ -76,7 +75,7 @@ class TestInstance(testtools.TestCase):
 
         ctx.logger.info("delete VM")
         current_ctx.set(ctx=ctx)
-        instance.delete(ctx=ctx)
+        self.assertEqual(202, instance.delete(ctx=ctx))
 
         ctx.logger.info("check if NIC is release")
         nic_machine_id = "nicmachineName"
@@ -108,7 +107,7 @@ class TestInstance(testtools.TestCase):
         
         ctx.logger.info("delete VM")
         current_ctx.set(ctx=ctx)
-        instance.delete(ctx=ctx)
+        self.assertEqual(202, instance.delete(ctx=ctx))
 
         ctx.logger.info("check if NIC is release")
         nic_machine_id = "nicmachineName"
@@ -120,7 +119,7 @@ class TestInstance(testtools.TestCase):
 
             time.sleep(20)
         ctx.logger.info("END delete VM test")
-    """
+
     def test_conflict(self):
         ctx = self.mock_ctx('testconflict')
 
@@ -139,7 +138,7 @@ class TestInstance(testtools.TestCase):
                         )
             time.sleep(20)
 
-        ctx.logger.info("check VM creation conflict")
+        ctx.logger.info("VM creation conflict")
         current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
                          instance.create,
@@ -148,7 +147,7 @@ class TestInstance(testtools.TestCase):
 
         ctx.logger.info("delete VM")
         current_ctx.set(ctx=ctx)
-        instance.delete(ctx=ctx)
+        self.assertEqual(202, instance.delete(ctx=ctx))
 
         ctx.logger.info("check if NIC is release")
         nic_machine_id = "nicmachineName"
@@ -166,17 +165,11 @@ class TestInstance(testtools.TestCase):
                           instance.get_vm_provisioning_state,
                           ctx=ctx
                           )
-        ctx.logger.debug(instance.get_disks_statuses)
-        self.assertTrue(False)
 
-        """
-        ctx.logger.info("delete VM conflict")
+        ctx.logger.info("delete VM conflict")        
         current_ctx.set(ctx=ctx) 
-        self.assertRaises(utils.WindowsAzureError,
-                          instance.delete,
-                          ctx=ctx
-                          )
-        """
+        self.assertEqual(204, instance.delete(ctx=ctx))
+       
     def test_stop(self):
         ctx = self.mock_ctx('teststop')
         current_ctx.set(ctx=ctx)
