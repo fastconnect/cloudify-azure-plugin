@@ -11,7 +11,7 @@ from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 from cloudify.exceptions import NonRecoverableError
 
-TIME_DELAY = 30
+TIME_DELAY = 20
 
 class TestInstance(testtools.TestCase):
 
@@ -40,7 +40,7 @@ class TestInstance(testtools.TestCase):
         
         ctx.logger.info("check VM creation success")
         current_ctx.set(ctx=ctx)
-        self.assertEqual( constants.SUCCEEDED, status_vm)
+        self.assertEqual(constants.SUCCEEDED, status_vm)
 
         ctx.logger.info("delete VM")
         current_ctx.set(ctx=ctx)
@@ -54,8 +54,8 @@ class TestInstance(testtools.TestCase):
             time.sleep(TIME_DELAY)
         ctx.logger.info("END create VM test")
 
-    def test_delete(self):
-    
+
+    def test_delete(self):    
         ctx = test_utils.mock_ctx('testdelete')
         ctx.logger.info("BEGIN delete VM test")
     
@@ -88,6 +88,7 @@ class TestInstance(testtools.TestCase):
 
             time.sleep(TIME_DELAY)
         ctx.logger.info("END delete VM test")
+
 
     def test_conflict(self):
         ctx = test_utils.mock_ctx('testconflict')
@@ -138,7 +139,9 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("delete VM conflict")        
         current_ctx.set(ctx=ctx) 
         self.assertEqual(204, instance.delete(ctx=ctx))
-       
+        ctx.logger.info("END conflict VM test")
+  
+     
     def test_stop(self):
         ctx = test_utils.mock_ctx('teststop')
         current_ctx.set(ctx=ctx)

@@ -31,7 +31,8 @@ def mock_ctx(test_name):
         'create_option':'FromImage',
         'resource_group_name': 'cloudifygroup',
         'management_network_name': 'cloudifynetwork',
-        'management_subnet_name': 'cloudifysubnet'
+        'management_subnet_name': 'cloudifysubnet',
+        'ip_name': 'cloudifyip'
     }
 
     return MockCloudifyContext(node_id='test',
