@@ -48,5 +48,5 @@ node_types:
                   implementation: azure.plugin.instance.create
                 #stop:
                 #  implementation: azure.plugin.instance.stop
-                #delete:
-                #  implementation: azure.plugin.instance.terminate
+                delete:
+                  implementation: azure.plugin.instance.delete

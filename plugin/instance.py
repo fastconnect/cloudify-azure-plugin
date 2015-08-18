@@ -26,7 +26,6 @@ def create(**_):
     utils.validate_node_property('version', ctx.node.properties)
     utils.validate_node_property('network_interface_name', ctx.node.properties)
     utils.validate_node_property('storage_account', ctx.node.properties)
-    utils.validate_node_property('create_option', ctx.node.properties)
     utils.validate_node_property('compute_user', ctx.node.properties)
     utils.validate_node_property('compute_password', ctx.node.properties)
 
@@ -155,6 +154,7 @@ def delete(**_):
     vm_name = ctx.node.properties['compute_name']
     resource_group_name = ctx.node.properties['resource_group_name']
 
+    ctx.logger.info('Deleting vm {}.'.format(vm_name))
     connection.AzureConnectionClient().azure_delete(
         ctx, 
         ("subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute" + 
