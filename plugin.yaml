@@ -6,7 +6,7 @@
 plugins:
   azure:
     executor: central_deployment_agent
-    source: C:\Users\devandie\Source\Repos\cloudify-azure-plugin\cloudify-azure-plugin.zip
+    source: .\cloudify-azure-plugin.zip
 
 node_types:
     cloudify.azure.nodes.Instance:
@@ -35,8 +35,6 @@ node_types:
             network_interface_name:
                 type: string
             storage_account:
-                type: string
-            create_option:
                 type: string
             compute_user:
                 type: string

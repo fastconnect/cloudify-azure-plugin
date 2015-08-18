@@ -43,7 +43,7 @@ def create(**_):
     distro_version = ctx.node.properties['version']
     network_interface_name = ctx.node.properties['network_interface_name']
     storage_account = ctx.node.properties['storage_account']
-    create_option = ctx.node.properties['create_option']
+    create_option = 'FromImage'
     os_disk_name = "{}_{}_{}.vhd".format(vm_name, 
                                        storage_account,
                                        random.randint(0,1000)
