@@ -183,7 +183,8 @@ def get_vm_provisioning_state(**_):
             "/{}?InstanceView&api-version={}").format(
                 subscription_id, 
                 resource_group_name, 
-                vm_name, api_version
+                vm_name,
+                api_version
             )
         )
     jsonGet = response.json()

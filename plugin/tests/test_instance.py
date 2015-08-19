@@ -64,6 +64,7 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("check VM status")
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
+            current_ctx.set(ctx=ctx)
             status_vm = instance.get_vm_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)    
         
@@ -76,10 +77,10 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("check if NIC is release")
         nic_machine_id = "nicmachineName"
         while nic_machine_id is not None :
+            current_ctx.set(ctx=ctx)
             nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
             time.sleep(TIME_DELAY)
         ctx.logger.info("END create VM test")
-
 
     def test_delete(self):    
         ctx = self.mock_ctx('testdelete')
@@ -92,6 +93,7 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("check VM status")
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
+            current_ctx.set(ctx=ctx)
             status_vm = instance.get_vm_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
         
@@ -104,6 +106,7 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("check if NIC is release")
         nic_machine_id = "nicmachineName"
         while nic_machine_id is not None:
+            current_ctx.set(ctx=ctx)
             nic_machine_id = instance.get_nic_virtual_machine_id(
                                     ctx=ctx
                                 )
@@ -114,7 +117,7 @@ class TestInstance(testtools.TestCase):
 
     def test_conflict(self):
         ctx = self.mock_ctx('testconflict')
-
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN conflict VM test")
 
         ctx.logger.info("create VM")
@@ -123,6 +126,7 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("check VM creation success")
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
+            current_ctx.set(ctx=ctx)
             status_vm = instance.get_vm_provisioning_state(
                             ctx=ctx
                         )
@@ -140,6 +144,7 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("check if NIC is release")
         nic_machine_id = "nicmachineName"
         while nic_machine_id is not None:
+            current_ctx.set(ctx=ctx)
             nic_machine_id = instance.get_nic_virtual_machine_id(
                                 ctx=ctx
                             )
@@ -155,8 +160,9 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("delete VM conflict")
         self.assertEqual(204, instance.delete(ctx=ctx))
         ctx.logger.info("END conflict VM test")
-  
+        time.sleep(TIME_DELAY)
      
     def test_stop(self):
         ctx = self.mock_ctx('teststop')
         current_ctx.set(ctx=ctx)
+
