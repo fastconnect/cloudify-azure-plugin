@@ -12,59 +12,123 @@ from cloudify.mocks import MockCloudifyContext
 
 TIME_DELAY = 20
 
-class TestInstance(testtools.TestCase):
+class TestNIC(testtools.TestCase):
+
+    def mock_ctx(self, test_name):
+        """ Creates a mock context for the instance
+            tests
+        """
+
+        test_properties = {
+            'subscription_id': test_utils.SUBSCRIPTION_ID,
+            'username': test_utils.AZURE_USERNAME, 
+            'password': test_utils.AZURE_PASSWORD,
+            'location': 'westeurope',
+            'network_interface_name': 'testnic',
+            'resource_group_name': 'cloudifygroup',
+            'management_network_name': 'cloudifynetwork',
+            'management_subnet_name': 'subnet',
+            'ip_name': 'cloudifyip'
+        }
+
+        return MockCloudifyContext(node_id='test',
+                                   properties=test_properties)
 
     def setUp(self):
-        super(TestInstance, self).setUp()
+        super(TestNIC, self).setUp()
 
 
     def tearDown(self):
-        super(TestInstance, self).tearDown()
+        super(TestNIC, self).tearDown()
         time.sleep(TIME_DELAY)
 
 
     def test_create_nic(self):
-        ctx = test_utils.mock_ctx('testcreatenic')
-
+        ctx = self.mock_ctx('testcreatenic')
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create NIC test")
 
         ctx.logger.info("create NIC")
-        current_ctx.set(ctx=ctx)
         nic.create(ctx=ctx)
 
-        ctx.logger.info("check if NIC is release")
-            
-        nic_machine_id = None
-        while nic_machine_id is None:
-            current_ctx.set(ctx=ctx)
-            nic_machine_id = instance.get_nic_virtual_machine_id(
-                                ctx=ctx
-                            )
-            time.sleep(TIME_DELAY)
-    
-        """
-        ctx.logger.info("check NIC status")
         status_nic = constants.CREATING
         while status_nic == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_nic = #instance.get_vm_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)    
-        
-        ctx.logger.info("check VM creation success")
-        current_ctx.set(ctx=ctx)
-        self.assertEqual(constants.SUCCEEDED, status_vm)
-
-        ctx.logger.info("delete VM")
-        current_ctx.set(ctx=ctx)
-        self.assertEqual(202, instance.delete(ctx=ctx))
-
-        ctx.logger.info("check if NIC is release")
-        nic_machine_id = "nicmachineName"
-        while nic_machine_id is not None :
-            current_ctx.set(ctx=ctx)
-            nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
+            status_nic = nic.get_nic_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
-        ctx.logger.info("END create VM test")
-        """
+        
+        ctx.logger.info("check NIC creation success")
+        self.assertEqual( constants.SUCCEEDED, status_nic)
+
+        ctx.logger.info("delete NIC")
+        self.assertEqual(202, nic.delete(ctx=ctx))
+
+        ctx.logger.info("check is NIC is release")
+        self.assertRaises(utils.WindowsAzureError,
+                         nic.get_nic_provisioning_state,
+                         ctx=ctx
+                         )
+        ctx.logger.info("END create NIC  test")
+
+
     def test_delete_nic(self):
-        ctx = test_utils.mock_ctx('testdeletenic')
+        ctx = self.mock_ctx('testdeletenic')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN delete NIC test")
+
+        ctx.logger.info("create NIC")
+        nic.create(ctx=ctx)
+
+        status_nic = constants.CREATING
+        while status_nic == constants.CREATING :
+            current_ctx.set(ctx=ctx)
+            status_nic = nic.get_nic_provisioning_state(ctx=ctx)
+            time.sleep(TIME_DELAY)
+        
+        ctx.logger.info("check NIC creation success")
+        self.assertEqual( constants.SUCCEEDED, status_nic)
+
+        ctx.logger.info("delete NIC")
+        self.assertEqual(202, nic.delete(ctx=ctx))
+
+        ctx.logger.info("check is NIC is release")
+        self.assertRaises(utils.WindowsAzureError,
+                         nic.get_nic_provisioning_state,
+                         ctx=ctx
+                         )
+        ctx.logger.info("END delete NIC  test")
+
+
+    def test_conflict_nic(self):
+        ctx = self.mock_ctx('testconflictnic')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN conflict NIC test")
+
+        ctx.logger.info("create NIC")
+        self.assertEqual(201, nic.create(ctx=ctx))
+
+        status_nic = constants.CREATING
+        while status_nic == constants.CREATING :
+            current_ctx.set(ctx=ctx)
+            status_nic = nic.get_nic_provisioning_state(ctx=ctx)
+            time.sleep(TIME_DELAY)
+        
+        ctx.logger.info("check NIC creation success")
+        self.assertEqual( constants.SUCCEEDED, status_nic)
+
+        ctx.logger.info("create NIC conflict")
+        self.assertEqual(200, nic.create(ctx=ctx))
+
+        ctx.logger.info("delete NIC")
+        self.assertEqual(202, nic.delete(ctx=ctx))
+
+        ctx.logger.info("check is NIC is release")
+        self.assertRaises(utils.WindowsAzureError,
+                         nic.get_nic_provisioning_state,
+                         ctx=ctx
+                         )
+
+        ctx.logger.info("delete NIC conflict")
+        self.assertEqual(204, nic.delete(ctx=ctx))
+
+        ctx.logger.info("END create NIC  test")

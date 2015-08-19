@@ -68,15 +68,38 @@ def _get_vm_public_ip(ctx):
 
     return (response.json())['properties']['ipAddress']
 
+
+def get_nic_provisioning_state(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    api_version = constants.AZURE_API_VERSION_06
+    resource_group_name = ctx.node.properties['resource_group_name']
+    network_interface_name = ctx.node.properties['network_interface_name']
+    response = connection.AzureConnectionClient().azure_get(
+            ctx, 
+            ("subscriptions/{}/resourcegroups/{}/"+
+            "providers/microsoft.network/networkInterfaces"+
+            "/{}?InstanceView&api-version={}").format(
+                subscription_id, 
+                resource_group_name, 
+                network_interface_name,
+                api_version
+            )
+        )
+    jsonGet = response.json()
+    status_nic = jsonGet['properties']['provisioningState']
+    return status_nic
+
+
 def create(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
     utils.validate_node_property('location', ctx.node.properties)
     utils.validate_node_property('management_network_name', ctx.node.properties)
     utils.validate_node_property('management_subnet_name', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.node.properties)
-    utils.validate_node_property('sku', ctx.node.properties)
-    utils.validate_node_property('version', ctx.node.properties)
     utils.validate_node_property('network_interface_name', ctx.node.properties)
     utils.validate_node_property('ip_name', ctx.node.properties)
 
@@ -101,18 +124,10 @@ def create(**_):
                             "id": "/subscriptions/{}/resourceGroups/{}/providers/microsoft.network/virtualNetworks/{}/subnets/{}"
                                 .format(subscription_id, 
                                         resource_group_name, 
-                                        network_interface_name, 
+                                        management_network_name, 
                                         management_subnet_name)
                         },
                         "privateIPAllocationMethod": str(private_ip_allocation_method),
-                        "publicIPAddress": {
-                            "id": "/subscriptions/{}/resourceGroups/{}/providers/microsoft.network/publicIPAddresses/{}"
-                                .format(subscription_id, 
-                                        resource_group_name, 
-                                        network_interface_name, 
-                                        ip_name)
-
-                        }
                     }
                 }
             ]
@@ -121,7 +136,8 @@ def create(**_):
 
     ctx.logger.info('Beginning nic creation')
     cntn = connection.AzureConnectionClient()
-    cntn.azure_put(ctx, 
+
+    response = cntn.azure_put(ctx, 
                    ("subscriptions/{}/resourcegroups/{}/" +
                     "providers/microsoft.network" +
                     "/networkInterfaces/{}" +
@@ -133,7 +149,7 @@ def create(**_):
                                             ),
                     json=json
                     )
-
+    return response.status_code
 
 def delete(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
