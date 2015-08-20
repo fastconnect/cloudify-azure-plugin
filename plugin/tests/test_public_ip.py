@@ -46,7 +46,9 @@ class TestPublicIP(testtools.TestCase):
         ctx.logger.info("BEGIN create public_ip test")
 
         ctx.logger.info("create public_ip")
-        self.assertEqual(200, public_ip.create(ctx=ctx))
+        status_code = public_ip.create(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         status_ip = constants.CREATING
         while status_ip == constants.CREATING :
@@ -61,6 +63,7 @@ class TestPublicIP(testtools.TestCase):
 
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
+
 
         try:
             while status_ip == constants.DELETING :
@@ -80,7 +83,10 @@ class TestPublicIP(testtools.TestCase):
         ctx.logger.info("BEGIN create public_ip test")
 
         ctx.logger.info("create public_ip")
-        self.assertEqual(200, public_ip.create(ctx=ctx))
+        
+        status_code = public_ip.create(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         status_ip = constants.CREATING
         while status_ip == constants.CREATING :
@@ -114,8 +120,10 @@ class TestPublicIP(testtools.TestCase):
         ctx.logger.info("BEGIN create public_ip test")
 
         ctx.logger.info("create public_ip")
-        self.assertEqual(200, public_ip.create(ctx=ctx))
-    
+        status_code = public_ip.create(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+
         status_ip = constants.CREATING
         while status_ip == constants.CREATING :
             current_ctx.set(ctx=ctx)
@@ -127,8 +135,9 @@ class TestPublicIP(testtools.TestCase):
         ctx.logger.info("check public_ip creation success")
         self.assertEqual( constants.SUCCEEDED, status_ip)
 
-        ctx.logger.info("create conflict public_ip")
-        self.assertEqual(200, public_ip.create(ctx=ctx))
+        status_code = public_ip.create(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
