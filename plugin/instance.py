@@ -155,7 +155,7 @@ def delete(**_):
     resource_group_name = ctx.node.properties['resource_group_name']
 
     ctx.logger.info('Deleting vm {}.'.format(vm_name))
-    connection.AzureConnectionClient().azure_delete(
+    response = connection.AzureConnectionClient().azure_delete(
         ctx, 
         ("subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute" + 
         "/virtualMachines/{}?api-version={}").format(subscription_id, 
@@ -163,6 +163,7 @@ def delete(**_):
                                                      vm_name, api_version
                                                      )
         )
+    return response.status_code
 
 
 def get_vm_provisioning_state(**_):
@@ -182,7 +183,8 @@ def get_vm_provisioning_state(**_):
             "/{}?InstanceView&api-version={}").format(
                 subscription_id, 
                 resource_group_name, 
-                vm_name, api_version
+                vm_name,
+                api_version
             )
         )
     jsonGet = response.json()
@@ -218,35 +220,3 @@ def get_nic_virtual_machine_id(**_):
         return None
      
     return vm_id
-
-
-
-def get_disks_statuses(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.node.properties)
-
-    subscription_id = ctx.node.properties['subscription_id']
-    api_version = constants.AZURE_API_VERSION_06
-    resource_group_name = ctx.node.properties['resource_group_name']
-    network_interface_name = ctx.node.properties['network_interface_name']
-    try:
-        response = connection.AzureConnectionClient().azure_get(
-                ctx, 
-                ("subscriptions/{}/resourcegroups/{}/"+
-                "providers/microsoft.network/networkInterfaces/{}"+
-                "/InstanceView?api-version={}").format(
-                    subscription_id, 
-                    resource_group_name,
-                    network_interface_name, 
-                    api_version
-                )
-            )
-        jsonGet = response.json()
-        ctx.logger.debug(jsonGet)
-
-        disks_statuses = jsonGet['disks']['statuses']['code']
-    except KeyError :
-        return None
-     
-    return disks_statuses
