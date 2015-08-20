@@ -24,9 +24,8 @@ class TestPublicIP(testtools.TestCase):
             'username': test_utils.AZURE_USERNAME, 
             'password': test_utils.AZURE_PASSWORD,
             'location': 'westeurope',
-            'network_interface_name': 'testnic',
             'resource_group_name': 'cloudifygroup',
-            'public_ip_name': 'testpublicip',
+            'public_ip_name': test_name,
         }
 
         return MockCloudifyContext(node_id='test',
@@ -42,12 +41,12 @@ class TestPublicIP(testtools.TestCase):
 
 
     def test_create_public_ip(self):
-        ctx = self.mock_ctx('testcreatenic')
+        ctx = self.mock_ctx('createip')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create public_ip test")
 
         ctx.logger.info("create public_ip")
-        public_ip.create(ctx=ctx)
+        self.assertEqual(200, public_ip.create(ctx=ctx))
 
         status_ip = constants.CREATING
         while status_ip == constants.CREATING :
@@ -62,8 +61,90 @@ class TestPublicIP(testtools.TestCase):
 
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
+
+        try:
+            while status_ip == constants.DELETING :
+                current_ctx.set(ctx=ctx)
+                ctx.logger.debug(status_ip)           
+                status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+                time.sleep(TIME_DELAY)
+        except utils.WindowsAzureError:
+            pass
+
         ctx.logger.info("END create public_ip  test")
 
 
-    #def test_delete_public_ip(self):
+    def test_delete_public_ip(self):
+        ctx = self.mock_ctx('deleteip')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create public_ip test")
+
+        ctx.logger.info("create public_ip")
+        self.assertEqual(200, public_ip.create(ctx=ctx))
+
+        status_ip = constants.CREATING
+        while status_ip == constants.CREATING :
+            current_ctx.set(ctx=ctx)
+            ctx.logger.debug(status_ip)
+            status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+            time.sleep(TIME_DELAY)
+        
+        ctx.logger.info("check public_ip creation success")
+        self.assertEqual( constants.SUCCEEDED, status_ip)
+
+        ctx.logger.info("delete public_ip")
+        self.assertEqual(202, public_ip.delete(ctx=ctx))
+        
+        status_ip = constants.DELETING
+        try:
+            while status_ip == constants.DELETING :
+                current_ctx.set(ctx=ctx)
+                ctx.logger.debug(status_ip)           
+                status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+                time.sleep(TIME_DELAY)
+        except utils.WindowsAzureError:
+            pass
+
+        ctx.logger.info("END create public_ip  test")
+
+
+    def test_conflict_public_ip(self):
+        ctx = self.mock_ctx('conflictip')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create public_ip test")
+
+        ctx.logger.info("create public_ip")
+        self.assertEqual(200, public_ip.create(ctx=ctx))
+    
+        status_ip = constants.CREATING
+        while status_ip == constants.CREATING :
+            current_ctx.set(ctx=ctx)
+            ctx.logger.debug(status_ip)
+            status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+            time.sleep(TIME_DELAY)
+    
+        ctx.logger.debug(status_ip)
+        ctx.logger.info("check public_ip creation success")
+        self.assertEqual( constants.SUCCEEDED, status_ip)
+
+        ctx.logger.info("create conflict public_ip")
+        self.assertEqual(200, public_ip.create(ctx=ctx))
+
+        ctx.logger.info("delete public_ip")
+        self.assertEqual(202, public_ip.delete(ctx=ctx))
+
+        status_ip = constants.DELETING
+        try:
+            while status_ip == constants.DELETING :
+                current_ctx.set(ctx=ctx)
+                ctx.logger.debug(status_ip)           
+                status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+                time.sleep(TIME_DELAY)
+        except utils.WindowsAzureError:
+            pass
+
+        ctx.logger.info("delete conflict public_ip")
+        self.assertEqual(204, public_ip.delete(ctx=ctx))
+
+        ctx.logger.info("END create public_ip  test")
 

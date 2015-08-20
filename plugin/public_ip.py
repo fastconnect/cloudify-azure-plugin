@@ -34,13 +34,11 @@ def get_public_ip_provisioning_state(**_):
 def delete(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.node.properties)
     utils.validate_node_property('public_ip_name', ctx.node.properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
     resource_group_name = ctx.node.properties['resource_group_name']
-    network_interface_name = ctx.node.properties['network_interface_name']
     public_ip_name =ctx.node.properties['public_ip_name']
 
     response = connection.AzureConnectionClient().azure_delete(
