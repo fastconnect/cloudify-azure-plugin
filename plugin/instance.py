@@ -47,7 +47,7 @@ def create(**_):
                                        storage_account,
                                        random.randint(0,1000)
                                        )
-    os_disk_vhd = "https://{0}.blob.core.windows.net/vhds/{0}.vhd".format(
+    os_disk_vhd = "https://{}.blob.core.windows.net/vhds/{}.vhd".format(
                                                     storage_account,
                                                     os_disk_name
                                                     )
