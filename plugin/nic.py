@@ -72,7 +72,7 @@ def _get_vm_ip(ctx, public=False):
     return (response.json())['properties']['ipAddress']
 
 
-def get_nic_provisioning_state(**_):
+def get_provisioning_state(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
     utils.validate_node_property('network_interface_name', ctx.node.properties)
@@ -81,6 +81,8 @@ def get_nic_provisioning_state(**_):
     api_version = constants.AZURE_API_VERSION_06
     resource_group_name = ctx.node.properties['resource_group_name']
     network_interface_name = ctx.node.properties['network_interface_name']
+
+
     response = connection.AzureConnectionClient().azure_get(
             ctx, 
             ("subscriptions/{}/resourcegroups/{}/"+
@@ -116,6 +118,7 @@ def create(**_):
     ip_name = ctx.node.properties['ip_name']
     private_ip_allocation_method = "Dynamic"
 
+    ctx.logger.info('generate NIC Json')
     json ={
         "location": str(location),
         "properties": {
@@ -136,8 +139,9 @@ def create(**_):
             ]
         }
     }
+    ctx.logger.debug(json)
 
-    ctx.logger.info('Beginning nic creation')
+    ctx.logger.info('create NIC : ' + network_interface_name)
     cntn = connection.AzureConnectionClient()
 
     response = cntn.azure_put(ctx, 
@@ -164,7 +168,9 @@ def delete(**_):
     resource_group_name = ctx.node.properties['resource_group_name']
     network_interface_name = ctx.node.properties['network_interface_name']
 
-    response = connection.AzureConnectionClient().azure_delete(
+    ctx.logger.info('delete NIC : ' + network_interface_name)
+    cntn = connection.AzureConnectionClient()
+    response = cntn.azure_delete(
       ctx, 
       ("subscriptions/{}/resourceGroups/{}/providers/microsoft.network" + 
       "/networkInterfaces/{}?api-version={}").format(subscription_id, 
