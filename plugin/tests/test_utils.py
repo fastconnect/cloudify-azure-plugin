@@ -2,8 +2,8 @@ from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 
 
-AZURE_USERNAME = 'api@louisdevandierefastconnect.onmicrosoft.com'
-SUBSCRIPTION_ID = '3121df85-fac7-48ec-bd49-08c2570686d0'
+AZURE_USERNAME = 'api@victoroudinfastconnect.onmicrosoft.com'
+SUBSCRIPTION_ID = '18d68acb-caef-42cb-9dde-050ed320998c'
 AZURE_PASSWORD = 'Azerty@01'
 COMPUTE_USER = 'administrateur'
 COMPUTE_PASSWORD = 'Cloud?db'
