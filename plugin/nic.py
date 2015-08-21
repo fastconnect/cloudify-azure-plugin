@@ -7,7 +7,7 @@ from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 from cloudify.decorators import operation
 
-def _get_vm_public_ip(ctx):
+def _get_vm_ip(ctx, public=False):
     ''' 
         Get the public IP from a machine or a network interface. 
     '''
@@ -56,7 +56,10 @@ def _get_vm_public_ip(ctx):
     else:
         raise NonRecoverableError('Unable to get public ip: missing argument')
 
-    pip = (response.json())['properties']['ipConfigurations'][0]['properties']['publicIPAddress']['id']
+    if public:
+        pip = (response.json())['properties']['ipConfigurations'][0]['properties']['publicIPAddress']['id']
+    else:
+        return (response.json())['properties']['ipConfigurations'][0]['properties']['privateIPAddress']
 
     response = azure_connection.azure_get(
                                         ctx,

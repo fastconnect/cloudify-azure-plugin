@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import time
+import re
 #Local import
 from plugin import utils
 from plugin import constants
@@ -47,7 +48,7 @@ def create(**_):
                                        storage_account,
                                        random.randint(0,1000)
                                        )
-    os_disk_vhd = "https://{0}.blob.core.windows.net/vhds/{0}.vhd".format(
+    os_disk_vhd = "https://{}.blob.core.windows.net/vhds/{}.vhd".format(
                                                     storage_account,
                                                     os_disk_name
                                                     )
@@ -110,7 +111,7 @@ def create(**_):
 	    }
 	}
 
-    ctx.logger.info('Beginning vm creation')
+    ctx.logger.info('Beginning vm creation: {}'.format(ctx.node.id))
     cntn = connection.AzureConnectionClient()
     cntn.azure_put(ctx, 
                    ("subscriptions/{}/resourcegroups/{}/" +
@@ -136,7 +137,11 @@ def create(**_):
         raise NonRecoverableError('Provisionning: {}.'.format(status))
     else:
         ctx.logger.info('{} {}'.format(vm_name, status))
-        ip = nic._get_vm_public_ip(ctx)
+        if re.search(r'manager', ctx.node.id):
+            ip = nic._get_vm_ip(ctx, True)
+        else:
+            ip = nic._get_vm_ip(ctx)
+
         ctx.logger.info(
                 'Machine is running at {}.'.format(ip)
                 )
