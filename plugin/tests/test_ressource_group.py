@@ -74,6 +74,76 @@ class TestRessourceGroup(testtools.TestCase):
         ctx.logger.info("END create ressource_group  test")
 
 
-    #def test_delete_ressource_group(self):
+    def test_delete_ressource_group(self):
+        ctx = self.mock_ctx('testdeletegroup')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create ressource_group test")
 
-    #def test_conflict_ressource_group(self):
+        ctx.logger.info("create ressource_group")
+        status_code = ressource_group.create(ctx=ctx)
+        ctx.logger.debug("status_code = " + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+
+        status_ressource_group = constants.CREATING
+        while status_ressource_group == constants.CREATING :
+            current_ctx.set(ctx=ctx)
+            ctx.logger.debug(status_ressource_group)
+            status_ressource_group = ressource_group.get_ressource_group_provisioning_state(ctx=ctx)
+            time.sleep(TIME_DELAY)
+        
+        ctx.logger.debug(status_ressource_group)
+        ctx.logger.info("check ressource_group creation success")
+        self.assertEqual( constants.SUCCEEDED, status_ressource_group)
+
+        ctx.logger.info("delete ressource_group")
+        self.assertEqual(202, ressource_group.delete(ctx=ctx))
+
+        try:
+            while status_ressource_group == constants.DELETING :
+                current_ctx.set(ctx=ctx)
+                ctx.logger.debug(status_ip)           
+                status_ressource_group = ressource_group.get_ressource_group_provisioning_state(ctx=ctx)
+                time.sleep(TIME_DELAY)
+        except utils.WindowsAzureError:
+            pass
+
+        ctx.logger.info("END create ressource_group  test")
+
+
+    def test_conflict_ressource_group(self):
+        ctx = self.mock_ctx('conflictgroup')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN conflict ressource_group test")
+
+        ctx.logger.info("create ressource group")
+        status_code = ressource_group.create(ctx=ctx)
+        ctx.logger.debug("status_code = " + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+
+        status_ressource_group = constants.CREATING
+        while status_ressource_group == constants.CREATING :
+            current_ctx.set(ctx=ctx)
+            ctx.logger.debug(status_ressource_group)
+            status_ressource_group = ressource_group.get_ressource_group_provisioning_state(ctx=ctx)
+            time.sleep(TIME_DELAY)
+
+        ctx.logger.info("conflict create ressource group")
+        status_code = ressource_group.create(ctx=ctx)
+        ctx.logger.debug("status_code = " + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+
+
+        ctx.logger.info("delete ressource_group")
+        self.assertEqual(202, ressource_group.delete(ctx=ctx))
+
+        try:
+            while status_ressource_group == constants.DELETING :
+                current_ctx.set(ctx=ctx)
+                ctx.logger.debug(status_ip)           
+                status_ressource_group = ressource_group.get_ressource_group_provisioning_state(ctx=ctx)
+                time.sleep(TIME_DELAY)
+        except utils.WindowsAzureError:
+            pass
+
+        ctx.logger.info("conflict delete ressource_group")
+        self.assertEqual(202, ressource_group.delete(ctx=ctx))

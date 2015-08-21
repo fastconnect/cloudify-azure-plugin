@@ -36,7 +36,7 @@ def delete(**_):
     resource_group_name = ctx.node.properties['resource_group_name']
 
     cntn = connection.AzureConnectionClient()
-    response = cntn.azure_put(ctx, 
+    response = cntn.azure_delete(ctx, 
                    ("subscriptions/{}/resourcegroups/{}" +
                     "?api-version={}").format(
                                             subscription_id, 
@@ -57,9 +57,7 @@ def create(**_):
     resource_group_name = ctx.node.properties['resource_group_name']
     location = ctx.node.properties['location']
 
-    json ={
-            "location": str(location)
-        }
+    json ={"location": str(location)}
 
     ctx.logger.info('Beginning ressource_group creation')
     cntn = connection.AzureConnectionClient()
