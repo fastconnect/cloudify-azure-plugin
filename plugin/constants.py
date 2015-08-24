@@ -54,9 +54,12 @@ REQUEST_FAILED = 'Failed'
 TOKEN_URL = 'https://login.windows.net/common/oauth2/token'
 RESOURCE_CONNECTION_URL = 'https://management.core.windows.net/'
 AZURE_API_URL = 'https://management.azure.com'
-AZURE_API_VERSION_06 = '2015-06-15'
-AZURE_API_VERSION_05_preview = '2015-05-01-preview'
+
 AZURE_API_VERSION_01 = '2015-01-01'
+AZURE_API_VERSION_04_PREVIEW = '2014-04-01-preview'
+AZURE_API_VERSION_05_preview = '2015-05-01-preview'
+AZURE_API_VERSION_06 = '2015-06-15'
+
 # Do not touch, it represents a client ID used to get access token
 APPLICATION_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 

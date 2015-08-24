@@ -43,7 +43,7 @@ class TestNIC(testtools.TestCase):
         time.sleep(TIME_DELAY)
 
 
-    def test_create_nic(self):
+    def test_create(self):
         ctx = self.mock_ctx('testcreatenic')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create NIC test")
@@ -54,7 +54,7 @@ class TestNIC(testtools.TestCase):
         status_nic = constants.CREATING
         while status_nic == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_nic = nic.get_nic_provisioning_state(ctx=ctx)
+            status_nic = nic.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
         
         ctx.logger.info("check NIC creation success")
@@ -65,24 +65,26 @@ class TestNIC(testtools.TestCase):
 
         ctx.logger.info("check is NIC is release")
         self.assertRaises(utils.WindowsAzureError,
-                         nic.get_nic_provisioning_state,
+                         nic.get_provisioning_state,
                          ctx=ctx
                          )
         ctx.logger.info("END create NIC  test")
 
 
-    def test_delete_nic(self):
+    def test_delete(self):
         ctx = self.mock_ctx('testdeletenic')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN delete NIC test")
 
         ctx.logger.info("create NIC")
-        nic.create(ctx=ctx)
+        status_code = nic.create(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         status_nic = constants.CREATING
         while status_nic == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_nic = nic.get_nic_provisioning_state(ctx=ctx)
+            status_nic = nic.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
         
         ctx.logger.info("check NIC creation success")
@@ -93,38 +95,42 @@ class TestNIC(testtools.TestCase):
 
         ctx.logger.info("check is NIC is release")
         self.assertRaises(utils.WindowsAzureError,
-                         nic.get_nic_provisioning_state,
+                         nic.get_provisioning_state,
                          ctx=ctx
                          )
         ctx.logger.info("END delete NIC  test")
 
 
-    def test_conflict_nic(self):
+    def test_conflict(self):
         ctx = self.mock_ctx('testconflictnic')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN conflict NIC test")
 
         ctx.logger.info("create NIC")
-        self.assertEqual(201, nic.create(ctx=ctx))
+        status_code = nic.create(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         status_nic = constants.CREATING
         while status_nic == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_nic = nic.get_nic_provisioning_state(ctx=ctx)
+            status_nic = nic.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
         
         ctx.logger.info("check NIC creation success")
         self.assertEqual( constants.SUCCEEDED, status_nic)
 
         ctx.logger.info("create NIC conflict")
-        self.assertEqual(200, nic.create(ctx=ctx))
+        status_code = nic.create(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         ctx.logger.info("delete NIC")
         self.assertEqual(202, nic.delete(ctx=ctx))
 
         ctx.logger.info("check is NIC is release")
         self.assertRaises(utils.WindowsAzureError,
-                         nic.get_nic_provisioning_state,
+                         nic.get_provisioning_state,
                          ctx=ctx
                          )
 
