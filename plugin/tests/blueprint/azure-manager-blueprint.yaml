@@ -10,7 +10,7 @@ imports:
     - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
     - http://www.getcloudify.org/spec/fabric-plugin/1.2rc1/plugin.yaml
     # relative import of plugin.yaml that resides in the blueprint directory
-    - ./plugin.yaml
+    - plugin.yaml
 
 inputs:
     subscription_id:
@@ -42,6 +42,10 @@ inputs:
         type: string
     compute_password:
         type: string
+    public_key:
+        type: string
+    private_key:
+        type: string
     resource_group_name:
         type: string
 
@@ -63,6 +67,7 @@ node_templates:
             storage_account: {get_input: storage_account}
             compute_user: {get_input: compute_user}
             compute_password: {get_input: compute_password}
+            public_key: {get_input: public_key}
             resource_group_name: {get_input: resource_group_name}
             install_agent: false
 
@@ -82,7 +87,7 @@ node_templates:
                     min_workers: 0
                     max_workers: 5
                     remote_execution_port: 22
-                    user: ubuntu
+                    user: { get_input: compute_user }
 
                 workflows:
                     task_retries: -1  # this means forever
@@ -106,7 +111,12 @@ node_templates:
                             provider_context: { get_attribute: [manager, provider_context] }
                         fabric_env:
                             user: { get_input: compute_user }
-                            password: { get_input: compute_password }
-                            connection_attempts: 10
-                            timeout: 60
+                            key_filename: { get_input: private_key }
+                delete:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
+                        fabric_env:
+                            user: { get_input: compute_user }
+                            key_filename: { get_input: private_key }
    

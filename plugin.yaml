@@ -40,6 +40,8 @@ node_types:
                 type: string
             compute_password:
                 type: string
+            public_key:
+                type: string
             resource_group_name:
                 type: string
         interfaces:

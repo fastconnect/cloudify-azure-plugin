@@ -29,6 +29,7 @@ def create(**_):
     utils.validate_node_property('storage_account', ctx.node.properties)
     utils.validate_node_property('compute_user', ctx.node.properties)
     utils.validate_node_property('compute_password', ctx.node.properties)
+    utils.validate_node_property('public_key', ctx.node.properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
@@ -56,6 +57,11 @@ def create(**_):
     network_interface = ctx.node.properties['network_interface_name']
     admin_username = ctx.node.properties['compute_user']
     admin_password = ctx.node.properties['compute_password']
+    public_key = ctx.node.properties['public_key']
+
+    #Get the public key as string
+    with open(public_key) as f:
+        public_keydata = f.read()
 
     json = {
 	    'id':('/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute' +
@@ -75,8 +81,16 @@ def create(**_):
 	            'adminUsername': str(admin_username),
 	            'adminPassword': str(admin_password),
 	            'linuxConfiguration':{
-                    'disablePasswordAuthentication': 'false'
+                    'disablePasswordAuthentication': 'true',
+                    'ssh': {
+                        'publicKeys': [ { 
+                            'path': '/home/{}/.ssh/authorized_keys'.format(
+                                                            admin_username
+                                                            ),
+                            'keyData': str(public_keydata)
+                        } ]
                     }
+                }
 	        },
 	        'storageProfile':{
 	            'imageReference':{
@@ -129,8 +143,8 @@ def create(**_):
     status = get_vm_provisioning_state()
 
     while status == constants.CREATING:
-        time.sleep(20)
         ctx.logger.info('{} is still {}'.format(vm_name, status))
+        time.sleep(20)
         status = get_vm_provisioning_state()
 
     if status != constants.SUCCEEDED:
@@ -138,8 +152,10 @@ def create(**_):
     else:
         ctx.logger.info('{} {}'.format(vm_name, status))
         if re.search(r'manager', ctx.node.id):
-            ip = nic._get_vm_ip(ctx, True)
+            # Get public ip of the manager
+            ip = nic._get_vm_ip(ctx, public=True)
         else:
+            # Get private ip of the agent
             ip = nic._get_vm_ip(ctx)
 
         ctx.logger.info(
