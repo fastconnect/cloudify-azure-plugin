@@ -1,6 +1,7 @@
 ﻿import testtools
 import time
 import test_utils
+import inspect
 
 from plugin import utils
 from plugin import constants
@@ -33,13 +34,15 @@ class TestInstance(testtools.TestCase):
             'compute_name': test_name,
             'compute_user': test_utils.COMPUTE_USER,
             'compute_password': test_utils.COMPUTE_PASSWORD,
+            'public_key': test_utils.PUBLIC_KEY,
+            'private_key': test_utils.PRIVATE_KEY,
             'resources_prefix': 'boulay',
-            'network_interface_name': 'cloudifynic',
-            'storage_account': 'cloudifystorageaccount',
+            'network_interface_name': 'fcnic',
+            'storage_account': 'fastconnectstorage',
             'create_option':'FromImage',
-            'resource_group_name': 'cloudifygroup',
-            'management_network_name': 'cloudifynetwork',
-            'management_subnet_name': 'cloudifysubnet',
+            'resource_group_name': 'FCtest',
+            'management_network_name': 'fcvnet',
+            'management_subnet_name': 'subnet',
         }
 
         return MockCloudifyContext(node_id='test',
@@ -56,9 +59,9 @@ class TestInstance(testtools.TestCase):
     def test_create(self):
         ctx = self.mock_ctx('testcreate')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN create VM test")
-
+        ctx.logger.info("BEGIN create VM test: {}".format(ctx.instance.id))
         ctx.logger.info("create VM")    
+
         instance.create(ctx=ctx) 
         
         ctx.logger.info("check VM status")
