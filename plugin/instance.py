@@ -57,11 +57,7 @@ def create(**_):
     network_interface = ctx.node.properties['network_interface_name']
     admin_username = ctx.node.properties['compute_user']
     admin_password = ctx.node.properties['compute_password']
-    public_key = ctx.node.properties['public_key']
-
-    #Get the public key as string
-    with open(public_key) as f:
-        public_keydata = f.read()
+    public_key = ctx.get_resource(ctx.node.properties['public_key'])
 
     json = {
 	    'id':('/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute' +
@@ -87,7 +83,7 @@ def create(**_):
                             'path': '/home/{}/.ssh/authorized_keys'.format(
                                                             admin_username
                                                             ),
-                            'keyData': str(public_keydata)
+                            'keyData': str(public_key)
                         } ]
                     }
                 }
@@ -125,7 +121,7 @@ def create(**_):
 	    }
 	}
 
-    ctx.logger.info('Beginning vm creation: {}'.format(ctx.node.id))
+    ctx.logger.info('Beginning vm creation: {}'.format(ctx.instance.id))
     cntn = connection.AzureConnectionClient()
     cntn.azure_put(ctx, 
                    ("subscriptions/{}/resourcegroups/{}/" +
@@ -151,7 +147,7 @@ def create(**_):
         raise NonRecoverableError('Provisionning: {}.'.format(status))
     else:
         ctx.logger.info('{} {}'.format(vm_name, status))
-        if re.search(r'manager', ctx.node.id):
+        if re.search(r'manager', ctx.instance.id):
             # Get public ip of the manager
             ip = nic._get_vm_ip(ctx, public=True)
         else:
@@ -161,7 +157,7 @@ def create(**_):
         ctx.logger.info(
                 'Machine is running at {}.'.format(ip)
                 )
-        ctx.instance.runtime_properties['ip'] = ip
+        ctx.instance.runtime_properties['ip'] = ip   
 
 
 @operation
