@@ -114,7 +114,6 @@ class TestInstance(testtools.TestCase):
             time.sleep(TIME_DELAY)
         ctx.logger.info("END delete VM test")
 
-
     def test_conflict(self):
         ctx = self.mock_ctx('testconflict')
         current_ctx.set(ctx=ctx)
@@ -166,3 +165,49 @@ class TestInstance(testtools.TestCase):
         ctx = self.mock_ctx('teststop')
         current_ctx.set(ctx=ctx)
 
+    def test_concurrent_create(self):
+        ctx1 = self.mock_ctx('testconcurrentcreate1')
+        ctx2 = self.mock_ctx('testconcurrentcreate2')
+        #current_ctx.set(ctx=ctx)
+        ctx1.logger.info("BEGIN concurrent create VM 1 test")
+        ctx2.logger.info("BEGIN concurrent create VM 2 test")
+
+        ctx1.logger.info("create VM 1")
+        instance.create(ctx=ctx1)
+
+        ctx2.logger.info("create VM 2")
+        instance.create(ctx=ctx2)
+
+        ctx1.logger.info("check VM 1 status")
+        ctx2.logger.info("check VM 2 status")
+        status_vm1 = constants.CREATING
+        status_vm2 = constants.CREATING
+        while bool(status_vm1 == constants.CREATING or status_vm2 == constants.CREATING) :
+            #current_ctx.set(ctx=ctx)
+            status_vm1 = instance.get_vm_provisioning_state(ctx=ctx1)
+            status_vm2 = instance.get_vm_provisioning_state(ctx=ctx2)
+            time.sleep(TIME_DELAY)
+
+        ctx1.logger.info("check VM 1 creation success")
+        self.assertEqual(constants.SUCCEEDED, status_vm1)
+
+        ctx2.logger.info("check VM 2 creation success")
+        self.assertEqual(constants.SUCCEEDED, status_vm2)
+
+        ctx1.logger.info("delete VM 1")
+        self.assertEqual(202, instance.delete(ctx=ctx1))
+
+        ctx2.logger.info("delete VM 2")
+        self.assertEqual(202, instance.delete(ctx=ctx2))
+
+        ctx1.logger.info("check if NIC 1 is release")
+        ctx2.logger.info("check if NIC 2 is release")
+        nic_machine_id1 = "nicmachineName"
+        nic_machine_id2 = "nicmachineName"
+        while bool(nic_machine_id1 is not None or nic_machine_id2 is not None) :
+            #current_ctx.set(ctx=ctx)
+            nic_machine_id1 = instance.get_nic_virtual_machine_id(ctx=ctx1)
+            nic_machine_id2 = instance.get_nic_virtual_machine_id(ctx=ctx2)
+            time.sleep(TIME_DELAY)
+        ctx1.logger.info("END create VM 1 test")
+        ctx2.logger.info("END create VM 2 test")
