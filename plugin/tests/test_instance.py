@@ -2,6 +2,7 @@
 import time
 import test_utils
 import inspect
+import threading
 
 from plugin import utils
 from plugin import constants
@@ -37,12 +38,12 @@ class TestInstance(testtools.TestCase):
             'public_key': test_utils.PUBLIC_KEY,
             'private_key': test_utils.PRIVATE_KEY,
             'resources_prefix': 'boulay',
-            'network_interface_name': 'fcnic',
-            'storage_account': 'fastconnectstorage',
+            #'network_interface_name': '', #TODO: auto-generated nic per instance
+            'storage_account': 'storageaccounttest3',
             'create_option':'FromImage',
-            'resource_group_name': 'FCtest',
-            'management_network_name': 'fcvnet',
-            'management_subnet_name': 'subnet',
+            'resource_group_name': 'resource_group_test',
+            'management_network_name': 'management_network_test',
+            'management_subnet_name': 'subnet_test',
         }
 
         return MockCloudifyContext(node_id='test',
@@ -77,12 +78,12 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))
 
-        ctx.logger.info("check if NIC is release")
-        nic_machine_id = "nicmachineName"
-        while nic_machine_id is not None :
-            current_ctx.set(ctx=ctx)
-            nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
-            time.sleep(TIME_DELAY)
+        #ctx.logger.info("check if NIC is release")
+        #nic_machine_id = "nicmachineName"
+        #while nic_machine_id is not None :
+            #current_ctx.set(ctx=ctx)
+            #nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
+            #time.sleep(TIME_DELAY)
         ctx.logger.info("END create VM test")
 
     def test_delete(self):    
@@ -106,15 +107,14 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))
 
-        ctx.logger.info("check if NIC is release")
-        nic_machine_id = "nicmachineName"
-        while nic_machine_id is not None:
-            current_ctx.set(ctx=ctx)
-            nic_machine_id = instance.get_nic_virtual_machine_id(
-                                    ctx=ctx
-                                )
-
-            time.sleep(TIME_DELAY)
+        #ctx.logger.info("check if NIC is release")
+        #nic_machine_id = "nicmachineName"
+        #while nic_machine_id is not None:
+            #current_ctx.set(ctx=ctx)
+            #nic_machine_id = instance.get_nic_virtual_machine_id(
+            #                        ctx=ctx
+            #                    )
+            #time.sleep(TIME_DELAY)
         ctx.logger.info("END delete VM test")
 
     def test_conflict(self):
@@ -143,14 +143,14 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))
 
-        ctx.logger.info("check if NIC is release")
-        nic_machine_id = "nicmachineName"
-        while nic_machine_id is not None:
-            current_ctx.set(ctx=ctx)
-            nic_machine_id = instance.get_nic_virtual_machine_id(
-                                ctx=ctx
-                            )
-            time.sleep(TIME_DELAY)
+        #ctx.logger.info("check if NIC is release")
+        #nic_machine_id = "nicmachineName"
+        #while nic_machine_id is not None:
+            #current_ctx.set(ctx=ctx)
+            #nic_machine_id = instance.get_nic_virtual_machine_id(
+            #                    ctx=ctx
+            #                )
+            #time.sleep(TIME_DELAY)
         
         ctx.logger.info("check vm provisionning state in a deleted machine")
         self.assertRaises(
@@ -175,11 +175,22 @@ class TestInstance(testtools.TestCase):
         ctx1.logger.info("BEGIN concurrent create VM 1 test")
         ctx2.logger.info("BEGIN concurrent create VM 2 test")
 
+        def create_vm(lctx):
+            instance.create(ctx=lctx)
+            return
+        vm1 = threading.Thread(target=create_vm, args=(ctx1,))
+        vm2 = threading.Thread(target=create_vm, args=(ctx2,))
+
         ctx1.logger.info("create VM 1")
-        instance.create(ctx=ctx1)
+        #instance.create(ctx=ctx1)
+        vm1.start()
 
         ctx2.logger.info("create VM 2")
-        instance.create(ctx=ctx2)
+        #instance.create(ctx=ctx2)
+        vm2.start()
+
+        vm1.join()
+        vm2.join()
 
         ctx1.logger.info("check VM 1 status")
         ctx2.logger.info("check VM 2 status")
@@ -187,7 +198,9 @@ class TestInstance(testtools.TestCase):
         status_vm2 = constants.CREATING
         while bool(status_vm1 == constants.CREATING or status_vm2 == constants.CREATING) :
             #current_ctx.set(ctx=ctx)
+            current_ctx.set(ctx=ctx1)
             status_vm1 = instance.get_vm_provisioning_state(ctx=ctx1)
+            current_ctx.set(ctx=ctx2)
             status_vm2 = instance.get_vm_provisioning_state(ctx=ctx2)
             time.sleep(TIME_DELAY)
 
@@ -203,14 +216,5 @@ class TestInstance(testtools.TestCase):
         ctx2.logger.info("delete VM 2")
         self.assertEqual(202, instance.delete(ctx=ctx2))
 
-        ctx1.logger.info("check if NIC 1 is release")
-        ctx2.logger.info("check if NIC 2 is release")
-        nic_machine_id1 = "nicmachineName"
-        nic_machine_id2 = "nicmachineName"
-        while bool(nic_machine_id1 is not None or nic_machine_id2 is not None) :
-            #current_ctx.set(ctx=ctx)
-            nic_machine_id1 = instance.get_nic_virtual_machine_id(ctx=ctx1)
-            nic_machine_id2 = instance.get_nic_virtual_machine_id(ctx=ctx2)
-            time.sleep(TIME_DELAY)
         ctx1.logger.info("END create VM 1 test")
         ctx2.logger.info("END create VM 2 test")
