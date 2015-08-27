@@ -47,9 +47,11 @@ def create(**_):
     #network_interface_name = ctx.node.properties['network_interface_name']
     storage_account = ctx.node.properties['storage_account']
     create_option = 'FromImage'
+
+    number = random.randint(0,1000)
     os_disk_name = "{}_{}_{}.vhd".format(vm_name, 
                                        storage_account,
-                                       random.randint(0,1000)
+                                       number
                                        )
     os_disk_vhd = "https://{}.blob.core.windows.net/vhds/{}.vhd".format(
                                                     storage_account,
@@ -58,11 +60,11 @@ def create(**_):
 
     #generation of nic and public ip name
     network_interface_name = "{}_nic_{}".format(vm_name,
-                                       random.randint(0,1000)
+                                       number
                                        )
     ctx.node.properties['network_interface_name'] = network_interface_name
     public_ip_name = "{}_pip_{}".format(vm_name,
-                                       random.randint(0,1000)
+                                       number
                                        )
     ctx.node.properties['public_ip_name'] = public_ip_name
 
