@@ -106,7 +106,7 @@ def create(**_):
     utils.validate_node_property('management_network_name', ctx.node.properties)
     utils.validate_node_property('management_subnet_name', ctx.node.properties)
     utils.validate_node_property('network_interface_name', ctx.node.properties)
-    utils.validate_node_property('ip_name', ctx.node.properties)
+    utils.validate_node_property('public_ip_name', ctx.node.properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
@@ -115,7 +115,7 @@ def create(**_):
     management_network_name = ctx.node.properties['management_network_name']
     management_subnet_name = ctx.node.properties['management_subnet_name']
     network_interface_name = ctx.node.properties['network_interface_name']
-    ip_name = ctx.node.properties['ip_name']
+    public_ip_name = ctx.node.properties['public_ip_name']
     private_ip_allocation_method = "Dynamic"
 
     ctx.logger.info('generate NIC Json')
@@ -124,7 +124,7 @@ def create(**_):
         "properties": {
             "ipConfigurations": [
                 {
-                    "name": str(ip_name),
+                    "name": str(public_ip_name),
                     "properties": {
                         "subnet": {
                             "id": "/subscriptions/{}/resourceGroups/{}/providers/microsoft.network/virtualNetworks/{}/subnets/{}"
