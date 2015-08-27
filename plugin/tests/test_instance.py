@@ -3,6 +3,7 @@ import time
 import test_utils
 import inspect
 import threading
+import Queue
 
 from plugin import utils
 from plugin import constants
@@ -216,5 +217,60 @@ class TestInstance(testtools.TestCase):
         ctx2.logger.info("delete VM 2")
         self.assertEqual(202, instance.delete(ctx=ctx2))
 
-        ctx1.logger.info("END create VM 1 test")
-        ctx2.logger.info("END create VM 2 test")
+        ctx1.logger.info("END concurrent create VM 1 test")
+        ctx2.logger.info("END concurrent create VM 2 test")
+
+    def test_concurrent_delete(self):
+        ctx1 = self.mock_ctx('testconcurrentdelete1')
+        ctx2 = self.mock_ctx('testconcurrentdelete2')
+        #current_ctx.set(ctx=ctx)
+        ctx1.logger.info("BEGIN concurrent delete VM 1 test")
+        ctx2.logger.info("BEGIN concurrent delete VM 2 test")
+
+        ctx1.logger.info("create VM 1")
+        instance.create(ctx=ctx1)
+
+        ctx2.logger.info("create VM 2")
+        instance.create(ctx=ctx2)
+
+        ctx1.logger.info("check VM 1 status")
+        ctx2.logger.info("check VM 2 status")
+        status_vm1 = constants.CREATING
+        status_vm2 = constants.CREATING
+        while bool(status_vm1 == constants.CREATING or status_vm2 == constants.CREATING) :
+            #current_ctx.set(ctx=ctx)
+            current_ctx.set(ctx=ctx1)
+            status_vm1 = instance.get_vm_provisioning_state(ctx=ctx1)
+            current_ctx.set(ctx=ctx2)
+            status_vm2 = instance.get_vm_provisioning_state(ctx=ctx2)
+            time.sleep(TIME_DELAY)
+
+        ctx1.logger.info("check VM 1 creation success")
+        self.assertEqual(constants.SUCCEEDED, status_vm1)
+
+        ctx2.logger.info("check VM 2 creation success")
+        self.assertEqual(constants.SUCCEEDED, status_vm2)
+
+        def delete_vm(mokctx, queue):
+            queue.put(instance.delete(ctx=mokctx))
+        queue1 = Queue.Queue()
+        queue2 = Queue.Queue()
+        vm1 = threading.Thread(target=delete_vm, args=(ctx1,queue1))
+        vm2 = threading.Thread(target=delete_vm, args=(ctx2,queue2))
+
+        ctx1.logger.info("delete VM 1")
+        #self.assertEqual(202, instance.delete(ctx=ctx1))
+        vm1.start()
+
+        ctx2.logger.info("delete VM 2")
+        #self.assertEqual(202, instance.delete(ctx=ctx2))
+        vm2.start()
+
+        vm1.join()
+        vm2.join()
+        
+        self.assertEqual(202, queue1.get())
+        self.assertEqual(202, queue2.get())
+
+        ctx1.logger.info("END concurrent delete VM 1 test")
+        ctx2.logger.info("END concurrent delete VM 2 test")
