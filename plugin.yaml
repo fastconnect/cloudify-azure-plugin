@@ -47,8 +47,6 @@ node_types:
         interfaces:
             cloudify.interfaces.lifecycle:
                 create:
-                  implementation: azure.plugin.instance.create
-                #stop:
-                #  implementation: azure.plugin.instance.stop
+                    implementation: azure.plugin.instance.create
                 delete:
-                  implementation: azure.plugin.instance.delete
+                    implementation: azure.plugin.instance.delete
