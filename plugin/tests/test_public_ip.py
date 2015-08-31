@@ -51,7 +51,7 @@ class TestPublicIP(testtools.TestCase):
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         status_ip = constants.CREATING
-        while status_ip == constants.CREATING :
+        while status_ip != constants.SUCCEEDED :
             current_ctx.set(ctx=ctx)
             ctx.logger.debug(status_ip)
             status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
@@ -63,7 +63,6 @@ class TestPublicIP(testtools.TestCase):
 
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
-
 
         try:
             while status_ip == constants.DELETING :
@@ -89,7 +88,7 @@ class TestPublicIP(testtools.TestCase):
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         status_ip = constants.CREATING
-        while status_ip == constants.CREATING :
+        while status_ip != constants.SUCCEEDED :
             current_ctx.set(ctx=ctx)
             ctx.logger.debug(status_ip)
             status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
@@ -125,7 +124,7 @@ class TestPublicIP(testtools.TestCase):
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         status_ip = constants.CREATING
-        while status_ip == constants.CREATING :
+        while status_ip != constants.SUCCEEDED :
             current_ctx.set(ctx=ctx)
             ctx.logger.debug(status_ip)
             status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)

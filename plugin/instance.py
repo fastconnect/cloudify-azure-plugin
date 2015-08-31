@@ -7,12 +7,14 @@ from plugin import utils
 from plugin import constants
 from plugin import connection
 from plugin import nic
+from plugin import public_ip
 
 #Cloudify imports
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 from cloudify.decorators import operation
 
+TIME_DELAY = 5
 
 @operation
 def create(**_):
@@ -25,7 +27,7 @@ def create(**_):
     utils.validate_node_property('offer', ctx.node.properties)
     utils.validate_node_property('sku', ctx.node.properties)
     utils.validate_node_property('version', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.node.properties)
+    #utils.validate_node_property('network_interface_name', ctx.node.properties)
     utils.validate_node_property('storage_account', ctx.node.properties)
     utils.validate_node_property('compute_user', ctx.node.properties)
     utils.validate_node_property('compute_password', ctx.node.properties)
@@ -42,22 +44,53 @@ def create(**_):
     offer = ctx.node.properties['offer']
     sku = ctx.node.properties['sku']
     distro_version = ctx.node.properties['version']
-    network_interface_name = ctx.node.properties['network_interface_name']
+    #network_interface_name = ctx.node.properties['network_interface_name']
     storage_account = ctx.node.properties['storage_account']
     create_option = 'FromImage'
+
+    number = random.randint(0,1000)
     os_disk_name = "{}_{}_{}.vhd".format(vm_name, 
                                        storage_account,
-                                       random.randint(0,1000)
+                                       number
                                        )
     os_disk_vhd = "https://{}.blob.core.windows.net/vhds/{}.vhd".format(
                                                     storage_account,
                                                     os_disk_name
                                                     )
+
+    #generation of nic and public ip name
+    network_interface_name = "{}_nic_{}".format(vm_name,
+                                       number
+                                       )
+    ctx.node.properties['network_interface_name'] = network_interface_name
+    public_ip_name = "{}_pip_{}".format(vm_name,
+                                       number
+                                       )
+    ctx.node.properties['public_ip_name'] = public_ip_name
+
+    #generation of public_ip
+    public_ip.create(ctx=ctx)
+    status_ip = constants.CREATING
+    while status_ip != constants.SUCCEEDED :
+        status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+        time.sleep(TIME_DELAY)
+    if constants.SUCCEEDED != status_ip :
+        ctx.logger.info('status creation public ip is : ' + str(status_ip))
+        raise NonRecoverableError('Failed provisionning Public IP : {}.'.format(status_ip))
+
+    #generation of nic
+    nic.create(ctx=ctx)
+    status_nic = constants.CREATING
+    while status_nic == constants.CREATING :
+        status_nic = nic.get_provisioning_state(ctx=ctx)
+        time.sleep(TIME_DELAY)
+    if constants.SUCCEEDED != status_nic :
+        raise NonRecoverableError('Failed provisionning nic : {}.'.format(status_nic))
+
     computer_name = ctx.node.properties['compute_name']
-    network_interface = ctx.node.properties['network_interface_name']
     admin_username = ctx.node.properties['compute_user']
     admin_password = ctx.node.properties['compute_password']
-    public_key = ctx.get_resource(ctx.node.properties['public_key'])
+    public_key = ctx.node.properties['public_key']
 
     json = {
 	    'id':('/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute' +
@@ -113,7 +146,7 @@ def create(**_):
                         format(
                             subscription_id,
                             resource_group_name, 
-                            network_interface
+                            network_interface_name
                             )
 	            }
 	            ]
@@ -122,19 +155,40 @@ def create(**_):
 	}
 
     ctx.logger.info('Beginning vm creation: {}'.format(ctx.instance.id))
-    cntn = connection.AzureConnectionClient()
-    cntn.azure_put(ctx, 
-                   ("subscriptions/{}/resourcegroups/{}/" +
-                    "providers/Microsoft.Compute" +
-                    "/virtualMachines/{}" +
-                    "?validating=true&api-version={}").format(
-                                                    subscription_id, 
-                                                    resource_group_name, 
-                                                    vm_name, 
-                                                    api_version
-                                                    ),
-                    json=json
-                    )
+    try:
+        cntn = connection.AzureConnectionClient()
+        cntn.azure_put(ctx,
+           ("subscriptions/{}/resourcegroups/{}/" +
+            "providers/Microsoft.Compute" +
+            "/virtualMachines/{}" +
+            "?validating=true&api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                vm_name,
+                api_version
+            ),
+            json=json
+        )
+    except:
+        ctx.logger.info('Creation vm failed: {}'.format(ctx.instance.id))
+        #deletin puplic ip
+        public_ip.delete(ctx=ctx)
+
+        status_ip = constants.DELETING
+        try:
+            while status_ip == constants.DELETING :
+                status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+                time.sleep(TIME_DELAY)
+        except utils.WindowsAzureError:
+            pass
+
+        #deleting nic
+        nic.delete(ctx=ctx)
+        try:
+            nic.get_provisioning_state(ctx=ctx)
+        except utils.WindowsAzureError:
+            pass
+        pass
 
     status = get_vm_provisioning_state()
 
@@ -165,6 +219,8 @@ def delete(**_):
     utils.validate_node_property('subscription_id',ctx.node.properties)
     utils.validate_node_property('compute_name',ctx.node.properties)
     utils.validate_node_property('resource_group_name',ctx.node.properties)
+    utils.validate_node_property('network_interface_name',ctx.node.properties)
+    utils.validate_node_property('public_ip_name',ctx.node.properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
@@ -180,6 +236,35 @@ def delete(**_):
                                                      vm_name, api_version
                                                      )
         )
+
+    #deletin puplic ip
+    public_ip.delete(ctx=ctx)
+
+    status_ip = constants.DELETING
+    try:
+        while status_ip == constants.DELETING :
+            status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+            time.sleep(TIME_DELAY)
+    except utils.WindowsAzureError:
+        pass
+
+    #wait vm deletion
+    status = get_vm_provisioning_state()
+    try:
+        while status == constants.DELETING:
+            ctx.logger.info('{} is still {}'.format(vm_name, status))
+            time.sleep(20)
+            status = get_vm_provisioning_state()
+    except utils.WindowsAzureError:
+        pass
+
+    #deleting nic
+    nic.delete(ctx=ctx)
+    try:
+        nic.get_provisioning_state(ctx=ctx)
+    except utils.WindowsAzureError:
+        pass
+
     return response.status_code
 
 

@@ -28,7 +28,7 @@ class TestNIC(testtools.TestCase):
             'resource_group_name': 'cloudifygroup',
             'management_network_name': 'cloudifynetwork',
             'management_subnet_name': 'subnet',
-            'ip_name': 'cloudifyip'
+            'public_ip_name': 'cloudifyip'
         }
 
         return MockCloudifyContext(node_id='test',
