@@ -1,15 +1,13 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.2rc1/types.yaml
+  - http://www.getcloudify.org/spec/cloudify/3.2.1/types.yaml
   - plugin.yaml
 
 inputs:
     subscription_id:
-        default: '18d68acb-caef-42cb-9dde-050ed320998c'
         type: string
     username:
-        default: 'api@louisdevandierefastconnect.onmicrosoft.com'
         type: string
     password:
         default: 'Azerty@01'
@@ -33,13 +31,12 @@ inputs:
         default: 'Standard_A1'
         type: string
     compute_name:
-        default: 'manager-azure'
+        type: string
+    management_network_name:
+        type: string
+    management_subnet_name:
         type: string
     storage_account:
-        default: 'fcteststorage'
-        type: string
-    create_option:
-        default: 'FromImage'
         type: string
     compute_user:
         default: 'administrateur'
@@ -50,7 +47,6 @@ inputs:
     public_key:
         type: string
     resource_group_name:
-        default: 'FCtest'
         type: string
 
 node_templates:
@@ -75,4 +71,5 @@ node_templates:
             compute_password: {get_input: compute_password}
             resource_group_name: {get_input: resource_group_name}
             public_key: { get_input: public_key }
-            
+            management_network_name: { get_input: management_network_name}
+            management_subnet_name: { get_input: management_subnet_name }

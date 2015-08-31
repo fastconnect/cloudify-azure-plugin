@@ -6,7 +6,7 @@
 plugins:
   azure:
     executor: central_deployment_agent
-    source: .\cloudify-azure-plugin.zip
+    source: cloudify-azure-plugin
 
 node_types:
     cloudify.azure.nodes.Instance:
