@@ -32,8 +32,6 @@ node_types:
                 type: string
             compute_name:
                 type: string
-            network_interface_name:
-                type: string
             storage_account:
                 type: string
             compute_user:
@@ -43,6 +41,10 @@ node_types:
             public_key:
                 type: string
             resource_group_name:
+                type: string
+            management_network_name:
+                type: string
+            management_subnet_name:
                 type: string
         interfaces:
             cloudify.interfaces.lifecycle:
