@@ -1,0 +1,78 @@
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.2rc1/types.yaml
+  - plugin.yaml
+
+inputs:
+    subscription_id:
+        default: '18d68acb-caef-42cb-9dde-050ed320998c'
+        type: string
+    username:
+        default: 'api@louisdevandierefastconnect.onmicrosoft.com'
+        type: string
+    password:
+        default: 'Azerty@01'
+        type: string
+    location:   
+        default: 'westeurope'
+        type: string
+    publisherName:
+        default: 'Canonical'
+        type: string
+    offer:
+        default: 'UbuntuServer'
+        type: string
+    sku:
+        default: 12.04.5-LTS
+        type: string
+    version:
+        default: 'latest'
+        type: string
+    flavor_id:
+        default: 'Standard_A1'
+        type: string
+    compute_name:
+        default: 'manager-azure'
+        type: string
+    storage_account:
+        default: 'fcteststorage'
+        type: string
+    create_option:
+        default: 'FromImage'
+        type: string
+    compute_user:
+        default: 'administrateur'
+        type: string
+    compute_password:
+        default: 'Azerty?01'
+        type: string
+    public_key:
+        type: string
+    resource_group_name:
+        default: 'FCtest'
+        type: string
+
+node_templates:
+    compute_node:
+        type: cloudify.azure.nodes.Instance
+        properties:
+            cloudify_agent:
+                default:
+                    user: { get_input: compute_user }
+            subscription_id: { get_input: subscription_id }
+            username: { get_input: username }
+            password: { get_input: password }
+            location: { get_input: location }
+            publisherName: { get_input: publisherName }
+            offer: { get_input: offer }
+            sku: { get_input: sku }
+            version: { get_input: version }
+            flavor_id: { get_input: flavor_id }
+            compute_name: {get_input: compute_name}
+            storage_account: {get_input: storage_account}
+            compute_user: {get_input: compute_user}
+            compute_password: {get_input: compute_password}
+            resource_group_name: {get_input: resource_group_name}
+            public_key: { get_input: public_key }
+            
