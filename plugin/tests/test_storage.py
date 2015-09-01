@@ -2,9 +2,14 @@ import testtools
 import time
 import test_utils
 
-from plugin import utils
-from plugin import constants
-from plugin import storage
+try:
+    from plugin import utils
+    from plugin import constants
+    from plugin import storage
+except:
+    import utils
+    import constants
+    import storage
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
