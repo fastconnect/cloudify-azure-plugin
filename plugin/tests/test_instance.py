@@ -5,10 +5,14 @@ import inspect
 import threading
 import Queue
 
-from plugin import utils
-from plugin import constants
-from plugin import connection
-from plugin import instance
+try:
+    from plugin import utils
+    from plugin import constants
+    from plugin import instance
+except:
+    import utils
+    import constants
+    import instance
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
@@ -39,7 +43,6 @@ class TestInstance(testtools.TestCase):
             'public_key': test_utils.PUBLIC_KEY,
             'private_key': test_utils.PRIVATE_KEY,
             'resources_prefix': 'boulay',
-            #'network_interface_name': '', #TODO: auto-generated nic per instance
             'storage_account': 'storageaccounttest3',
             'create_option':'FromImage',
             'resource_group_name': 'resource_group_test',
@@ -130,9 +133,7 @@ class TestInstance(testtools.TestCase):
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_vm = instance.get_vm_provisioning_state(
-                            ctx=ctx
-                        )
+            status_vm = instance.get_vm_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
 
         ctx.logger.info("VM creation conflict")
@@ -152,13 +153,13 @@ class TestInstance(testtools.TestCase):
             #                    ctx=ctx
             #                )
             #time.sleep(TIME_DELAY)
-        
+
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("check vm provisionning state in a deleted machine")
-        self.assertRaises(
-                          utils.WindowsAzureError,
-                          instance.get_vm_provisioning_state,
-                          ctx=ctx
-                          )
+        self.assertRaises(utils.WindowsAzureError,
+            instance.get_vm_provisioning_state,
+            ctx=ctx
+        )
 
         ctx.logger.info("delete VM conflict")
         self.assertEqual(204, instance.delete(ctx=ctx))
