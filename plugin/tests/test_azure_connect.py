@@ -6,9 +6,14 @@ from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 from azure.servicemanagement import ServiceManagementService
 
-from plugin import connection
-from plugin import constants
-from plugin.utils import WindowsAzureError
+try:
+    from plugin import connection
+    from plugin import constants
+    from plugin.utils import WindowsAzureError
+except:
+    import connection
+    import constants
+    from utils import WindowsAzureError
 
 
 class TestConnection(testtools.TestCase):
