@@ -39,7 +39,7 @@ def delete(**_):
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
     resource_group_name = ctx.node.properties['resource_group_name']
-    public_ip_name =ctx.node.properties['public_ip_name']
+    public_ip_name =ctx.instance.runtime_properties['public_ip_name']
 
     response = connection.AzureConnectionClient().azure_delete(
       ctx, 
@@ -63,7 +63,7 @@ def create(**_):
     api_version = constants.AZURE_API_VERSION_06
     resource_group_name = ctx.node.properties['resource_group_name']
     location = ctx.node.properties['location']
-    public_ip_name = ctx.node.properties['public_ip_name']
+    public_ip_name = ctx.instance.runtime_properties['public_ip_name']
     public_ip_allocation_method = "Static"
 
     json ={
