@@ -3,8 +3,10 @@ import constants
 import utils
 
 from cloudify import ctx
+from cloudify.decorators import operation
 
 
+@operation
 def create_network(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
@@ -48,6 +50,7 @@ def create_network(**_):
     return response.status_code
 
 
+@operation
 def delete_network(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
@@ -105,6 +108,7 @@ def get_provisioning_state_network(**_):
     return status_storage
 
 
+@operation
 def create_subnet(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
@@ -145,6 +149,7 @@ def create_subnet(**_):
     return response.status_code
 
 
+@operation
 def delete_subnet(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
