@@ -1,10 +1,13 @@
+from cloudify.decorators import operation
 import connection
 import constants
 import utils
 
 from cloudify import ctx
+from cloudify.decorators import operation
 
 
+@operation
 def create(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
@@ -57,6 +60,7 @@ def create(**_):
     return response.status_code
 
 
+@operation
 def delete(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
