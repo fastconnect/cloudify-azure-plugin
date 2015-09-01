@@ -3,11 +3,18 @@ import random
 import time
 import re
 #Local import
-from plugin import utils
-from plugin import constants
-from plugin import connection
-from plugin import nic
-from plugin import public_ip
+try:
+    from plugin import utils
+    from plugin import constants
+    from plugin import connection
+    from plugin import nic
+    from plugin import public_ip
+except:
+    import utils
+    import constants
+    import connection
+    import nic
+    import public_ip
 
 #Cloudify imports
 from cloudify import ctx
@@ -48,8 +55,13 @@ def create(**_):
     storage_account = ctx.node.properties['storage_account']
     create_option = 'FromImage'
 
+    #check availability name
+    if not is_available(ctx=ctx):
+        ctx.logger.info('VM creation not possible, {} already exist'.format(vm_name))
+        raise utils.WindowsAzureError(400,'{} already exist'.format(vm_name))
+
     number = random.randint(0,1000)
-    os_disk_name = "{}_{}_{}.vhd".format(vm_name, 
+    os_disk_name = "{}_{}_{}.vhd".format(vm_name,
                                        storage_account,
                                        number
                                        )
@@ -62,11 +74,11 @@ def create(**_):
     network_interface_name = "{}_nic_{}".format(vm_name,
                                        number
                                        )
-    ctx.node.properties['network_interface_name'] = network_interface_name
+    ctx.instance.runtime_properties['network_interface_name'] = network_interface_name
     public_ip_name = "{}_pip_{}".format(vm_name,
                                        number
                                        )
-    ctx.node.properties['public_ip_name'] = public_ip_name
+    ctx.instance.runtime_properties['public_ip_name'] = public_ip_name
 
     #generation of public_ip
     public_ip.create(ctx=ctx)
@@ -169,7 +181,30 @@ def create(**_):
             ),
             json=json
         )
-    except:
+
+        status = get_vm_provisioning_state()
+
+        while status == constants.CREATING:
+            ctx.logger.info('{} is still {}'.format(vm_name, status))
+            time.sleep(20)
+            status = get_vm_provisioning_state()
+
+        if status != constants.SUCCEEDED:
+            raise NonRecoverableError('Provisionning: {}.'.format(status))
+        else:
+            ctx.logger.info('{} {}'.format(vm_name, status))
+            if re.search(r'manager', ctx.instance.id):
+                # Get public ip of the manager
+                ip = nic._get_vm_ip(ctx, public=True)
+            else:
+                # Get private ip of the agent
+                ip = nic._get_vm_ip(ctx)
+
+            ctx.logger.info(
+                    'Machine is running at {}.'.format(ip)
+                    )
+            ctx.instance.runtime_properties['ip'] = ip
+    except utils.WindowsAzureError as e:
         ctx.logger.info('Creation vm failed: {}'.format(ctx.instance.id))
         #deletin puplic ip
         public_ip.delete(ctx=ctx)
@@ -188,30 +223,7 @@ def create(**_):
             nic.get_provisioning_state(ctx=ctx)
         except utils.WindowsAzureError:
             pass
-        pass
-
-    status = get_vm_provisioning_state()
-
-    while status == constants.CREATING:
-        ctx.logger.info('{} is still {}'.format(vm_name, status))
-        time.sleep(20)
-        status = get_vm_provisioning_state()
-
-    if status != constants.SUCCEEDED:
-        raise NonRecoverableError('Provisionning: {}.'.format(status))
-    else:
-        ctx.logger.info('{} {}'.format(vm_name, status))
-        if re.search(r'manager', ctx.instance.id):
-            # Get public ip of the manager
-            ip = nic._get_vm_ip(ctx, public=True)
-        else:
-            # Get private ip of the agent
-            ip = nic._get_vm_ip(ctx)
-
-        ctx.logger.info(
-                'Machine is running at {}.'.format(ip)
-                )
-        ctx.instance.runtime_properties['ip'] = ip   
+        raise utils.WindowsAzureError(e.code, e.message)
 
 
 @operation
@@ -249,8 +261,8 @@ def delete(**_):
         pass
 
     #wait vm deletion
-    status = get_vm_provisioning_state()
     try:
+        status = get_vm_provisioning_state()
         while status == constants.DELETING:
             ctx.logger.info('{} is still {}'.format(vm_name, status))
             time.sleep(20)
@@ -322,3 +334,33 @@ def get_nic_virtual_machine_id(**_):
         return None
      
     return vm_id
+
+def is_available(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('compute_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    resource_group_name = ctx.node.properties['resource_group_name']
+    vm_name = ctx.node.properties['compute_name']
+    api_version = constants.AZURE_API_VERSION_06
+
+    response = connection.AzureConnectionClient().azure_get(
+        ctx,
+        ("subscriptions/{}/resourcegroups/{}/"+
+            "providers/Microsoft.Compute/virtualmachines"+
+            "?api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                api_version
+        )
+    )
+    jsonGet = response.json()
+    ctx.logger.debug(jsonGet)
+
+    list = jsonGet['value']
+    for vm in list:
+        if vm['name']== vm_name:
+            return False
+
+    return True
