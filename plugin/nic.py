@@ -80,7 +80,7 @@ def get_provisioning_state(**_):
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
     resource_group_name = ctx.node.properties['resource_group_name']
-    network_interface_name = ctx.node.properties['network_interface_name']
+    network_interface_name = ctx.instance.runtime_properties['network_interface_name']
 
 
     response = connection.AzureConnectionClient().azure_get(
@@ -166,7 +166,7 @@ def delete(**_):
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
     resource_group_name = ctx.node.properties['resource_group_name']
-    network_interface_name = ctx.node.properties['network_interface_name']
+    network_interface_name = ctx.instance.runtime_properties['network_interface_name']
 
     ctx.logger.info('delete NIC : ' + network_interface_name)
     cntn = connection.AzureConnectionClient()
