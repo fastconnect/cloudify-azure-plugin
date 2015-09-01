@@ -3,7 +3,10 @@ import utils
 import requests
 import re
 from cloudify import ctx
-from plugin import utils
+try:
+    from plugin import utils
+except:
+    import utils
 
 
 class AzureConnectionClient():
