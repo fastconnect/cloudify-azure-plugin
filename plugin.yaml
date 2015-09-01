@@ -9,46 +9,211 @@ plugins:
     source: .\cloudify-azure-plugin.zip
 
 node_types:
-    cloudify.azure.nodes.Instance:
-        derived_from: cloudify.nodes.Compute
-        properties:
-            subscription_id:
-                type: string
-            username:
-                type: string
-            password:
-                type: string
-            location:   
-                type: string
-            publisherName:
-                type: string
-            offer:
-                type: string
-            sku:
-                type: string
-            version:
-                type: string
-            flavor_id:
-                type: string
-            compute_name:
-                type: string
-            network_interface_name:
-                type: string
-            storage_account:
-                type: string
-            compute_user:
-                type: string
-            compute_password:
-                type: string
-            public_key:
-                type: string
-            resource_group_name:
-                type: string
-        interfaces:
-            cloudify.interfaces.lifecycle:
-                create:
-                  implementation: azure.plugin.instance.create
-                #stop:
-                #  implementation: azure.plugin.instance.stop
-                delete:
-                  implementation: azure.plugin.instance.delete
+  cloudify.azure.nodes.ResourceGroup:
+    derived_from: cloudify.nodes.Root
+    properties:
+      subscription_id:
+        description: >
+          Indicates the subscription id required to create resource group
+        type: string
+        default: ''
+      location:
+        description: >
+          location where the resource group will be created
+        type: string
+        default: 'westeurope'
+      username:
+        description: >
+          Indicates the username of the subscription id required to create resource group
+        type: string
+        default: ''
+      password:
+        description: >
+          Indicates the password of the subscription id required to create resource group
+        type: string
+        default: ''
+      resource_group_name:
+        description: >
+          Indicates the name of the resource group to create
+        type: string
+        default: ''
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.ressource_group.create
+        delete:
+          implementation: azure.plugin.ressource_group.delete
+
+  cloudify.azure.nodes.StorageAccount:
+    derived_from: cloudify.nodes.Root
+    properties:
+      subscription_id:
+        description: >
+          the subscription id required to create public storage account 
+        type: string
+        default: ''
+      location:
+        description: >
+          location where VM will be provisioned
+        type: string
+        default: 'westeurope'
+      username:
+        description: >
+          Indicates the username of the subscription id required to create storage account
+        type: string
+        default: ''
+      password:
+        description: >
+          Indicates the password of the subscription id required to create storage account
+        type: string
+        default: ''
+      resource_group_name:
+        type: string
+        default: ''
+      storage_account_name:
+        type: string
+        default: ''
+      account_type:
+        description: >
+          account_type possible [Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS]
+        type: string
+        default: 'Standard_LRS'
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.storage.create
+        delete:
+          implementation: azure.plugin.storage.delete
+
+  cloudify.azure.nodes.Network:
+    derived_from: cloudify.nodes.Network
+    properties:
+      subscription_id:
+        type: string
+        default: ''
+      location:
+        type: string
+        default: 'West US'
+      username:
+        type: string
+        default: ''
+      password:
+        type: string
+        default: ''
+      resource_group_name:
+        type: string
+        default: ''
+      virtual_network_name:
+        type: string
+        default: ''
+      virtual_network_address_prefix:
+        type: string
+        default: ''
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.network.create_network
+        delete:
+          implementation: azure.plugin.network.delete_network
+
+  cloudify.azure.nodes.Subnet:
+    derived_from: cloudify.nodes.Network
+    properties:
+      subscription_id:
+        type: string
+        default: ''
+      location:
+        type: string
+        default: 'West US'
+      username:
+        type: string
+        default: ''
+      password:
+        type: string
+        default: ''
+      resource_group_name:
+        type: string
+        default: ''
+      virtual_network_name:
+        type: string
+        default: ''
+      subnet_name:
+        type: string
+        default: ''
+      subnet_address_prefix:
+        type: string
+        default: ''
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.network.create_subnet
+        delete:
+          implementation: azure.plugin.network.delete_subnet
+
+  cloudify.azure.nodes.Instance:
+    derived_from: cloudify.nodes.Compute
+    properties:
+      subscription_id:
+        type: string
+      username:
+        type: string
+      password:
+        type: string
+      location:   
+        type: string
+      publisherName:
+        type: string
+      offer:
+        type: string
+      sku:
+        type: string
+      version:
+        type: string
+      flavor_id:
+        type: string
+      compute_name:
+        type: string
+      storage_account:
+        type: string
+      compute_user:
+        type: string
+      compute_password:
+        type: string
+      public_key:
+        type: string
+      resource_group_name:
+        type: string
+      virtual_network_name:
+        type: string
+      subnet_name:
+        type: string
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.instance.create
+        #stop:
+        #  implementation: azure.plugin.instance.stop
+        delete:
+          implementation: azure.plugin.instance.delete
+
+relationships:
+  cloudify.azure.relationships.storage_account_connected_to_resource_group:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.azure.relationships.network_connected_to_resource_group:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.azure.relationships.subnet_connected_to_network:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.azure.relationships.instance_connected_to_resource_group:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.azure.relationships.instance_connected_to_storage_account:
+    derived_from: cloudify.relationships.depends_on
+
+  cloudify.azure.relationships.instance_connected_to_network:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.azure.relationships.instance_connected_to_subnet:
+    derived_from: cloudify.relationships.connected_to
