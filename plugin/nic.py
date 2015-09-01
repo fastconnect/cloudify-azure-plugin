@@ -2,6 +2,7 @@
 import connection
 import constants
 import utils
+from public_ip import get_public_address_id
 
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
@@ -17,7 +18,7 @@ def _get_vm_ip(ctx, public=False):
     api_version = constants.AZURE_API_VERSION_06
     vm_name = ctx.node.properties['compute_name']
     resource_group = ctx.node.properties['resource_group_name']
-    nic = ctx.node.properties['network_interface_name']
+    nic = ctx.instance.runtime_properties['network_interface_name']
 
     if nic is not None:
         response = azure_connection.azure_get(
@@ -75,7 +76,7 @@ def _get_vm_ip(ctx, public=False):
 def get_provisioning_state(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
@@ -105,8 +106,8 @@ def create(**_):
     utils.validate_node_property('location', ctx.node.properties)
     utils.validate_node_property('management_network_name', ctx.node.properties)
     utils.validate_node_property('management_subnet_name', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.node.properties)
-    utils.validate_node_property('public_ip_name', ctx.node.properties)
+    #utils.validate_node_property('network_interface_name', ctx.node.properties)
+    utils.validate_node_property('public_ip_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
@@ -114,9 +115,10 @@ def create(**_):
     location = ctx.node.properties['location']
     management_network_name = ctx.node.properties['management_network_name']
     management_subnet_name = ctx.node.properties['management_subnet_name']
-    network_interface_name = ctx.node.properties['network_interface_name']
-    public_ip_name = ctx.node.properties['public_ip_name']
+    network_interface_name = ctx.instance.runtime_properties['network_interface_name']
+    public_ip_name = ctx.instance.runtime_properties['public_ip_name']
     private_ip_allocation_method = "Dynamic"
+    public_ip_id = get_public_address_id(ctx)
 
     ctx.logger.info('generate NIC Json')
     json ={
@@ -134,6 +136,9 @@ def create(**_):
                                         management_subnet_name)
                         },
                         "privateIPAllocationMethod": str(private_ip_allocation_method),
+                        "publicIPAddress":{  
+                            "id": str(public_ip_id)
+                        },
                     }
                 }
             ]
@@ -161,7 +166,7 @@ def create(**_):
 def delete(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06

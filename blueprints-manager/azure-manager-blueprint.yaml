@@ -1,0 +1,125 @@
+# DSL version, should appear in the main blueprint.yaml
+# and may appear in other imports. In such case, the versions must match
+tosca_definitions_version: cloudify_dsl_1_0
+
+imports:
+    # importing cloudify related types, plugins, workflow, etc...
+    # to speed things up, it is possible downloading this file,
+    # including it in the blueprint directory and importing it
+    # instead.
+    - http://www.getcloudify.org/spec/cloudify/3.2.1/types.yaml
+    - http://www.getcloudify.org/spec/fabric-plugin/1.2.1/plugin.yaml
+    # relative import of plugin.yaml that resides in the blueprint directory
+    - plugin.yaml
+
+inputs:
+    subscription_id:
+        type: string
+    username:
+        type: string
+    password:
+        type: string
+    location:   
+        default: 'westeurope'
+        type: string
+    publisherName:
+        type: string
+    offer:
+        type: string
+    sku:
+        type: string
+    version:
+        type: string
+        default: 'latest'
+    flavor_id:
+        type: string
+        default: 'Standard_A1'
+    compute_name:
+        type: string
+    network_interface_name:
+        type: string
+    storage_account:
+        type: string
+    compute_user:
+        type: string
+    compute_password:
+        type: string
+    public_key:
+        type: string
+    private_key:
+        type: string
+    resource_group_name:
+        type: string
+
+node_templates:
+    manager_server:
+        type: cloudify.azure.nodes.Instance
+        properties:
+            subscription_id: { get_input: subscription_id }
+            username: { get_input: username }
+            password: { get_input: password }
+            location: { get_input: location }
+            publisherName: { get_input: publisherName }
+            offer: { get_input: offer }
+            sku: { get_input: sku }
+            version: { get_input: version }
+            flavor_id: { get_input: flavor_id }
+            compute_name: {get_input: compute_name}
+            network_interface_name: {get_input: network_interface_name}
+            storage_account: {get_input: storage_account}
+            compute_user: {get_input: compute_user}
+            compute_password: {get_input: compute_password}
+            public_key: {get_input: public_key}
+            resource_group_name: {get_input: resource_group_name}
+            install_agent: false
+
+    manager:
+        type: cloudify.nodes.CloudifyManager
+        properties:
+            cloudify_packages:
+                agents:
+                    ubuntu_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.1/ga-RELEASE/cloudify-ubuntu-agent_3.2.1-ga-b212_amd64.deb
+                    centos_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.1/ga-RELEASE/cloudify-centos-final-agent_3.2.1-ga-b212_amd64.deb
+                    windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.1/ga-RELEASE/cloudify-windows-agent_3.2.1-ga-b212_amd64.deb
+                docker:
+                    docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.2.1/ga-RELEASE/cloudify-docker_3.2.1-ga-b212.tar
+
+            cloudify:
+                cloudify_agent:
+                    min_workers: 0
+                    max_workers: 5
+                    remote_execution_port: 22
+                    user: { get_input: compute_user }
+
+                workflows:
+                    task_retries: -1  # this means forever
+                    task_retry_interval: 30
+
+                policy_engine:
+                    start_timeout: 120
+
+        relationships:
+          - target: manager_server
+            type: cloudify.relationships.contained_in
+
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                create:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
+                        task_properties:
+                            cloudify_packages: { get_property: [manager, cloudify_packages] }
+                            agent_local_key_path: { get_input: private_key }
+                            provider_context: { get_attribute: [manager, provider_context] }
+                        fabric_env:
+                            user: { get_input: compute_user }
+                            key_filename: { get_input: private_key }
+                delete:
+                    implementation: fabric.fabric_plugin.tasks.run_module_task
+                    inputs:
+                        task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
+                        fabric_env:
+                            user: { get_input: compute_user }
+                            key_filename: { get_input: private_key }
+   

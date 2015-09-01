@@ -1,4 +1,4 @@
-import testtools
+﻿import testtools
 import time
 import test_utils
 
@@ -28,15 +28,18 @@ class TestNIC(testtools.TestCase):
             'username': test_utils.AZURE_USERNAME, 
             'password': test_utils.AZURE_PASSWORD,
             'location': 'westeurope',
-            'network_interface_name': 'testnic',
-            'resource_group_name': 'cloudifygroup',
-            'management_network_name': 'cloudifynetwork',
-            'management_subnet_name': 'subnet',
-            'public_ip_name': 'cloudifyip'
+            'resource_group_name': 'resource_group_test',
+            'management_network_name': 'management_network_test',
+            'management_subnet_name': 'subnet_test',
         }
 
+        test_runtime = {'public_ip_name': 'nic_test',
+                        'network_interface_name': 'testnic'
+                        }
         return MockCloudifyContext(node_id='test',
-                                   properties=test_properties)
+                                   properties=test_properties,
+                                   runtime_properties=test_runtime
+                                   )
 
     def setUp(self):
         super(TestNIC, self).setUp()
@@ -50,7 +53,7 @@ class TestNIC(testtools.TestCase):
     def test_create(self):
         ctx = self.mock_ctx('testcreatenic')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN create NIC test")
+        ctx.logger.info("BEGIN create NIC test:{}".format(ctx.instance.runtime_properties['public_ip_name']))
 
         ctx.logger.info("create NIC")
         nic.create(ctx=ctx)

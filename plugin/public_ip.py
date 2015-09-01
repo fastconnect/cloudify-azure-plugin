@@ -6,15 +6,16 @@ import utils
 from cloudify import ctx
 from cloudify.decorators import operation
 
+
 def get_public_ip_provisioning_state(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('public_ip_name', ctx.node.properties)
+    utils.validate_node_property('public_ip_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
     resource_group_name = ctx.node.properties['resource_group_name']
-    public_ip_name = ctx.node.properties['public_ip_name']
+    public_ip_name = ctx.instance.runtime_properties['public_ip_name']
 
     response = connection.AzureConnectionClient().azure_get(
             ctx, 
@@ -31,10 +32,11 @@ def get_public_ip_provisioning_state(**_):
     status_public_ip = jsonGet['properties']['provisioningState']
     return status_public_ip
 
+
 def delete(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('public_ip_name', ctx.node.properties)
+    utils.validate_node_property('public_ip_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
@@ -57,14 +59,14 @@ def create(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
     utils.validate_node_property('location', ctx.node.properties)
-    utils.validate_node_property('public_ip_name', ctx.node.properties)
+    utils.validate_node_property('public_ip_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
     resource_group_name = ctx.node.properties['resource_group_name']
     location = ctx.node.properties['location']
     public_ip_name = ctx.instance.runtime_properties['public_ip_name']
-    public_ip_allocation_method = "Static"
+    public_ip_allocation_method = "Dynamic"
 
     json ={
        "location": str(location),
@@ -89,3 +91,26 @@ def create(**_):
                     json=json
                     )
     return response.status_code
+
+
+def get_public_address_id(ctx):
+    subscription_id = ctx.node.properties['subscription_id']
+    api_version = constants.AZURE_API_VERSION_05_preview
+    resource_group_name = ctx.node.properties['resource_group_name']
+    public_ip_name =ctx.instance.runtime_properties['public_ip_name']
+
+    response = connection.AzureConnectionClient().azure_get(
+                              ctx, 
+                              ('subscriptions/{}' +
+                              '/resourceGroups/{}' +
+                              '/providers/microsoft.network/' +
+                              'publicIPAddresses/{}' +
+                              '?api-version={}').format(
+                                  subscription_id,
+                                  resource_group_name,
+                                  public_ip_name,
+                                  api_version
+                                  )
+                              )
+
+    return response.json()['id']

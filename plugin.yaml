@@ -6,7 +6,7 @@
 plugins:
   azure:
     executor: central_deployment_agent
-    source: .\cloudify-azure-plugin.zip
+    source: cloudify-azure-plugin
 
 node_types:
   cloudify.azure.nodes.ResourceGroup:
@@ -191,8 +191,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: azure.plugin.instance.create
-        #stop:
-        #  implementation: azure.plugin.instance.stop
         delete:
           implementation: azure.plugin.instance.delete
 
