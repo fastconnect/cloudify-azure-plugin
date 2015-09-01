@@ -17,7 +17,11 @@
 import os
 
 # Cloudify Imports
-from plugin import constants
+try:
+    from plugin import constants
+except:
+    import constants
+
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 
