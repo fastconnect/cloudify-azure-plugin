@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from cloudify.decorators import operation
 import connection
 import constants
