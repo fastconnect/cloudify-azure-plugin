@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from cloudify.decorators import operation
-import connection
-import constants
-import utils
+from plugin import (utils,
+                    constants,
+                    connection,
+                    )
 
 from cloudify import ctx
 from cloudify.decorators import operation

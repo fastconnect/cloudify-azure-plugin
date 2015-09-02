@@ -16,6 +16,8 @@
 
 # Built-in Imports
 import os
+import importlib
+from time import sleep
 
 # Cloudify Imports
 try:
@@ -79,36 +81,35 @@ def get_instance_or_source_node_properties():
                     constants.NODE_INSTANCE))
 
 
-def azure_request(ctx, service_management, request, *args,**kwargs):
+def wait_status(ctx, resource, 
+                start_status=constants.CREATING,
+                wait_status=constants.SUCCEEDED
+                ):
     """ A helper to send request to Azure. The operation status
     is check to monitor the request. Failures are managed too.
 
     :param ctx: The Cloudify context to log information.
-    :param service_management: The service management object to contact Azure.
-    :param request: The request to send. The request's result has to be an
-    operation.
+    :param resource: The resource to waiting for.
+    :param start_status: The initial status.
+    :param wait_status: The expected status.
     """
-    ctx.logger.info('Trying to perform {0}...'.format(request))
+
+    module = importlib.import_module('plugin.{}'.format(resource), 
+                                     package=None
+                                     )
+    ctx.logger.info('Checking {} state {}...'.format(resource, wait_status))
+    status = start_status
+
+    while status == start_status :
+        status = getattr(module, 'get_provisioning_state')()
+        sleep(constants.TIME_DELAY)
     
-    try:
-        resp = getattr(service_management, request)(*args, **kwargs)
+    if status != wait_status :
+        raise NonRecoverableError(
+            'Failed waiting {} for {}: {}.'.format(
+                            wait_status, resource, status)
+            )
 
-        ctx.logger.info('Operation in progress...')
-
-        operation = service_management.get_operation_status(resp.request_id)
-        while operation.status == constants.REQUEST_IN_PROGRESS:
-            operation = service_management.\
-                get_operation_status(resp.request_id)
-
-        if operation.status == constants.REQUEST_FAILED:
-            ctx.logger.info(
-                'Operation failed: {0}...'.format(operation.error.message)
-                )
-        else:
-            ctx.logger.info('Operation Succeeded.')
-    except WindowsAzureError as e:
-        ctx.logger.info('WindowsAzureError: {0}'.format(e.message))
-        raise NonRecoverableError()
 
 class WindowsAzureError(Exception):
     def __init__(self, code, message):

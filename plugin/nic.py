@@ -1,8 +1,8 @@
-﻿# -*- coding: utf-8 -*-
-from cloudify.exceptions import NonRecoverableError
-import connection
-import constants
-import utils
+# -*- coding: utf-8 -*-
+from plugin import (utils,
+                    constants,
+                    connection,
+                    )
 from public_ip import get_public_address_id
 
 from cloudify import ctx

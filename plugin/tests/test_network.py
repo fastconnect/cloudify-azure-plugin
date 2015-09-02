@@ -2,14 +2,10 @@ import testtools
 import time
 import test_utils
 
-try:
-    from plugin import utils
-    from plugin import constants
-    from plugin import network
-except:
-    import utils
-    import constants
-    import network
+from plugin import (utils,
+                    constants,
+                    network
+                    )
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext

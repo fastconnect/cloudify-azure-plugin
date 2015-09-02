@@ -1,13 +1,9 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import constants
-import utils
 import requests
 import re
 from cloudify import ctx
-try:
-    from plugin import utils
-except:
-    import utils
+from utils import WindowsAzureError
 
 
 class AzureConnectionClient():
@@ -96,7 +92,7 @@ class AzureConnectionClient():
                 message = 'Error {}: Unknwn error.'.format(
                                         response.status_code
                                         )
-            raise utils.WindowsAzureError(
+            raise WindowsAzureError(
                     response.status_code,
                     message
                     )

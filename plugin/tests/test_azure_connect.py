@@ -4,16 +4,11 @@ import test_utils
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
-from azure.servicemanagement import ServiceManagementService
 
-try:
-    from plugin import connection
-    from plugin import constants
-    from plugin.utils import WindowsAzureError
-except:
-    import connection
-    import constants
-    from utils import WindowsAzureError
+from plugin import (connection,
+                    constants
+                    )
+from plugin.utils import WindowsAzureError
 
 
 class TestConnection(testtools.TestCase):

@@ -1,15 +1,11 @@
-﻿import testtools
+import testtools
 import time
 import test_utils
 
-try:
-    from plugin import utils
-    from plugin import constants
-    from plugin import nic
-except:
-    import utils
-    import constants
-    import nic
+from plugin import (utils,
+                    constants,
+                    nic
+                    )
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext

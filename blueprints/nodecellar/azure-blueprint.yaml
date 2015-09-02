@@ -44,8 +44,6 @@ inputs:
         default: 'Standard_A1'
     compute_name:
         type: string
-    network_interface_name:
-        type: string
     storage_account:
         type: string
     compute_user:
@@ -55,6 +53,10 @@ inputs:
     public_key:
         type: string
     resource_group_name:
+        type: string
+    management_network_name:
+        type: string
+    management_subnet_name:
         type: string
 
 node_types:
@@ -123,8 +125,9 @@ node_templates:
       sku: { get_input: sku }
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
-      compute_name: {get_input: compute_name}
-      network_interface_name: {get_input: network_interface_name}
+      compute_name: mongod-host
+      management_network_name: { get_input: management_network_name}
+      management_subnet_name: { get_input: management_subnet_name }
       storage_account: {get_input: storage_account}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
@@ -143,8 +146,9 @@ node_templates:
       sku: { get_input: sku }
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
-      compute_name: {get_input: compute_name}
-      network_interface_name: {get_input: network_interface_name}
+      compute_name: nodejs-host
+      management_network_name: { get_input: management_network_name}
+      management_subnet_name: { get_input: management_subnet_name }
       storage_account: {get_input: storage_account}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}

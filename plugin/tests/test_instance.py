@@ -5,14 +5,10 @@ import inspect
 import threading
 import Queue
 
-try:
-    from plugin import utils
-    from plugin import constants
-    from plugin import instance
-except:
-    import utils
-    import constants
-    import instance
+from plugin import (utils,
+                    constants,
+                    instance
+                    )
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
@@ -73,7 +69,7 @@ class TestInstance(testtools.TestCase):
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_vm = instance.get_vm_provisioning_state(ctx=ctx)
+            status_vm = instance.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)    
         
         ctx.logger.info("check VM creation success")
@@ -82,12 +78,6 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))
 
-        #ctx.logger.info("check if NIC is release")
-        #nic_machine_id = "nicmachineName"
-        #while nic_machine_id is not None :
-            #current_ctx.set(ctx=ctx)
-            #nic_machine_id = instance.get_nic_virtual_machine_id(ctx=ctx)
-            #time.sleep(TIME_DELAY)
         ctx.logger.info("END create VM test")
 
     def test_delete(self):    
@@ -102,7 +92,7 @@ class TestInstance(testtools.TestCase):
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_vm = instance.get_vm_provisioning_state(ctx=ctx)
+            status_vm = instance.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
         
         ctx.logger.info("check VM creation success")
@@ -111,14 +101,6 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))
 
-        #ctx.logger.info("check if NIC is release")
-        #nic_machine_id = "nicmachineName"
-        #while nic_machine_id is not None:
-            #current_ctx.set(ctx=ctx)
-            #nic_machine_id = instance.get_nic_virtual_machine_id(
-            #                        ctx=ctx
-            #                    )
-            #time.sleep(TIME_DELAY)
         ctx.logger.info("END delete VM test")
 
     def test_conflict(self):
@@ -133,7 +115,7 @@ class TestInstance(testtools.TestCase):
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_vm = instance.get_vm_provisioning_state(ctx=ctx)
+            status_vm = instance.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
 
         ctx.logger.info("VM creation conflict")
@@ -145,21 +127,13 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))
 
-        #ctx.logger.info("check if NIC is release")
-        #nic_machine_id = "nicmachineName"
-        #while nic_machine_id is not None:
-            #current_ctx.set(ctx=ctx)
-            #nic_machine_id = instance.get_nic_virtual_machine_id(
-            #                    ctx=ctx
-            #                )
-            #time.sleep(TIME_DELAY)
-
         current_ctx.set(ctx=ctx)
         ctx.logger.info("check vm provisionning state in a deleted machine")
-        self.assertRaises(utils.WindowsAzureError,
-            instance.get_vm_provisioning_state,
-            ctx=ctx
-        )
+        self.assertRaises(
+                          utils.WindowsAzureError,
+                          instance.get_provisioning_state,
+                          ctx=ctx
+                          )
 
         ctx.logger.info("delete VM conflict")
         self.assertEqual(204, instance.delete(ctx=ctx))
@@ -201,9 +175,9 @@ class TestInstance(testtools.TestCase):
         while bool(status_vm1 == constants.CREATING or status_vm2 == constants.CREATING) :
             #current_ctx.set(ctx=ctx)
             current_ctx.set(ctx=ctx1)
-            status_vm1 = instance.get_vm_provisioning_state(ctx=ctx1)
+            status_vm1 = instance.get_provisioning_state(ctx=ctx1)
             current_ctx.set(ctx=ctx2)
-            status_vm2 = instance.get_vm_provisioning_state(ctx=ctx2)
+            status_vm2 = instance.get_provisioning_state(ctx=ctx2)
             time.sleep(TIME_DELAY)
 
         ctx1.logger.info("check VM 1 creation success")
@@ -238,12 +212,13 @@ class TestInstance(testtools.TestCase):
         ctx2.logger.info("check VM 2 status")
         status_vm1 = constants.CREATING
         status_vm2 = constants.CREATING
-        while bool(status_vm1 == constants.CREATING or status_vm2 == constants.CREATING) :
+        while bool(status_vm1 == constants.CREATING or
+                   status_vm2 == constants.CREATING) :
             #current_ctx.set(ctx=ctx)
             current_ctx.set(ctx=ctx1)
-            status_vm1 = instance.get_vm_provisioning_state(ctx=ctx1)
+            status_vm1 = instance.get_provisioning_state(ctx=ctx1)
             current_ctx.set(ctx=ctx2)
-            status_vm2 = instance.get_vm_provisioning_state(ctx=ctx2)
+            status_vm2 = instance.get_provisioning_state(ctx=ctx2)
             time.sleep(TIME_DELAY)
 
         ctx1.logger.info("check VM 1 creation success")
