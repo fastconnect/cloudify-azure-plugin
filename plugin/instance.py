@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import random
-import time
 import re
 #Local import
-from plugin import utils
-from plugin import constants
-from plugin import connection
-from plugin import nic
-from plugin import public_ip
+from plugin import (utils,
+                    constants,
+                    connection,
+                    nic,
+                    public_ip
+                    )
 
 #Cloudify imports
 from cloudify import ctx
@@ -69,24 +69,11 @@ def create(**_):
 
     #generation of public_ip
     public_ip.create(ctx=ctx)
-    status_ip = constants.CREATING
-    while status_ip != constants.SUCCEEDED :
-        status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
-        time.sleep(TIME_DELAY)
-    if constants.SUCCEEDED != status_ip :
-        ctx.logger.info('status creation public ip is : ' + str(status_ip))
-        raise NonRecoverableError(
-                'Failed provisionning Public IP : {}.'.format(status_ip)
-                )
+    utils.wait_status(ctx, 'public_ip')
 
     #generation of nic
     nic.create(ctx=ctx)
-    status_nic = constants.CREATING
-    while status_nic == constants.CREATING :
-        status_nic = nic.get_provisioning_state(ctx=ctx)
-        time.sleep(TIME_DELAY)
-    if constants.SUCCEEDED != status_nic :
-        raise NonRecoverableError('Failed provisionning nic : {}.'.format(status_nic))
+    utils.wait_status(ctx, 'nic')
 
     computer_name = ctx.node.properties['compute_name']
     admin_username = ctx.node.properties['compute_user']
@@ -175,44 +162,33 @@ def create(**_):
         #deletin puplic ip
         public_ip.delete(ctx=ctx)
 
-        status_ip = constants.DELETING
         try:
-            while status_ip == constants.DELETING :
-                status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
-                time.sleep(TIME_DELAY)
+            utils.wait_status(ctx, 'public_ip',start_status=constants.DELETING)
         except utils.WindowsAzureError:
             pass
 
         #deleting nic
         nic.delete(ctx=ctx)
         try:
-            nic.get_provisioning_state(ctx=ctx)
+            utils.wait_status(ctx, 'nic',start_status=constants.DELETING)
         except utils.WindowsAzureError:
             pass
         pass
 
-    status = get_vm_provisioning_state()
+    utils.wait_status(ctx, 'instance')
 
-    while status == constants.CREATING:
-        ctx.logger.info('{} is still {}'.format(vm_name, status))
-        time.sleep(20)
-        status = get_vm_provisioning_state()
-
-    if status != constants.SUCCEEDED:
-        raise NonRecoverableError('Provisionning: {}.'.format(status))
+    ctx.logger.info('VM has been started.')
+    if re.search(r'manager', ctx.instance.id):
+        # Get public ip of the manager
+        ip = nic._get_vm_ip(ctx, public=True)
     else:
-        ctx.logger.info('{} {}'.format(vm_name, status))
-        if re.search(r'manager', ctx.instance.id):
-            # Get public ip of the manager
-            ip = nic._get_vm_ip(ctx, public=True)
-        else:
-            # Get private ip of the agent
-            ip = nic._get_vm_ip(ctx)
+        # Get private ip of the agent
+        ip = nic._get_vm_ip(ctx)
 
-        ctx.logger.info(
-                'Machine is running at {}.'.format(ip)
-                )
-        ctx.instance.runtime_properties['ip'] = ip   
+    ctx.logger.info(
+            'Machine is running at {}.'.format(ip)
+            )
+    ctx.instance.runtime_properties['ip'] = ip   
 
 
 @operation
@@ -239,33 +215,22 @@ def delete(**_):
         )
 
     #wait vm deletion
-    status = get_vm_provisioning_state()
     try:
-        while status == constants.DELETING:
-            ctx.logger.info('{} is still {}'.format(vm_name, status))
-            time.sleep(20)
-            status = get_vm_provisioning_state()
+        utils.wait_status(ctx, 'instance',start_status=constants.DELETING)
     except utils.WindowsAzureError:
         pass
-
 
     #deleting nic
     nic.delete(ctx=ctx)
     try:
-        while status_ip == constants.DELETING :
-            status_ip = nic.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
+        utils.wait_status(ctx, 'nic',start_status=constants.DELETING)
     except utils.WindowsAzureError:
         pass
 
     #deletin puplic ip
     public_ip.delete(ctx=ctx)
-
-    status_ip = constants.DELETING
     try:
-        while status_ip == constants.DELETING :
-            status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
+        utils.wait_status(ctx, 'public_ip',start_status=constants.DELETING)
     except utils.WindowsAzureError:
         pass
 
@@ -282,7 +247,7 @@ def stop(**_):
     ctx.logger.info("VM stops.")
 
 
-def get_vm_provisioning_state(**_):
+def get_provisioning_state(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
     utils.validate_node_property('compute_name', ctx.node.properties)
