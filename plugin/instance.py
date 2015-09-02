@@ -34,7 +34,6 @@ def create(**_):
     utils.validate_node_property('offer', ctx.node.properties)
     utils.validate_node_property('sku', ctx.node.properties)
     utils.validate_node_property('version', ctx.node.properties)
-    #utils.validate_node_property('network_interface_name', ctx.node.properties)
     utils.validate_node_property('storage_account', ctx.node.properties)
     utils.validate_node_property('compute_user', ctx.node.properties)
     utils.validate_node_property('compute_password', ctx.node.properties)
@@ -51,7 +50,6 @@ def create(**_):
     offer = ctx.node.properties['offer']
     sku = ctx.node.properties['sku']
     distro_version = ctx.node.properties['version']
-    #network_interface_name = ctx.node.properties['network_interface_name']
     storage_account = ctx.node.properties['storage_account']
     create_option = 'FromImage'
 
@@ -181,8 +179,7 @@ def create(**_):
             json=json
         )
 
-        status = get_vm_provisioning_state()
-
+        status = constants.CREATING
         while status == constants.CREATING:
             ctx.logger.info('{} is still {}'.format(vm_name, status))
             time.sleep(20)
@@ -205,9 +202,17 @@ def create(**_):
             ctx.instance.runtime_properties['ip'] = ip
     except utils.WindowsAzureError as e:
         ctx.logger.info('Creation vm failed: {}'.format(ctx.instance.id))
+        ctx.logger.info('Error code: {}'.format(e.code))
+        ctx.logger.info('Error message: {}'.format(e.message))
+        #deleting nic
+        nic.delete(ctx=ctx)
+        try:
+            nic.get_provisioning_state(ctx=ctx)
+        except utils.WindowsAzureError:
+            pass
+
         #deletin puplic ip
         public_ip.delete(ctx=ctx)
-
         status_ip = constants.DELETING
         try:
             while status_ip == constants.DELETING :
@@ -216,12 +221,6 @@ def create(**_):
         except utils.WindowsAzureError:
             pass
 
-        #deleting nic
-        nic.delete(ctx=ctx)
-        try:
-            nic.get_provisioning_state(ctx=ctx)
-        except utils.WindowsAzureError:
-            pass
         raise utils.WindowsAzureError(e.code, e.message)
 
 
@@ -230,8 +229,8 @@ def delete(**_):
     utils.validate_node_property('subscription_id',ctx.node.properties)
     utils.validate_node_property('compute_name',ctx.node.properties)
     utils.validate_node_property('resource_group_name',ctx.node.properties)
-    utils.validate_node_property('network_interface_name',ctx.node.properties)
-    utils.validate_node_property('public_ip_name',ctx.node.properties)
+    utils.validate_node_property('network_interface_name',ctx.instance.runtime_properties)
+    utils.validate_node_property('public_ip_name',ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
@@ -248,17 +247,6 @@ def delete(**_):
                                                      )
         )
 
-    #deletin puplic ip
-    public_ip.delete(ctx=ctx)
-
-    status_ip = constants.DELETING
-    try:
-        while status_ip == constants.DELETING :
-            status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
-    except utils.WindowsAzureError:
-        pass
-
     #wait vm deletion
     try:
         status = get_vm_provisioning_state()
@@ -273,6 +261,16 @@ def delete(**_):
     nic.delete(ctx=ctx)
     try:
         nic.get_provisioning_state(ctx=ctx)
+    except utils.WindowsAzureError:
+        pass
+
+    #deletin puplic ip
+    public_ip.delete(ctx=ctx)
+    status_ip = constants.DELETING
+    try:
+        while status_ip == constants.DELETING :
+            status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+            time.sleep(TIME_DELAY)
     except utils.WindowsAzureError:
         pass
 
@@ -307,7 +305,7 @@ def get_vm_provisioning_state(**_):
 def get_nic_virtual_machine_id(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
-    #utils.validate_node_property('network_interface_name', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
