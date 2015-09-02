@@ -217,11 +217,11 @@ def create(**_):
 
 @operation
 def delete(**_):
-    utils.validate_node_property('subscription_id',ctx.node.properties)
-    utils.validate_node_property('compute_name',ctx.node.properties)
-    utils.validate_node_property('resource_group_name',ctx.node.properties)
-    utils.validate_node_property('network_interface_name',ctx.node.properties)
-    utils.validate_node_property('public_ip_name',ctx.node.properties)
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('compute_name', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.instance.runtime_properties)
+    utils.validate_node_property('public_ip_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
@@ -238,6 +238,26 @@ def delete(**_):
                                                      )
         )
 
+    #wait vm deletion
+    status = get_vm_provisioning_state()
+    try:
+        while status == constants.DELETING:
+            ctx.logger.info('{} is still {}'.format(vm_name, status))
+            time.sleep(20)
+            status = get_vm_provisioning_state()
+    except utils.WindowsAzureError:
+        pass
+
+
+    #deleting nic
+    nic.delete(ctx=ctx)
+    try:
+        while status_ip == constants.DELETING :
+            status_ip = nic.get_provisioning_state(ctx=ctx)
+            time.sleep(TIME_DELAY)
+    except utils.WindowsAzureError:
+        pass
+
     #deletin puplic ip
     public_ip.delete(ctx=ctx)
 
@@ -249,24 +269,17 @@ def delete(**_):
     except utils.WindowsAzureError:
         pass
 
-    #wait vm deletion
-    status = get_vm_provisioning_state()
-    try:
-        while status == constants.DELETING:
-            ctx.logger.info('{} is still {}'.format(vm_name, status))
-            time.sleep(20)
-            status = get_vm_provisioning_state()
-    except utils.WindowsAzureError:
-        pass
-
-    #deleting nic
-    nic.delete(ctx=ctx)
-    try:
-        nic.get_provisioning_state(ctx=ctx)
-    except utils.WindowsAzureError:
-        pass
-
     return response.status_code
+
+
+@operation
+def start(**_):
+    ctx.logger.info("VM starts.")
+    
+
+@operation
+def stop(**_):
+    ctx.logger.info("VM stops.")
 
 
 def get_vm_provisioning_state(**_):
