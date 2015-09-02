@@ -1,11 +1,11 @@
-import testtools
+﻿import testtools
 import time
 import test_utils
 
-from plugin import utils
-from plugin import constants
-from plugin import connection
-from plugin import ressource_group
+from plugin import (utils,
+                    constants,
+                    ressource_group
+                    )
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext

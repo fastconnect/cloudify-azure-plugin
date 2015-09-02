@@ -1,7 +1,8 @@
 ﻿from cloudify.exceptions import NonRecoverableError
-import connection
-import constants
-import utils
+from plugin import (utils,
+                    constants,
+                    connection,
+                    )
 from public_ip import get_public_address_id
 
 from cloudify import ctx

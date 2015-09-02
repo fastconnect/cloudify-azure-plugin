@@ -1,13 +1,14 @@
 ﻿from cloudify.exceptions import NonRecoverableError
-import connection
-import constants
-import utils
+from plugin import (connection,
+                    constants,
+                    utils
+                    )
 
 from cloudify import ctx
 from cloudify.decorators import operation
 
 
-def get_public_ip_provisioning_state(**_):
+def get_provisioning_state(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
     utils.validate_node_property('public_ip_name', ctx.instance.runtime_properties)

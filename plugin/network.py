@@ -1,6 +1,7 @@
-import connection
-import constants
-import utils
+﻿from plugin import (utils,
+                    constants,
+                    connection,
+                    )
 
 from cloudify import ctx
 
