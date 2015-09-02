@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from cloudify.exceptions import NonRecoverableError
 import connection
 import constants
