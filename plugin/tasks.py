@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ########
 # Copyright (c) 2014 GigaSpaces Technologies Ltd. All rights reserved
 #
