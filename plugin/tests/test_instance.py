@@ -42,8 +42,8 @@ class TestInstance(testtools.TestCase):
             'storage_account': 'storageaccounttest3',
             'create_option':'FromImage',
             'resource_group_name': 'resource_group_test',
-            'management_network_name': 'management_network_test',
-            'management_subnet_name': 'subnet_test',
+            'virtual_network_name': 'management_network_test',
+            'subnet_name': 'subnet_test',
         }
 
         return MockCloudifyContext(node_id='test',

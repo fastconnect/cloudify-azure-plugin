@@ -24,7 +24,7 @@ class TestNetwork(testtools.TestCase):
             'username': test_utils.AZURE_USERNAME,
             'password': test_utils.AZURE_PASSWORD,
             'location': 'westeurope',
-            'resource_group_name': 'cloudifygroup',
+            'resource_group_name': 'resource_group_test',
             'virtual_network_name': test_name,
             'virtual_network_address_prefix': '10.0.0.0/16',
             'subnet_name': 'lan',
@@ -63,6 +63,7 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete_network(ctx=ctx))
 
         ctx.logger.info("Checking Virtual Network deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state_network,
             ctx=ctx
@@ -92,6 +93,7 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete_network(ctx=ctx))
 
         ctx.logger.info("Checking Virtual Network deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state_network,
             ctx=ctx
@@ -125,6 +127,7 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete_network(ctx=ctx))
 
         ctx.logger.info("check is Virtual Network is release")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state_network,
             ctx=ctx
@@ -167,6 +170,7 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete_subnet(ctx=ctx))
 
         ctx.logger.info("Checking Subnet deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state_subnet,
             ctx=ctx
@@ -176,6 +180,7 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete_network(ctx=ctx))
 
         ctx.logger.info("Checking Virtual Network deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state_network,
             ctx=ctx
@@ -217,6 +222,7 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete_subnet(ctx=ctx))
 
         ctx.logger.info("Checking Subnet deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state_subnet,
             ctx=ctx
@@ -226,6 +232,7 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete_network(ctx=ctx))
 
         ctx.logger.info("Checking Virtual Network deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state_network,
             ctx=ctx
@@ -271,6 +278,7 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete_subnet(ctx=ctx))
 
         ctx.logger.info("Checking Subnet deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state_subnet,
             ctx=ctx
@@ -280,6 +288,7 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete_network(ctx=ctx))
 
         ctx.logger.info("check is Virtual Network is release")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state_network,
             ctx=ctx

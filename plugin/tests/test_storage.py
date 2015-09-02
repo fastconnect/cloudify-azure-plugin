@@ -24,7 +24,7 @@ class TestStorage(testtools.TestCase):
             'username': test_utils.AZURE_USERNAME,
             'password': test_utils.AZURE_PASSWORD,
             'location': 'westeurope',
-            'resource_group_name': 'cloudifygroup',
+            'resource_group_name': 'resource_group_test',
             'storage_account_name': test_name,
             'account_type': 'Standard_LRS' #Standard_LRS|Standard_ZRS|Standard_GRS|Standard_RAGRS|Premium_LRS
         }
@@ -63,6 +63,7 @@ class TestStorage(testtools.TestCase):
         self.assertEqual(200, storage.delete(ctx=ctx))
 
         ctx.logger.info("Checking Storage Account deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             storage.get_provisioning_state,
             ctx=ctx
@@ -94,6 +95,7 @@ class TestStorage(testtools.TestCase):
         self.assertEqual(200, storage.delete(ctx=ctx))
 
         ctx.logger.info("Checking Storage Account deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             storage.get_provisioning_state,
             ctx=ctx
@@ -128,6 +130,7 @@ class TestStorage(testtools.TestCase):
         self.assertEqual(200, storage.delete(ctx=ctx))
 
         ctx.logger.info("check is Storage Account is release")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             storage.get_provisioning_state,
             ctx=ctx
