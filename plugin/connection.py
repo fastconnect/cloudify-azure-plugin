@@ -1,4 +1,5 @@
-﻿import constants
+﻿# -*- coding: utf-8 -*-
+import constants
 import utils
 import requests
 import re
