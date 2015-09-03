@@ -34,7 +34,7 @@ inputs:
     type: string
   compute_name:
     type: string
-  storage_account:
+  storage_account_name:
     type: string
   compute_user:
     type: string
@@ -73,7 +73,7 @@ node_templates:
       password: { get_input: password }
       location: { get_input: location }
       resource_group_name: {get_input: resource_group_name}
-      storage_account_name: {get_input: storage_account}
+      storage_account_name: {get_input: storage_account_name}
     relationships:
       - target: manager_resource_group
         type: cloudify.azure.relationships.storage_account_connected_to_resource_group
@@ -120,7 +120,7 @@ node_templates:
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: compute_name}
-      storage_account: {get_input: storage_account}
+      storage_account_name: {get_input: storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: {get_input: public_key}

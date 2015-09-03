@@ -44,7 +44,7 @@ inputs:
         default: 'Standard_A1'
     compute_name:
         type: string
-    storage_account:
+    storage_account_name:
         type: string
     compute_user:
         type: string
@@ -128,7 +128,7 @@ node_templates:
       compute_name: mongod-host
       management_network_name: { get_input: management_network_name}
       management_subnet_name: { get_input: management_subnet_name }
-      storage_account: {get_input: storage_account}
+      storage_account_name: {get_input: storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       resource_group_name: {get_input: resource_group_name}
@@ -149,7 +149,7 @@ node_templates:
       compute_name: nodejs-host
       management_network_name: { get_input: management_network_name}
       management_subnet_name: { get_input: management_subnet_name }
-      storage_account: {get_input: storage_account}
+      storage_account_name: {get_input: storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       resource_group_name: {get_input: resource_group_name}

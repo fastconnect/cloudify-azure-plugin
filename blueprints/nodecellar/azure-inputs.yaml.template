@@ -8,7 +8,7 @@ sku: '14.04.2-LTS'
 version: 'latest'
 flavor_id: 'Standard_A1'
 compute_name: ''
-storage_account: ''
+storage_account_name: ''
 compute_user: ''
 compute_password: ''
 public_key: |
