@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import random
 import re
 # Local import
@@ -337,3 +337,27 @@ def is_available(**_):
             return False
 
     return True
+
+def get_json_from_azure(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('compute_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    resource_group_name = ctx.node.properties['resource_group_name']
+    vm_name = ctx.node.properties['compute_name']
+    api_version = constants.AZURE_API_VERSION_05_preview
+
+    response = connection.AzureConnectionClient().azure_get(
+                    ctx,
+                    ('subscriptions/{}' + 
+                    '/resourceGroups/{}' +
+                    '/providers/Microsoft.Compute/virtualMachines/{}' +
+                    '?api-version={}').format(subscription_id,
+                                              resource_group_name,
+                                              vm_name,
+                                              api_version
+                                              )
+                    )
+
+    return response.json()
