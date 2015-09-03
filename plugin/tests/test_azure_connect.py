@@ -1,4 +1,4 @@
-﻿import testtools
+import testtools
 import requests
 import test_utils
 import time
@@ -14,7 +14,8 @@ from plugin.utils import WindowsAzureError
 
 class TestConnection(testtools.TestCase):
 
-    def get_mock_context(self, test_name):
+    @staticmethod
+    def get_mock_context(test_name):
         """ Creates a mock context."""
 
         return MockCloudifyContext(
@@ -25,7 +26,6 @@ class TestConnection(testtools.TestCase):
                 'subscription_id': test_utils.SUBSCRIPTION_ID
             }
         )
-
 
     def test_connect(self):
         """ this tests that a the correct region endpoint
@@ -57,10 +57,10 @@ class TestConnection(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         ctx.node.properties['password'] = 'wrong'
 
+        connection.AzureConnectionClient.token = None
         self.assertRaises(WindowsAzureError, 
                           connection.AzureConnectionClient
                           )
-
 
     def test_azure_get(self):
         ctx = self.get_mock_context('test_connect')
@@ -68,7 +68,7 @@ class TestConnection(testtools.TestCase):
 
         azure_connection = connection.AzureConnectionClient()
         json = azure_connection.azure_get(
-                ctx, 
+                ctx,
                 'subscriptions/{}?api-version={}'.format(
                     ctx.node.properties['subscription_id'],
                     constants.AZURE_API_VERSION_01

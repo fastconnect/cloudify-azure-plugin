@@ -54,4 +54,5 @@ nosetests.xml
 *.zip
 
 # PyCharm
+.idea
 plugin/.idea
