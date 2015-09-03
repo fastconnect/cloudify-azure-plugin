@@ -1,4 +1,4 @@
-﻿import testtools
+import testtools
 import time
 import test_utils
 
@@ -24,12 +24,17 @@ class TestPublicIP(testtools.TestCase):
             'username': test_utils.AZURE_USERNAME, 
             'password': test_utils.AZURE_PASSWORD,
             'location': 'westeurope',
-            'resource_group_name': 'cloudifygroup',
+            'resource_group_name': 'resource_group_test',
+        }
+
+        test_runtime = {
             'public_ip_name': test_name,
         }
 
         return MockCloudifyContext(node_id='test',
-                                   properties=test_properties)
+            properties=test_properties,
+            runtime_properties=test_runtime,
+        )
 
     def setUp(self):
         super(TestPublicIP, self).setUp()
@@ -41,7 +46,7 @@ class TestPublicIP(testtools.TestCase):
 
 
     def test_create_public_ip(self):
-        ctx = self.mock_ctx('createip')
+        ctx = self.mock_ctx('testcreateip')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create public_ip test")
 
@@ -54,7 +59,7 @@ class TestPublicIP(testtools.TestCase):
         while status_ip != constants.SUCCEEDED :
             current_ctx.set(ctx=ctx)
             ctx.logger.debug(status_ip)
-            status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+            status_ip = public_ip.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
         
         ctx.logger.debug(status_ip)
@@ -68,7 +73,7 @@ class TestPublicIP(testtools.TestCase):
             while status_ip == constants.DELETING :
                 current_ctx.set(ctx=ctx)
                 ctx.logger.debug(status_ip)           
-                status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+                status_ip = public_ip.get_provisioning_state(ctx=ctx)
                 time.sleep(TIME_DELAY)
         except utils.WindowsAzureError:
             pass
@@ -77,7 +82,7 @@ class TestPublicIP(testtools.TestCase):
 
 
     def test_delete_public_ip(self):
-        ctx = self.mock_ctx('deleteip')
+        ctx = self.mock_ctx('testdeleteip')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create public_ip test")
 
@@ -91,7 +96,7 @@ class TestPublicIP(testtools.TestCase):
         while status_ip != constants.SUCCEEDED :
             current_ctx.set(ctx=ctx)
             ctx.logger.debug(status_ip)
-            status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+            status_ip = public_ip.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
         
         ctx.logger.info("check public_ip creation success")
@@ -105,7 +110,7 @@ class TestPublicIP(testtools.TestCase):
             while status_ip == constants.DELETING :
                 current_ctx.set(ctx=ctx)
                 ctx.logger.debug(status_ip)           
-                status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+                status_ip = public_ip.get_provisioning_state(ctx=ctx)
                 time.sleep(TIME_DELAY)
         except utils.WindowsAzureError:
             pass
@@ -114,7 +119,7 @@ class TestPublicIP(testtools.TestCase):
 
 
     def test_conflict_public_ip(self):
-        ctx = self.mock_ctx('conflictip')
+        ctx = self.mock_ctx('testconflictip')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create public_ip test")
 
@@ -127,7 +132,7 @@ class TestPublicIP(testtools.TestCase):
         while status_ip != constants.SUCCEEDED :
             current_ctx.set(ctx=ctx)
             ctx.logger.debug(status_ip)
-            status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+            status_ip = public_ip.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
     
         ctx.logger.debug(status_ip)
@@ -146,7 +151,7 @@ class TestPublicIP(testtools.TestCase):
             while status_ip == constants.DELETING :
                 current_ctx.set(ctx=ctx)
                 ctx.logger.debug(status_ip)           
-                status_ip = public_ip.get_public_ip_provisioning_state(ctx=ctx)
+                status_ip = public_ip.get_provisioning_state(ctx=ctx)
                 time.sleep(TIME_DELAY)
         except utils.WindowsAzureError:
             pass

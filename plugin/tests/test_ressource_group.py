@@ -1,4 +1,4 @@
-﻿import testtools
+import testtools
 import time
 import test_utils
 

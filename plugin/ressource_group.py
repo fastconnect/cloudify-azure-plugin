@@ -1,4 +1,5 @@
-﻿from plugin import (utils,
+# -*- coding: utf-8 -*-
+from plugin import (utils,
                     constants,
                     connection,
                     )
@@ -28,6 +29,7 @@ def get_ressource_group_provisioning_state(**_):
     return status_ressource_group
 
 
+@operation
 def delete(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
@@ -48,6 +50,7 @@ def delete(**_):
     return response.status_code
 
 
+@operation
 def create(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)

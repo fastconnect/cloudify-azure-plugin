@@ -39,12 +39,11 @@ class TestInstance(testtools.TestCase):
             'public_key': test_utils.PUBLIC_KEY,
             'private_key': test_utils.PRIVATE_KEY,
             'resources_prefix': 'boulay',
-            #'network_interface_name': '', #TODO: auto-generated nic per instance
             'storage_account': 'storageaccounttest3',
             'create_option':'FromImage',
             'resource_group_name': 'resource_group_test',
-            'management_network_name': 'management_network_test',
-            'management_subnet_name': 'subnet_test',
+            'virtual_network_name': 'management_network_test',
+            'subnet_name': 'subnet_test',
         }
 
         return MockCloudifyContext(node_id='test',
@@ -116,9 +115,7 @@ class TestInstance(testtools.TestCase):
         status_vm = constants.CREATING
         while status_vm == constants.CREATING :
             current_ctx.set(ctx=ctx)
-            status_vm = instance.get_provisioning_state(
-                            ctx=ctx
-                        )
+            status_vm = instance.get_provisioning_state(ctx=ctx)
             time.sleep(TIME_DELAY)
 
         ctx.logger.info("VM creation conflict")
@@ -130,6 +127,7 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))
 
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("check vm provisionning state in a deleted machine")
         self.assertRaises(
                           utils.WindowsAzureError,

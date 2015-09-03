@@ -1,4 +1,5 @@
-﻿########
+﻿# -*- coding: utf-8 -*-
+########
 # Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +20,11 @@ import importlib
 from time import sleep
 
 # Cloudify Imports
-from plugin import constants
+try:
+    from plugin import constants
+except:
+    import constants
+
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 

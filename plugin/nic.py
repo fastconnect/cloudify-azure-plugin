@@ -1,4 +1,4 @@
-﻿from cloudify.exceptions import NonRecoverableError
+# -*- coding: utf-8 -*-
 from plugin import (utils,
                     constants,
                     connection,
@@ -105,17 +105,17 @@ def create(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
     utils.validate_node_property('location', ctx.node.properties)
-    utils.validate_node_property('management_network_name', ctx.node.properties)
-    utils.validate_node_property('management_subnet_name', ctx.node.properties)
-    #utils.validate_node_property('network_interface_name', ctx.node.properties)
+    utils.validate_node_property('virtual_network_name', ctx.node.properties)
+    utils.validate_node_property('subnet_name', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.instance.runtime_properties)
     utils.validate_node_property('public_ip_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
     resource_group_name = ctx.node.properties['resource_group_name']
     location = ctx.node.properties['location']
-    management_network_name = ctx.node.properties['management_network_name']
-    management_subnet_name = ctx.node.properties['management_subnet_name']
+    virtual_network_name = ctx.node.properties['virtual_network_name']
+    subnet_name = ctx.node.properties['subnet_name']
     network_interface_name = ctx.instance.runtime_properties['network_interface_name']
     public_ip_name = ctx.instance.runtime_properties['public_ip_name']
     private_ip_allocation_method = "Dynamic"
@@ -133,8 +133,8 @@ def create(**_):
                             "id": "/subscriptions/{}/resourceGroups/{}/providers/microsoft.network/virtualNetworks/{}/subnets/{}"
                                 .format(subscription_id, 
                                         resource_group_name, 
-                                        management_network_name, 
-                                        management_subnet_name)
+                                        virtual_network_name,
+                                        subnet_name)
                         },
                         "privateIPAllocationMethod": str(private_ip_allocation_method),
                         "publicIPAddress":{  

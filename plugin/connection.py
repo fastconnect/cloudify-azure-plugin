@@ -1,4 +1,5 @@
-﻿import constants
+# -*- coding: utf-8 -*-
+import constants
 import requests
 import re
 import time

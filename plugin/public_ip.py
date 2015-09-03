@@ -1,4 +1,4 @@
-﻿from cloudify.exceptions import NonRecoverableError
+# -*- coding: utf-8 -*-
 from plugin import (connection,
                     constants,
                     utils
@@ -6,6 +6,7 @@ from plugin import (connection,
 
 from cloudify import ctx
 from cloudify.decorators import operation
+from cloudify.exceptions import NonRecoverableError
 
 
 def get_provisioning_state(**_):

@@ -1,4 +1,4 @@
-﻿import testtools
+import testtools
 import time
 import test_utils
 
@@ -25,17 +25,19 @@ class TestNIC(testtools.TestCase):
             'password': test_utils.AZURE_PASSWORD,
             'location': 'westeurope',
             'resource_group_name': 'resource_group_test',
-            'management_network_name': 'management_network_test',
-            'management_subnet_name': 'subnet_test',
+            'virtual_network_name': 'management_network_test',
+            'subnet_name': 'subnet_test',
         }
 
-        test_runtime = {'public_ip_name': 'nic_test',
-                        'network_interface_name': 'testnic'
-                        }
+        test_runtime = {
+            'public_ip_name': 'nic_test',
+            'network_interface_name': test_name,
+        }
+
         return MockCloudifyContext(node_id='test',
-                                   properties=test_properties,
-                                   runtime_properties=test_runtime
-                                   )
+            properties=test_properties,
+            runtime_properties=test_runtime
+        )
 
     def setUp(self):
         super(TestNIC, self).setUp()

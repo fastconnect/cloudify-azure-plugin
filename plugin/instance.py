@@ -27,7 +27,6 @@ def create(**_):
     utils.validate_node_property('offer', ctx.node.properties)
     utils.validate_node_property('sku', ctx.node.properties)
     utils.validate_node_property('version', ctx.node.properties)
-    #utils.validate_node_property('network_interface_name', ctx.node.properties)
     utils.validate_node_property('storage_account', ctx.node.properties)
     utils.validate_node_property('compute_user', ctx.node.properties)
     utils.validate_node_property('compute_password', ctx.node.properties)
@@ -44,12 +43,16 @@ def create(**_):
     offer = ctx.node.properties['offer']
     sku = ctx.node.properties['sku']
     distro_version = ctx.node.properties['version']
-    #network_interface_name = ctx.node.properties['network_interface_name']
     storage_account = ctx.node.properties['storage_account']
     create_option = 'FromImage'
 
+    #check availability name
+    if not is_available(ctx=ctx):
+        ctx.logger.info('VM creation not possible, {} already exist'.format(vm_name))
+        raise utils.WindowsAzureError(400,'{} already exist'.format(vm_name))
+
     number = random.randint(0,1000)
-    os_disk_name = "{}_{}_{}.vhd".format(vm_name, 
+    os_disk_name = "{}_{}_{}.vhd".format(vm_name,
                                        storage_account,
                                        number
                                        )
@@ -141,7 +144,7 @@ def create(**_):
 	        }
 	    }
 	}
-    ctx.logger.info('JSON: {}'.format(json))
+    ctx.logger.debug('JSON: {}'.format(json))
     ctx.logger.info('Beginning vm creation: {}'.format(ctx.instance.id))
     try:
         cntn = connection.AzureConnectionClient()
@@ -157,38 +160,40 @@ def create(**_):
             ),
             json=json
         )
-    except:
+
+        utils.wait_status(ctx, 'instance')
+
+        ctx.logger.info('VMÂ has been started.')
+        if re.search(r'manager', ctx.instance.id):
+            # Get public ip of the manager
+            ip = nic._get_vm_ip(ctx, public=True)
+        else:
+            # Get private ip of the agent
+            ip = nic._get_vm_ip(ctx)
+
+        ctx.logger.info(
+            'Machine is running at {}.'.format(ip)
+        )
+        ctx.instance.runtime_properties['ip'] = ip
+    except utils.WindowsAzureError as e:
         ctx.logger.info('Creation vm failed: {}'.format(ctx.instance.id))
-        #deletin puplic ip
-        public_ip.delete(ctx=ctx)
-
-        try:
-            utils.wait_status(ctx, 'public_ip',start_status=constants.DELETING)
-        except utils.WindowsAzureError:
-            pass
-
+        ctx.logger.info('Error code: {}'.format(e.code))
+        ctx.logger.info('Error message: {}'.format(e.message))
         #deleting nic
         nic.delete(ctx=ctx)
         try:
             utils.wait_status(ctx, 'nic',start_status=constants.DELETING)
         except utils.WindowsAzureError:
             pass
-        pass
 
-    utils.wait_status(ctx, 'instance')
+        #deletin puplic ip
+        public_ip.delete(ctx=ctx)
+        try:
+            utils.wait_status(ctx, 'public_ip',start_status=constants.DELETING)
+        except utils.WindowsAzureError:
+            pass
 
-    ctx.logger.info('VMÂ has been started.')
-    if re.search(r'manager', ctx.instance.id):
-        # Get public ip of the manager
-        ip = nic._get_vm_ip(ctx, public=True)
-    else:
-        # Get private ip of the agent
-        ip = nic._get_vm_ip(ctx)
-
-    ctx.logger.info(
-            'Machine is running at {}.'.format(ip)
-            )
-    ctx.instance.runtime_properties['ip'] = ip   
+        raise utils.WindowsAzureError(e.code, e.message)
 
 
 @operation
@@ -275,7 +280,7 @@ def get_provisioning_state(**_):
 def get_nic_virtual_machine_id(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
-    #utils.validate_node_property('network_interface_name', ctx.node.properties)
+    utils.validate_node_property('network_interface_name', ctx.instance.runtime_properties)
 
     subscription_id = ctx.node.properties['subscription_id']
     api_version = constants.AZURE_API_VERSION_06
@@ -301,3 +306,33 @@ def get_nic_virtual_machine_id(**_):
         return None
      
     return vm_id
+
+def is_available(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('compute_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    resource_group_name = ctx.node.properties['resource_group_name']
+    vm_name = ctx.node.properties['compute_name']
+    api_version = constants.AZURE_API_VERSION_06
+
+    response = connection.AzureConnectionClient().azure_get(
+        ctx,
+        ("subscriptions/{}/resourcegroups/{}/"+
+            "providers/Microsoft.Compute/virtualmachines"+
+            "?api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                api_version
+        )
+    )
+    jsonGet = response.json()
+    ctx.logger.debug(jsonGet)
+
+    list = jsonGet['value']
+    for vm in list:
+        if vm['name']== vm_name:
+            return False
+
+    return True
