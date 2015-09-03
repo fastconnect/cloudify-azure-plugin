@@ -77,7 +77,6 @@ def create(**_):
     nic.create(ctx=ctx)
     utils.wait_status(ctx, 'nic')
 
-    computer_name = ctx.node.properties['compute_name']
     admin_username = ctx.node.properties['compute_user']
     admin_password = ctx.node.properties['compute_password']
     public_key = ctx.node.properties['public_key']
@@ -96,7 +95,7 @@ def create(**_):
                 'vmSize': str(vm_size)
             },
             'osProfile': {
-                'computerName': str(computer_name),
+                'computerName': str(vm_name),
                 'adminUsername': str(admin_username),
                 'adminPassword': str(admin_password),
                 'linuxConfiguration': {

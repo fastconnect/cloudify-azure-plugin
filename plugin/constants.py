@@ -68,3 +68,32 @@ APPLICATION_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 # config
 NODE_INSTANCE = 'node-instance'
 RELATIONSHIP_INSTANCE = 'relationship-instance'
+
+# properties keys
+SUBSCRIPTION_KEY = 'subscription_id'
+USERNAME_KEY = 'username'
+PASSWORD_KEY = 'password'
+LOCATION_KEY = 'location'
+
+RESOURCE_GROUP_KEY = 'resource_group_name'
+
+STORAGE_ACCOUNT_KEY = 'storage_account_name'
+ACCOUNT_TYPE_KEY = 'account_type'
+
+VIRTUAL_NETWORK_KEY = 'virtual_network_name'
+VIRTUAL_NETWORK_ADDRESS_KEY = 'virtual_network_address_prefix'
+SUBNET_KEY = 'subnet_name'
+SUBNET_ADDRESS_KEY = 'subnet_address_prefix'
+
+NETWORK_INTERFACE_KEY = 'network_interface_name'
+
+PUBLIC_IP_KEY = 'public_ip_name'
+
+COMPUTE_KEY = 'compute_name'
+COMPUTE_USER_KEY = 'compute_user'
+COMPUTE_PASSWORD_KEY = 'compute_password'
+FLAVOR_KEY = 'flavor_id'
+PUBLISHER_KEY = 'publisher_name'
+OFFER_KEY = 'offer'
+SKU_KEY = 'sku'
+SKU_VERSION_KEY = 'version'
