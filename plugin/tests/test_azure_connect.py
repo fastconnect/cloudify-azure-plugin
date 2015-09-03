@@ -57,6 +57,7 @@ class TestConnection(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         ctx.node.properties['password'] = 'wrong'
 
+        connection.AzureConnectionClient.token = None
         self.assertRaises(WindowsAzureError, 
                           connection.AzureConnectionClient
                           )
