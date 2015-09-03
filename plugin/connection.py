@@ -2,6 +2,7 @@
 import constants
 import requests
 import re
+import time
 from cloudify import ctx
 from utils import WindowsAzureError
 
@@ -9,17 +10,19 @@ from utils import WindowsAzureError
 class AzureConnectionClient():
     """Provides functions for getting the Azure Service Management Service
     """
-
+    token = None
+    expires_on = None
     def __init__(self):
         self.connection = None
-        self.token = None
         self._get_token()
 
     def azure_get(self, ctx, path, header={}):
         path = '{}/{}'.format(constants.AZURE_API_URL, path)
        #ctx.logger.debug(path)
         header.update({'Content-Type':'application/json', 
-                        'Authorization':'Bearer {}'.format(self.token)
+                        'Authorization':'Bearer {}'.format(
+                                      AzureConnectionClient.token
+                                      )
                         })
         #ctx.logger.debug('Requests get: {} with header {}'.format(path, header))
         return self._azure_response(requests.get(path,headers=header))
@@ -28,7 +31,9 @@ class AzureConnectionClient():
         path = '{}/{}'.format(constants.AZURE_API_URL, path)
         #ctx.logger.debug(path)
         header.update({'Content-Type':'application/json', 
-                    'Authorization':'Bearer {}'.format(self.token)
+                    'Authorization':'Bearer {}'.format(
+                                      AzureConnectionClient.token
+                                      )
                     })
         return self._azure_response(requests.post(path,headers=header,json=json))
 
@@ -37,7 +42,9 @@ class AzureConnectionClient():
         path = '{}/{}'.format(constants.AZURE_API_URL, path)
         #ctx.logger.debug(path)
         header.update({'Content-Type':'application/json', 
-                       'Authorization':'Bearer {}'.format(self.token)
+                       'Authorization':'Bearer {}'.format(
+                                      AzureConnectionClient.token
+                                      )
                        })
         return self._azure_response(requests.put(path,headers=header,json=json))
 
@@ -46,13 +53,17 @@ class AzureConnectionClient():
          path = '{}/{}'.format(constants.AZURE_API_URL, path)
          #ctx.logger.debug(path)
          header.update({'Content-Type':'application/json', 
-                       'Authorization':'Bearer {}'.format(self.token)
+                       'Authorization':'Bearer {}'.format(
+                                      AzureConnectionClient.token
+                                      )
                        })
          return self._azure_response(requests.delete(path,headers=header))
 
 
     def _get_token(self):
-        if self.token is None:
+        if ((AzureConnectionClient.token is None) or 
+            (time.gmtime() > AzureConnectionClient.expires_on)) :
+
             payload = {
                 'grant_type': 'password',
                 'client_id': constants.APPLICATION_ID,
@@ -61,12 +72,11 @@ class AzureConnectionClient():
                 'resource': constants.RESOURCE_CONNECTION_URL,
             }
             #ctx.logger.info('Getting token from Azure...')
-            json = self._azure_response(requests.post(constants.TOKEN_URL,
-                                                 data=payload
-                                                 )
-                                   ).json()
+            response = requests.post(constants.TOKEN_URL, data=payload)
+            json = self._azure_response(response).json()
             #ctx.logger.info('Token\'s been successfully taken from Azure')
-            self.token = json['access_token']
+            AzureConnectionClient.token = json['access_token']
+            AzureConnectionClient.expires_on = time.gmtime(float(json['expires_on']))
         else:
             ctx.logger.debug('Token\'s been already taken. Reusing it.')
 
