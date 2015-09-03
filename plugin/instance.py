@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ï»¿# -*- coding: utf-8 -*-
 import random
 import re
 #Local import
@@ -163,7 +163,7 @@ def create(**_):
 
         utils.wait_status(ctx, 'instance')
 
-        ctx.logger.info('VMÂ has been started.')
+        ctx.logger.info('VMï¿½ has been started.')
         if re.search(r'manager', ctx.instance.id):
             # Get public ip of the manager
             ip = nic._get_vm_ip(ctx, public=True)
