@@ -250,3 +250,26 @@ class TestInstance(testtools.TestCase):
 
         ctx1.logger.info("END concurrent delete VM 1 test")
         ctx2.logger.info("END concurrent delete VM 2 test")
+
+
+    def test_get_json(self):
+        ctx = self.mock_ctx('testgetjson')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN getjson VM test")
+
+        ctx.logger.info("Creating VM...")
+        instance.create(ctx=ctx)
+
+        time.sleep(TIME_DELAY)
+
+        ctx.logger.info("Getting json...")
+        current_ctx.set(ctx=ctx)
+        jsonVM = instance.get_json_from_azure(ctx=ctx)
+
+        self.assertEqual(jsonVM['name'], ctx.node.properties['compute_name'])
+
+        time.sleep(TIME_DELAY)
+
+        ctx.logger.info("Deleting VM...")
+        current_ctx.set(ctx=ctx)
+        instance.delete(ctx=ctx)
