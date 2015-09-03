@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import constants
 import requests
 import re
 import time
 from cloudify import ctx
+from plugin import constants
 from utils import WindowsAzureError
 
 
@@ -67,8 +67,8 @@ class AzureConnectionClient():
             payload = {
                 'grant_type': 'password',
                 'client_id': constants.APPLICATION_ID,
-                'username': ctx.node.properties['username'],
-                'password': ctx.node.properties['password'],
+                'username': ctx.node.properties[constants.USERNAME_KEY],
+                'password': ctx.node.properties[constants.PASSWORD_KEY],
                 'resource': constants.RESOURCE_CONNECTION_URL,
             }
             #ctx.logger.info('Getting token from Azure...')
