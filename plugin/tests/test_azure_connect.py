@@ -1,6 +1,7 @@
 ﻿import testtools
 import requests
 import test_utils
+import time
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
@@ -34,7 +35,21 @@ class TestConnection(testtools.TestCase):
         ctx = self.get_mock_context('test_connect')
         current_ctx.set(ctx=ctx)
 
-        self.assertIsNotNone(connection.AzureConnectionClient())
+        cnt = connection.AzureConnectionClient()
+        self.assertIsNotNone(cnt)
+        self.assertIsNotNone(connection.AzureConnectionClient.token)
+        self.assertIsNotNone(connection.AzureConnectionClient.expires_on)
+
+    def test_reuse_token(self):
+        ctx = self.get_mock_context('test_reuse_token')
+        current_ctx.set(ctx=ctx)
+        cnt = connection.AzureConnectionClient()
+        token = connection.AzureConnectionClient.token
+
+        time.sleep(constants.TIME_DELAY)
+
+        cnt = connection.AzureConnectionClient()
+        self.assertEqual(token, connection.AzureConnectionClient.token)
 
 
     def test_connect_fails(self):
