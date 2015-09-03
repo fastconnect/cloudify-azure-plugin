@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import random
 import re
+import inspect
 #Local import
 from plugin import (utils,
                     constants,
@@ -277,6 +278,7 @@ def get_provisioning_state(**_):
     status_vm = jsonGet['properties']['provisioningState']
     return status_vm
 
+
 def get_nic_virtual_machine_id(**_):
     utils.validate_node_property('subscription_id', ctx.node.properties)
     utils.validate_node_property('resource_group_name', ctx.node.properties)
@@ -318,15 +320,14 @@ def is_available(**_):
     api_version = constants.AZURE_API_VERSION_06
 
     response = connection.AzureConnectionClient().azure_get(
-        ctx,
-        ("subscriptions/{}/resourcegroups/{}/"+
-            "providers/Microsoft.Compute/virtualmachines"+
-            "?api-version={}").format(
-                subscription_id,
-                resource_group_name,
-                api_version
-        )
-    )
+                        ctx,
+                        ("subscriptions/{}/resourcegroups/{}/"+
+                         "providers/Microsoft.Compute/virtualmachines"+
+                         "?api-version={}").format(subscription_id,
+                                                   resource_group_name,
+                                                   api_version
+                                                  )   
+                        )
     jsonGet = response.json()
     ctx.logger.debug(jsonGet)
 
@@ -336,3 +337,28 @@ def is_available(**_):
             return False
 
     return True
+
+
+def get_json_from_azure(**_):
+    utils.validate_node_property('subscription_id', ctx.node.properties)
+    utils.validate_node_property('resource_group_name', ctx.node.properties)
+    utils.validate_node_property('compute_name', ctx.node.properties)
+
+    subscription_id = ctx.node.properties['subscription_id']
+    resource_group_name = ctx.node.properties['resource_group_name']
+    vm_name = ctx.node.properties['compute_name']
+    api_version = constants.AZURE_API_VERSION_05_preview
+
+    response = connection.AzureConnectionClient().azure_get(
+                    ctx,
+                    ('subscriptions/{}' + 
+                    '/resourceGroups/{}' +
+                    '/providers/Microsoft.Compute/virtualMachines/{}' +
+                    '?api-version={}').format(subscription_id,
+                                              resource_group_name,
+                                              vm_name,
+                                              api_version
+                                              )
+                    )
+
+    return response.json()
