@@ -161,7 +161,7 @@ node_types:
         type: string
       location:   
         type: string
-      publisherName:
+      publisher_name:
         type: string
       offer:
         type: string
