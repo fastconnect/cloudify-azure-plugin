@@ -15,7 +15,7 @@ inputs:
     location:   
         default: 'westeurope'
         type: string
-    publisherName:
+    publisher_name:
         default: 'Canonical'
         type: string
     offer:
@@ -60,7 +60,7 @@ node_templates:
             username: { get_input: username }
             password: { get_input: password }
             location: { get_input: location }
-            publisherName: { get_input: publisherName }
+            publisher_name: { get_input: publisher_name }
             offer: { get_input: offer }
             sku: { get_input: sku }
             version: { get_input: version }

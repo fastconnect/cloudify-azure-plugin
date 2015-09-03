@@ -1,7 +1,7 @@
 subscription_id: ''
 username: ''
 password: ''
-publisherName: ''
+publisher_name: ''
 offer: ''
 sku: ''
 compute_name: ''
