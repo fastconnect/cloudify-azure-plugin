@@ -20,15 +20,15 @@ class TestPublicIP(testtools.TestCase):
         """
 
         test_properties = {
-            'subscription_id': test_utils.SUBSCRIPTION_ID,
-            'username': test_utils.AZURE_USERNAME, 
-            'password': test_utils.AZURE_PASSWORD,
-            'location': 'westeurope',
-            'resource_group_name': 'resource_group_test',
+            constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+            constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+            constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+            constants.LOCATION_KEY: 'westeurope',
+            constants.RESOURCE_GROUP_KEY: 'resource_group_test',
         }
 
         test_runtime = {
-            'public_ip_name': test_name,
+            constants.PUBLIC_IP_KEY: test_name,
         }
 
         return MockCloudifyContext(node_id='test',
