@@ -24,26 +24,26 @@ class TestInstance(testtools.TestCase):
         """
 
         test_properties = {
-            'subscription_id': test_utils.SUBSCRIPTION_ID,
-            'username': test_utils.AZURE_USERNAME, 
-            'password': test_utils.AZURE_PASSWORD,
-            'location': 'westeurope',
-            'publisherName': 'Canonical',
-            'offer': 'UbuntuServer',
-            'sku': '12.04.5-LTS',
-            'version': 'latest',
-            'flavor_id': 'Standard_A1',
-            'compute_name': test_name,
-            'compute_user': test_utils.COMPUTE_USER,
-            'compute_password': test_utils.COMPUTE_PASSWORD,
-            'public_key': test_utils.PUBLIC_KEY,
-            'private_key': test_utils.PRIVATE_KEY,
+            constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+            constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+            constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+            constants.LOCATION_KEY: 'westeurope',
+            constants.PUBLISHER_KEY: 'Canonical',
+            constants.OFFER_KEY: 'UbuntuServer',
+            constants.SKU_KEY: '12.04.5-LTS',
+            constants.SKU_VERSION_KEY: 'latest',
+            constants.FLAVOR_KEY: 'Standard_A1',
+            constants.COMPUTE_KEY: test_name,
+            constants.COMPUTE_USER_KEY: test_utils.COMPUTE_USER,
+            constants.COMPUTE_PASSWORD_KEY: test_utils.COMPUTE_PASSWORD,
+            constants.PUBLIC_KEY_KEY: test_utils.PUBLIC_KEY,
+            constants.PRIVATE_KEY_KEY: test_utils.PRIVATE_KEY,
+            constants.STORAGE_ACCOUNT_KEY: 'storageaccounttest3',
+            constants.CREATE_OPTION_KEY:'FromImage',
+            constants.RESOURCE_GROUP_KEY: 'resource_group_test',
+            constants.VIRTUAL_NETWORK_KEY: 'management_network_test',
+            constants.SUBNET_KEY: 'subnet_test',
             'resources_prefix': 'boulay',
-            'storage_account': 'storageaccounttest3',
-            'create_option':'FromImage',
-            'resource_group_name': 'resource_group_test',
-            'virtual_network_name': 'management_network_test',
-            'subnet_name': 'subnet_test',
         }
 
         return MockCloudifyContext(node_id='test',
@@ -266,7 +266,7 @@ class TestInstance(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         jsonVM = instance.get_json_from_azure(ctx=ctx)
 
-        self.assertEqual(jsonVM['name'], ctx.node.properties['compute_name'])
+        self.assertEqual(jsonVM['name'], ctx.node.properties[constants.COMPUTE_KEY])
 
         time.sleep(TIME_DELAY)
 
