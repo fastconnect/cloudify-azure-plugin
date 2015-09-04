@@ -40,9 +40,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: azure.plugin.ressource_group.create
+          implementation: azure.plugin.resource_group.create
         delete:
-          implementation: azure.plugin.ressource_group.delete
+          implementation: azure.plugin.resource_group.delete
 
   cloudify.azure.nodes.StorageAccount:
     derived_from: cloudify.nodes.Root
