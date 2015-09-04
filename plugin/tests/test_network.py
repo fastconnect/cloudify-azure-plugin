@@ -20,15 +20,15 @@ class TestNetwork(testtools.TestCase):
         """
 
         test_properties = {
-            'subscription_id': test_utils.SUBSCRIPTION_ID,
-            'username': test_utils.AZURE_USERNAME,
-            'password': test_utils.AZURE_PASSWORD,
-            'location': 'westeurope',
-            'resource_group_name': 'resource_group_test',
-            'virtual_network_name': test_name,
-            'virtual_network_address_prefix': '10.0.0.0/16',
-            'subnet_name': 'lan',
-            'subnet_address_prefix': '10.0.1.0/24'
+            constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+            constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+            constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+            constants.LOCATION_KEY: 'westeurope',
+            constants.RESOURCE_GROUP_KEY: 'resource_group_test',
+            constants.VIRTUAL_NETWORK_KEY: test_name,
+            constants.VIRTUAL_NETWORK_ADDRESS_KEY: '10.0.0.0/16',
+            constants.SUBNET_KEY: 'lan',
+            constants.SUBNET_ADDRESS_KEY: '10.0.1.0/24'
         }
 
         return MockCloudifyContext(node_id='test',
@@ -140,6 +140,8 @@ class TestNetwork(testtools.TestCase):
 
     def test_create_subnet(self):
         ctx = self.mock_ctx('testcreatesubnet')
+        ctx.node.properties[constants.VIRTUAL_NETWORK_KEY] = 'testsubnetnetwork'
+        ctx.node.properties[constants.SUBNET_KEY] = 'testcreatesubnet'
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN test_create_subnet")
 
@@ -192,6 +194,8 @@ class TestNetwork(testtools.TestCase):
 
     def test_delete_subnet(self):
         ctx = self.mock_ctx('testdeletesubnet')
+        ctx.node.properties[constants.VIRTUAL_NETWORK_KEY] = 'testsubnetnetwork'
+        ctx.node.properties[constants.SUBNET_KEY] = 'testdeletesubnet'
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN test_delete_subnet")
 
@@ -244,6 +248,8 @@ class TestNetwork(testtools.TestCase):
 
     def test_conflict_subnet(self):
         ctx = self.mock_ctx('testconflictsubnet')
+        ctx.node.properties[constants.VIRTUAL_NETWORK_KEY] = 'testsubnetnetwork'
+        ctx.node.properties[constants.SUBNET_KEY] = 'testconflictsubnet'
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN test_conflict_subnet")
 

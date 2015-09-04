@@ -10,17 +10,17 @@ from cloudify.decorators import operation
 
 @operation
 def create_network(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('virtual_network_name', ctx.node.properties)
-    utils.validate_node_property('location', ctx.node.properties)
-    utils.validate_node_property('virtual_network_address_prefix', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.LOCATION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.VIRTUAL_NETWORK_ADDRESS_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    resource_group_name = ctx.node.properties['resource_group_name']
-    virtual_network_name = ctx.node.properties['virtual_network_name']
-    location = ctx.node.properties['location']
-    virtual_network_address_prefix = ctx.node.properties['virtual_network_address_prefix']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
+    location = ctx.node.properties[constants.LOCATION_KEY]
+    virtual_network_address_prefix = ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     json ={
@@ -54,13 +54,13 @@ def create_network(**_):
 
 @operation
 def delete_network(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('virtual_network_name', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    resource_group_name = ctx.node.properties['resource_group_name']
-    virtual_network_name = ctx.node.properties['virtual_network_name']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     ctx.logger.info('Deleting Virtual Network')
@@ -81,13 +81,13 @@ def delete_network(**_):
 
 
 def get_provisioning_state_network(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('virtual_network_name', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    resource_group_name = ctx.node.properties['resource_group_name']
-    virtual_network_name = ctx.node.properties['virtual_network_name']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     connect = connection.AzureConnectionClient()
@@ -112,17 +112,17 @@ def get_provisioning_state_network(**_):
 
 @operation
 def create_subnet(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('virtual_network_name', ctx.node.properties)
-    utils.validate_node_property('subnet_name', ctx.node.properties)
-    utils.validate_node_property('subnet_address_prefix', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.SUBNET_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.SUBNET_ADDRESS_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    resource_group_name = ctx.node.properties['resource_group_name']
-    virtual_network_name = ctx.node.properties['virtual_network_name']
-    subnet_name = ctx.node.properties['subnet_name']
-    subnet_address_prefix = ctx.node.properties['subnet_address_prefix']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
+    subnet_name = ctx.node.properties[constants.SUBNET_KEY]
+    subnet_address_prefix = ctx.node.properties[constants.SUBNET_ADDRESS_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     json ={
@@ -153,15 +153,15 @@ def create_subnet(**_):
 
 @operation
 def delete_subnet(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('virtual_network_name', ctx.node.properties)
-    utils.validate_node_property('subnet_name', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.SUBNET_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    resource_group_name = ctx.node.properties['resource_group_name']
-    virtual_network_name = ctx.node.properties['virtual_network_name']
-    subnet_name = ctx.node.properties['subnet_name']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
+    subnet_name = ctx.node.properties[constants.SUBNET_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     ctx.logger.info('Deleting Subnet')
@@ -184,15 +184,15 @@ def delete_subnet(**_):
 
 
 def get_provisioning_state_subnet(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('virtual_network_name', ctx.node.properties)
-    utils.validate_node_property('subnet_name', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.SUBNET_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    resource_group_name = ctx.node.properties['resource_group_name']
-    virtual_network_name = ctx.node.properties['virtual_network_name']
-    subnet_name = ctx.node.properties['subnet_name']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
+    subnet_name = ctx.node.properties[constants.SUBNET_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     connect = connection.AzureConnectionClient()
