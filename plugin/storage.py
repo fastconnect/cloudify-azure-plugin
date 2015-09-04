@@ -10,17 +10,17 @@ from cloudify.decorators import operation
 
 @operation
 def create(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('storage_account_name', ctx.node.properties)
-    utils.validate_node_property('location', ctx.node.properties)
-    utils.validate_node_property('account_type', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.LOCATION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.ACCOUNT_TYPE_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    resource_group_name = ctx.node.properties['resource_group_name']
-    storage_account_name = ctx.node.properties['storage_account_name']
-    location = ctx.node.properties['location']
-    account_type = ctx.node.properties['account_type']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    storage_account_name = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
+    location = ctx.node.properties[constants.LOCATION_KEY]
+    account_type = ctx.node.properties[constants.ACCOUNT_TYPE_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     ctx.logger.info('Checking availability storage_account_name ' + str(storage_account_name))
@@ -63,13 +63,13 @@ def create(**_):
 
 @operation
 def delete(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('storage_account_name', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    resource_group_name = ctx.node.properties['resource_group_name']
-    storage_account_name = ctx.node.properties['storage_account_name']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    storage_account_name = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     ctx.logger.info('Deleting Storage Account')
@@ -90,13 +90,13 @@ def delete(**_):
 
 
 def get_provisioning_state(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('storage_account_name', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    resource_group_name = ctx.node.properties['resource_group_name']
-    storage_account_name = ctx.node.properties['storage_account_name']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    storage_account_name = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     connect = connection.AzureConnectionClient()
@@ -120,11 +120,11 @@ def get_provisioning_state(**_):
 
 
 def availability_account_name(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('storage_account_name', ctx.node.properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
-    storage_account_name = ctx.node.properties['storage_account_name']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    storage_account_name = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     json ={
