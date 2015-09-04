@@ -13,13 +13,18 @@ def _get_vm_ip(ctx, public=False):
     ''' 
         Get the public IP from a machine or a network interface. 
     '''
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.instance.runtime_properties)
+
     azure_connection = connection.AzureConnectionClient()
 
-    subscription_id = ctx.node.properties['subscription_id']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    vm_name = ctx.node.properties['compute_name']
-    resource_group = ctx.node.properties['resource_group_name']
-    nic = ctx.instance.runtime_properties['network_interface_name']
+    vm_name = ctx.node.properties[constants.COMPUTE_KEY]
+    resource_group = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    nic = ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY]
 
     if nic is not None:
         response = azure_connection.azure_get(
@@ -75,14 +80,14 @@ def _get_vm_ip(ctx, public=False):
 
 
 def get_provisioning_state(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.instance.runtime_properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.instance.runtime_properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    resource_group_name = ctx.node.properties['resource_group_name']
-    network_interface_name = ctx.instance.runtime_properties['network_interface_name']
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    network_interface_name = ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY]
 
 
     response = connection.AzureConnectionClient().azure_get(
@@ -102,22 +107,22 @@ def get_provisioning_state(**_):
 
 
 def create(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('location', ctx.node.properties)
-    utils.validate_node_property('virtual_network_name', ctx.node.properties)
-    utils.validate_node_property('subnet_name', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.instance.runtime_properties)
-    utils.validate_node_property('public_ip_name', ctx.instance.runtime_properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.LOCATION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.SUBNET_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.instance.runtime_properties)
+    utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    resource_group_name = ctx.node.properties['resource_group_name']
-    location = ctx.node.properties['location']
-    virtual_network_name = ctx.node.properties['virtual_network_name']
-    subnet_name = ctx.node.properties['subnet_name']
-    network_interface_name = ctx.instance.runtime_properties['network_interface_name']
-    public_ip_name = ctx.instance.runtime_properties['public_ip_name']
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    location = ctx.node.properties[constants.LOCATION_KEY]
+    virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
+    subnet_name = ctx.node.properties[constants.SUBNET_KEY]
+    network_interface_name = ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY]
+    public_ip_name = ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
     private_ip_allocation_method = "Dynamic"
     public_ip_id = get_public_address_id(ctx)
 
@@ -165,14 +170,14 @@ def create(**_):
     return response.status_code
 
 def delete(**_):
-    utils.validate_node_property('subscription_id', ctx.node.properties)
-    utils.validate_node_property('resource_group_name', ctx.node.properties)
-    utils.validate_node_property('network_interface_name', ctx.instance.runtime_properties)
+    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.instance.runtime_properties)
 
-    subscription_id = ctx.node.properties['subscription_id']
+    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    resource_group_name = ctx.node.properties['resource_group_name']
-    network_interface_name = ctx.instance.runtime_properties['network_interface_name']
+    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    network_interface_name = ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY]
 
     ctx.logger.info('delete NIC : ' + network_interface_name)
     cntn = connection.AzureConnectionClient()

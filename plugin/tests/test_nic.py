@@ -20,13 +20,13 @@ class TestNIC(testtools.TestCase):
         """
 
         test_properties = {
-            'subscription_id': test_utils.SUBSCRIPTION_ID,
-            'username': test_utils.AZURE_USERNAME, 
-            'password': test_utils.AZURE_PASSWORD,
-            'location': 'westeurope',
-            'resource_group_name': 'resource_group_test',
-            'virtual_network_name': 'management_network_test',
-            'subnet_name': 'subnet_test',
+            constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+            constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+            constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+            constants.LOCATION_KEY: 'westeurope',
+            constants.RESOURCE_GROUP_KEY: 'resource_group_test',
+            constants.VIRTUAL_NETWORK_KEY: 'management_network_test',
+            constants.SUBNET_KEY: 'subnet_test',
         }
 
         test_runtime = {
@@ -51,7 +51,7 @@ class TestNIC(testtools.TestCase):
     def test_create(self):
         ctx = self.mock_ctx('testcreatenic')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN create NIC test:{}".format(ctx.instance.runtime_properties['public_ip_name']))
+        ctx.logger.info("BEGIN create NIC test")
 
         ctx.logger.info("create NIC")
         nic.create(ctx=ctx)
