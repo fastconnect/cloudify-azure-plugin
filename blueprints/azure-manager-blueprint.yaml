@@ -30,6 +30,7 @@ inputs:
     type: string
   version:
     type: string
+    default: 'latest'
   flavor_id:
     type: string
   compute_name:
