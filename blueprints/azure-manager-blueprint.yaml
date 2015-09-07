@@ -181,6 +181,7 @@ node_templates:
             fabric_env:
               user: { get_input: compute_user }
               key_filename: { get_input: private_key }
+              host_string: { get_attribute: [manager_server, public_ip] }
         delete:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
@@ -188,3 +189,4 @@ node_templates:
             fabric_env:
               user: { get_input: compute_user }
               key_filename: { get_input: private_key }
+              host_string: { get_attribute: [manager_server, public_ip] }
