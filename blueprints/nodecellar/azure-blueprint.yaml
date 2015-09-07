@@ -26,39 +26,45 @@ inputs:
     username:
         type: string
     password:
+        default: 'Azerty@01'
         type: string
     location:   
         default: 'westeurope'
         type: string
     publisher_name:
+        default: 'Canonical'
         type: string
     offer:
+        default: 'UbuntuServer'
         type: string
     sku:
+        default: 12.04.5-LTS
         type: string
     version:
-        type: string
         default: 'latest'
-    flavor_id:
         type: string
+    flavor_id:
         default: 'Standard_A1'
+        type: string
     compute_name:
+        type: string
+    virtual_network_name:
+        type: string
+    subnet_name:
         type: string
     storage_account_name:
         type: string
     compute_user:
+        default: 'administrateur'
         type: string
     compute_password:
+        default: 'Azerty?01'
         type: string
     public_key:
         type: string
     resource_group_name:
         type: string
-    management_network_name:
-        type: string
-    management_subnet_name:
-        type: string
-
+        
 node_types:
 
   ###########################################################
@@ -126,8 +132,8 @@ node_templates:
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
       compute_name: mongod-host
-      management_network_name: { get_input: management_network_name}
-      management_subnet_name: { get_input: management_subnet_name }
+      virtual_network_name: { get_input: virtual_network_name}
+      subnet_name: { get_input: subnet_name }
       storage_account_name: {get_input: storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
@@ -147,8 +153,8 @@ node_templates:
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
       compute_name: nodejs-host
-      management_network_name: { get_input: management_network_name}
-      management_subnet_name: { get_input: management_subnet_name }
+      virtual_network_name: { get_input: virtual_network_name}
+      subnet_name: { get_input: subnet_name }
       storage_account_name: {get_input: storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
