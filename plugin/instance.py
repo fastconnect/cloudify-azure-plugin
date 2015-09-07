@@ -67,6 +67,7 @@ def create(**_):
                                             os_disk_name
                                             )
 
+
     # generation of nic and public ip name
     network_interface_name = "{}_nic".format(vm_name)
     ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = \
@@ -171,10 +172,17 @@ def create(**_):
         ctx.logger.info('VM has been started.')
         if re.search(r'manager', ctx.instance.id):
             # Get public ip of the manager
-            ip = nic._get_vm_ip(ctx, public=True)
-        else:
-            # Get private ip of the agent
-            ip = nic._get_vm_ip(ctx)
+            ctx.instance.runtime_properties['public_ip'] = \
+                nic._get_vm_ip(ctx, public=True)
+            ctx.logger.info('Public IP manager: {}'
+                             .format(
+                                 ctx.instance.runtime_properties['public_ip']
+                                 )
+                             )
+
+        
+        # Get private ip of the agent
+        ip = nic._get_vm_ip(ctx)
 
         ctx.logger.info(
             'Machine is running at {}.'.format(ip)
