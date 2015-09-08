@@ -26,7 +26,6 @@ inputs:
     username:
         type: string
     password:
-        default: 'Azerty@01'
         type: string
     location:   
         default: 'westeurope'
@@ -46,7 +45,11 @@ inputs:
     flavor_id:
         default: 'Standard_A1'
         type: string
-    compute_name:
+    node_js_compute_name:
+        default: 'node-js-host'
+        type: string
+    mongo_compute_name:
+        default: 'mongod-host'
         type: string
     virtual_network_name:
         type: string
@@ -58,7 +61,6 @@ inputs:
         default: 'administrateur'
         type: string
     compute_password:
-        default: 'Azerty?01'
         type: string
     public_key:
         type: string
@@ -131,7 +133,7 @@ node_templates:
       sku: { get_input: sku }
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
-      compute_name: mongod-host
+      compute_name: {get_input: mongod_compute_name}
       virtual_network_name: { get_input: virtual_network_name}
       subnet_name: { get_input: subnet_name }
       storage_account_name: {get_input: storage_account_name}
@@ -152,7 +154,7 @@ node_templates:
       sku: { get_input: sku }
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
-      compute_name: nodejs-host
+      compute_name: {get_input: node_js_compute_name}
       virtual_network_name: { get_input: virtual_network_name}
       subnet_name: { get_input: subnet_name }
       storage_account_name: {get_input: storage_account_name}

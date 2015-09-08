@@ -10,7 +10,6 @@ inputs:
     username:
         type: string
     password:
-        default: 'Azerty@01'
         type: string
     location:   
         default: 'westeurope'
@@ -32,9 +31,9 @@ inputs:
         type: string
     compute_name:
         type: string
-    management_network_name:
+    virtual_network_name:
         type: string
-    management_subnet_name:
+    subnet_name:
         type: string
     storage_account_name:
         type: string
@@ -42,7 +41,6 @@ inputs:
         default: 'administrateur'
         type: string
     compute_password:
-        default: 'Azerty?01'
         type: string
     public_key:
         type: string
@@ -71,5 +69,5 @@ node_templates:
             compute_password: {get_input: compute_password}
             resource_group_name: {get_input: resource_group_name}
             public_key: { get_input: public_key }
-            management_network_name: { get_input: management_network_name}
-            management_subnet_name: { get_input: management_subnet_name }
+            virtual_network_name: { get_input: virtual_network_name}
+            subnet_name: { get_input: subnet_name }

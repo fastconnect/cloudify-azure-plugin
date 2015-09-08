@@ -1,10 +1,10 @@
-subscription_id: '18d68acb-caef-42cb-9dde-050ed320998c'
-username: 'api@victoroudinfastconnect.onmicrosoft.com'
-password: 'Azerty@01'
+subscription_id: ''
+username: ''
+password: ''
 compute_name: ''
 storage_account_name: ''
 public_key: |
 
 resource_group_name: ''
-management_network_name: ''
-management_subnet_name: ''
+network_name: ''
+subnet_name: ''
