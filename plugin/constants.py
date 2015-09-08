@@ -100,4 +100,5 @@ OFFER_KEY = 'offer'
 SKU_KEY = 'sku'
 SKU_VERSION_KEY = 'version'
 CREATE_OPTION_KEY = 'create_option'
+DISKS_KEY = 'disks'
 
