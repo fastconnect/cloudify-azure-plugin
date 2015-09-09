@@ -46,6 +46,9 @@ inputs:
         type: string
     resource_group_name:
         type: string
+    account_type:
+        default: 'Standard_LRS'
+        type: string
 
 node_templates:
     compute_node:
@@ -71,3 +74,18 @@ node_templates:
             public_key: { get_input: public_key }
             virtual_network_name: { get_input: virtual_network_name}
             subnet_name: { get_input: subnet_name }
+    
+        relationships:
+          - type: cloudify.azure.relationships.instance_connected_to_storage_account
+            target: compute_storage_account
+        
+    compute_storage_account:
+        type: cloudify.azure.nodes.StorageAccount
+        properties:
+            subscription_id: { get_input: subscription_id }
+            location: { get_input: location }
+            username: { get_input: username }
+            password: { get_input: password }
+            resource_group_name: {get_input: resource_group_name}
+            storage_account_name: {get_input: storage_account_name}
+            account_type: {get_input: account_type}
