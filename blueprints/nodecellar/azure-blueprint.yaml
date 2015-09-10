@@ -48,14 +48,12 @@ inputs:
     node_js_compute_name:
         default: 'node-js-host'
         type: string
-    mongo_compute_name:
+    mongod_compute_name:
         default: 'mongod-host'
         type: string
     virtual_network_name:
         type: string
     subnet_name:
-        type: string
-    storage_account_name:
         type: string
     compute_user:
         default: 'administrateur'
@@ -66,7 +64,12 @@ inputs:
         type: string
     resource_group_name:
         type: string
-        
+    mongod_storage_account_name:
+        type: string
+    nodejs_storage_account_name:
+        type: string
+    account_type:
+        type: string    
 node_types:
 
   ###########################################################
@@ -136,7 +139,7 @@ node_templates:
       compute_name: {get_input: mongod_compute_name}
       virtual_network_name: { get_input: virtual_network_name}
       subnet_name: { get_input: subnet_name }
-      storage_account_name: {get_input: storage_account_name}
+      storage_account_name: {get_input: mongod_storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       resource_group_name: {get_input: resource_group_name}
@@ -157,7 +160,7 @@ node_templates:
       compute_name: {get_input: node_js_compute_name}
       virtual_network_name: { get_input: virtual_network_name}
       subnet_name: { get_input: subnet_name }
-      storage_account_name: {get_input: storage_account_name}
+      storage_account_name: {get_input: nodejs_storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       resource_group_name: {get_input: resource_group_name}
@@ -194,12 +197,16 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: mongod_host
+      - type: cloudify.azure.relationships.instance_connected_to_storage_account
+        target: mongod_storage_account
 
   nodejs:
     type: nodecellar.nodes.NodeJSServer
     relationships:
       - type: cloudify.relationships.contained_in
         target: nodejs_host
+      - type: cloudify.azure.relationships.instance_connected_to_storage_account
+        target: nodejs_storage_account
 
   nodecellar:
     type: nodecellar.nodes.NodecellarApplicationModule
@@ -220,6 +227,29 @@ node_templates:
 
       - type: node_contained_in_nodejs
         target: nodejs
+
+
+  mongod_storage_account:
+        type: cloudify.azure.nodes.StorageAccount
+        properties:
+            subscription_id: { get_input: subscription_id }
+            location: { get_input: location }
+            username: { get_input: username }
+            password: { get_input: password }
+            resource_group_name: {get_input: resource_group_name}
+            storage_account_name: {get_input: mongod_storage_account_name}
+            account_type: {get_input: account_type}
+
+  nodejs_storage_account:
+        type: cloudify.azure.nodes.StorageAccount
+        properties:
+            subscription_id: { get_input: subscription_id }
+            location: { get_input: location }
+            username: { get_input: username }
+            password: { get_input: password }
+            resource_group_name: {get_input: resource_group_name}
+            storage_account_name: {get_input: nodejs_storage_account_name}
+            account_type: {get_input: account_type}
 
 ###########################################################
 # This outputs section exposes the application endpoint.
