@@ -9,7 +9,8 @@ compute_name: ''
 storage_account_name: ''
 compute_user: ''
 compute_password: ''
-public_key: ''
+public_key: |
+
 private_key: ''
 resource_group_name: ''
 virtual_network_name: ''

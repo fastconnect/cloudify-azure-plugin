@@ -10,7 +10,7 @@ imports:
   - http://www.getcloudify.org/spec/cloudify/3.2.1/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.2.1/plugin.yaml
   # relative import of plugin.yaml that resides in the blueprint directory
-  - plugin.yaml
+  - ../plugin.yaml
 
 inputs:
   subscription_id:
