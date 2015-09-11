@@ -73,7 +73,8 @@ class TestNIC(testtools.TestCase):
                          nic.get_provisioning_state,
                          ctx=ctx
                          )
-        ctx.logger.info("END create NIC  test")
+        
+        ctx.logger.info("END create NIC test")
 
 
     def test_delete(self):
@@ -103,7 +104,8 @@ class TestNIC(testtools.TestCase):
                          nic.get_provisioning_state,
                          ctx=ctx
                          )
-        ctx.logger.info("END delete NIC  test")
+
+        ctx.logger.info("END delete NIC test")
 
 
     def test_conflict(self):

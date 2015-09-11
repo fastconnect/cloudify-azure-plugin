@@ -70,7 +70,6 @@ class TestNetwork(testtools.TestCase):
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_create_network")
-        #self.assertTrue(False)
 
 
     def test_delete_network(self):
@@ -100,7 +99,6 @@ class TestNetwork(testtools.TestCase):
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_delete_network")
-        #self.assertTrue(False)
 
 
     def test_conflict_network(self):
@@ -133,9 +131,7 @@ class TestNetwork(testtools.TestCase):
             ctx=ctx
         )
         ctx.logger.info("Virtual Network Deleted")
-
         ctx.logger.info("END test_conflict_network")
-        #self.assertTrue(False)
 
 
     def test_create_subnet(self):
@@ -189,7 +185,6 @@ class TestNetwork(testtools.TestCase):
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_create_subnet")
-        #self.assertTrue(False)
 
 
     def test_delete_subnet(self):
@@ -243,7 +238,6 @@ class TestNetwork(testtools.TestCase):
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_delete_subnet")
-        #self.assertTrue(False)
 
 
     def test_conflict_subnet(self):
@@ -300,6 +294,4 @@ class TestNetwork(testtools.TestCase):
             ctx=ctx
         )
         ctx.logger.info("Virtual Network Deleted")
-
         ctx.logger.info("END test_conflict_subnet")
-        #self.assertTrue(False)

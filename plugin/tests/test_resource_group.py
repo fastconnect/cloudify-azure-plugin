@@ -41,7 +41,7 @@ class TestResourceGroup(testtools.TestCase):
     def test_create_resource_group(self):
         ctx = self.mock_ctx('testcreategroup')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN create resource_group test")
+        ctx.logger.info("BEGIN resource_group create test")
 
         ctx.logger.info("create resource_group")
         status_code = resource_group.create(ctx=ctx)
@@ -71,13 +71,13 @@ class TestResourceGroup(testtools.TestCase):
         except utils.WindowsAzureError:
             pass
 
-        ctx.logger.info("END create resource_group  test")
+        ctx.logger.info("END resource_group create test")
 
 
     def test_delete_resource_group(self):
         ctx = self.mock_ctx('testdeletegroup')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN create resource_group test")
+        ctx.logger.info("BEGIN resource_group delete test")
 
         ctx.logger.info("create resource_group")
         status_code = resource_group.create(ctx=ctx)
@@ -107,13 +107,13 @@ class TestResourceGroup(testtools.TestCase):
         except utils.WindowsAzureError:
             pass
 
-        ctx.logger.info("END create resource_group  test")
+        ctx.logger.info("END resource_group delete test")
 
 
     def test_conflict_resource_group(self):
         ctx = self.mock_ctx('conflictgroup')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN conflict resource_group test")
+        ctx.logger.info("BEGIN resource_group conflict test")
 
         ctx.logger.info("create resource group")
         status_code = resource_group.create(ctx=ctx)
@@ -147,3 +147,5 @@ class TestResourceGroup(testtools.TestCase):
 
         ctx.logger.info("conflict delete resource_group")
         self.assertEqual(202, resource_group.delete(ctx=ctx))
+
+        ctx.logger.info("END resource_group conflict test")

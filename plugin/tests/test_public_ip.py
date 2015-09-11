@@ -18,7 +18,6 @@ class TestPublicIP(testtools.TestCase):
         """ Creates a mock context for the instance
             tests
         """
-
         test_properties = {
             constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
             constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
@@ -78,16 +77,15 @@ class TestPublicIP(testtools.TestCase):
         except utils.WindowsAzureError:
             pass
 
-        ctx.logger.info("END create public_ip  test")
+        ctx.logger.info("END create public_ip test")
 
 
     def test_delete_public_ip(self):
         ctx = self.mock_ctx('testdeleteip')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN create public_ip test")
+        ctx.logger.info("BEGIN public_ip delete test")
 
-        ctx.logger.info("create public_ip")
-        
+        ctx.logger.info("create public_ip")   
         status_code = public_ip.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
@@ -115,13 +113,13 @@ class TestPublicIP(testtools.TestCase):
         except utils.WindowsAzureError:
             pass
 
-        ctx.logger.info("END create public_ip  test")
+        ctx.logger.info("END public_ip delete test")
 
 
     def test_conflict_public_ip(self):
         ctx = self.mock_ctx('testconflictip')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN create public_ip test")
+        ctx.logger.info("BEGIN conflict public_ip test")
 
         ctx.logger.info("create public_ip")
         status_code = public_ip.create(ctx=ctx)
@@ -158,6 +156,6 @@ class TestPublicIP(testtools.TestCase):
 
         ctx.logger.info("delete conflict public_ip")
         self.assertEqual(204, public_ip.delete(ctx=ctx))
-
-        ctx.logger.info("END create public_ip  test")
+        
+        ctx.logger.info("END conflict public_ip test")
 

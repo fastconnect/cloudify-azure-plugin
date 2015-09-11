@@ -126,7 +126,6 @@ def create(**_):
     private_ip_allocation_method = "Dynamic"
     public_ip_id = get_public_address_id(ctx)
 
-    ctx.logger.info('generate NIC Json')
     json ={
         "location": str(location),
         "properties": {
@@ -150,7 +149,6 @@ def create(**_):
             ]
         }
     }
-    ctx.logger.debug(json)
 
     ctx.logger.info('create NIC : ' + network_interface_name)
     cntn = connection.AzureConnectionClient()
