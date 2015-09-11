@@ -26,7 +26,8 @@ class TestStorage(testtools.TestCase):
             constants.LOCATION_KEY: 'westeurope',
             constants.RESOURCE_GROUP_KEY: 'resource_group_test',
             constants.STORAGE_ACCOUNT_KEY: test_name,
-            constants.ACCOUNT_TYPE_KEY: 'Standard_LRS' #Standard_LRS|Standard_ZRS|Standard_GRS|Standard_RAGRS|Premium_LRS
+            constants.ACCOUNT_TYPE_KEY: 'Standard_LRS', #Standard_LRS|Standard_ZRS|Standard_GRS|Standard_RAGRS|Premium_LRS
+            constants.STORAGE_DELETABLE_KEY: True
         }
 
         return MockCloudifyContext(node_id='test',
@@ -70,7 +71,7 @@ class TestStorage(testtools.TestCase):
         )
         ctx.logger.info("Storage Account Deleted")
         ctx.logger.info("END test_create_storage")
-        #self.assertTrue(False)
+ 
 
 
     def test_delete_storage(self):
@@ -101,8 +102,42 @@ class TestStorage(testtools.TestCase):
             ctx=ctx
         )
         ctx.logger.info("Storage Account Deleted")
+
+        ctx.node.properties[constants.STORAGE_DELETABLE_KEY] = False
+
+        status_code = storage.create(ctx=ctx)
+        ctx.logger.info("status_code : " + str(status_code))
+        self.assertTrue(bool((status_code == 200) | (status_code == 202)))
+        
+        ctx.logger.info("create storage with deletable propertie set to false")
+        
+        status_storage = constants.CREATING
+        while status_storage != constants.SUCCEEDED :
+            current_ctx.set(ctx=ctx)
+            status_storage = storage.get_provisioning_state(ctx=ctx)
+            ctx.logger.info("Storage Account status is " + status_storage)
+            time.sleep(TIME_DELAY)
+
+        ctx.logger.info("Storage Account Created")
+        self.assertEqual(constants.SUCCEEDED, status_storage)
+        
+        ctx.logger.info("not delete storage")
+        self.assertEqual(0, storage.delete(ctx=ctx))
+
+        ctx.logger.info("Set deletable propertie to True")
+        ctx.node.properties[constants.STORAGE_DELETABLE_KEY] = True
+
+        ctx.logger.info("Delete storage")
+        self.assertEqual(200, storage.delete(ctx=ctx))
+
+        ctx.logger.info("Checking Storage Account deleted")
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(utils.WindowsAzureError,
+            storage.get_provisioning_state,
+            ctx=ctx
+        )
+        ctx.logger.info("Storage Account Deleted")
         ctx.logger.info("END test_delete_storage")
-        #self.assertTrue(False)
 
 
     def test_conflict_storage(self):
@@ -138,4 +173,3 @@ class TestStorage(testtools.TestCase):
         ctx.logger.info("Storage Account Deleted")
 
         ctx.logger.info("END test_conflict_storage")
-        #self.assertTrue(False)

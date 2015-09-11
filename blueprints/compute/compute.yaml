@@ -49,7 +49,9 @@ inputs:
     account_type:
         default: 'Standard_LRS'
         type: string
-
+    storage_account_deletable:
+        default: False
+        type: boolean
 node_templates:
     compute_node:
         type: cloudify.azure.nodes.Instance
@@ -74,11 +76,11 @@ node_templates:
             public_key: { get_input: public_key }
             virtual_network_name: { get_input: virtual_network_name}
             subnet_name: { get_input: subnet_name }
-    
+
         relationships:
           - type: cloudify.azure.relationships.instance_connected_to_storage_account
             target: compute_storage_account
-        
+
     compute_storage_account:
         type: cloudify.azure.nodes.StorageAccount
         properties:
@@ -89,3 +91,4 @@ node_templates:
             resource_group_name: {get_input: resource_group_name}
             storage_account_name: {get_input: storage_account_name}
             account_type: {get_input: account_type}
+            deletable: {get_input: storage_account_deletable}
