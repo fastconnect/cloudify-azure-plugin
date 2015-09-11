@@ -15,6 +15,7 @@ resource_group_name: ''
 virtual_network_name: ''
 subnet_name: ''
 account_type: ''
+storage_account_deletable: False
 
 # To add disks to the machine, make a list of disk with these properties:
 # name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)

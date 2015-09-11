@@ -49,6 +49,9 @@ inputs:
     account_type:
         default: 'Standard_LRS'
         type: string
+    storage_account_deletable:
+        default: False
+        type: boolean
     compute_disks:
         default: {}
 
@@ -91,6 +94,7 @@ node_templates:
             resource_group_name: {get_input: resource_group_name}
             storage_account_name: {get_input: storage_account_name}
             account_type: {get_input: account_type}
+            deletable: {get_input: storage_account_deletable}
 
     compute_disk:
         type: cloudify.azure.nodes.Datadisks
