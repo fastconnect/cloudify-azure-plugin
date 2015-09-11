@@ -97,11 +97,14 @@ def wait_status(ctx, resource,
     module = importlib.import_module('plugin.{}'.format(resource), 
                                      package=None
                                      )
-    ctx.logger.info('Checking {} state {}...'.format(resource, wait_status))
+    ctx.logger.debug('Waiting state {} for {}...'.format(wait_status,
+                                                        resource)
+                    )
     status = start_status
 
     while status == start_status :
         status = getattr(module, 'get_provisioning_state')()
+        ctx.logger.info('{} is still {}.'.format(resource, status))
         sleep(constants.TIME_DELAY)
     
     if status != wait_status :

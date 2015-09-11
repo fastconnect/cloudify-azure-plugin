@@ -62,8 +62,9 @@ def create(**_):
     os_disk_name = "{}_{}.vhd".format(vm_name,
                                       storage_account
                                      )
-    os_disk_vhd = "https://{}.blob.core.windows.net/vhds/{}.vhd".format(
+    os_disk_vhd = "https://{}.blob.core.windows.net/{}-vhds/{}.vhd".format(
                                             storage_account,
+                                            vm_name,
                                             os_disk_name
                                             )
 
