@@ -78,6 +78,11 @@ node_types:
           account_type possible [Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS]
         type: string
         default: 'Standard_LRS'
+      deletable:
+        description: >
+          give the ability to keep the storage group
+        type: boolean
+        default: false
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

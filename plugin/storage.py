@@ -66,27 +66,36 @@ def delete(**_):
     utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.STORAGE_DELETABLE_KEY, ctx.node.properties)
 
     subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
     resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
     storage_account_name = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
+    deletable = ctx.node.properties[constants.STORAGE_DELETABLE_KEY]
 
-    ctx.logger.info('Deleting Storage Account')
-    connect = connection.AzureConnectionClient()
+    if deletable:
+        ctx.logger.info('Propertie deletable set to True.')
+        ctx.logger.info('Deleting Storage Account {}.'.format(storage_account_name))
+        connect = connection.AzureConnectionClient()
 
-    response = connect.azure_delete(ctx,
-        ("subscriptions/{}/resourceGroups/{}/" +
-            "providers/Microsoft.Storage" +
-            "/storageAccounts/{}" +
-            "?api-version={}").format(
-            subscription_id,
-            resource_group_name,
-            storage_account_name,
-            api_version
+        response = connect.azure_delete(ctx,
+            ("subscriptions/{}/resourceGroups/{}/" +
+                "providers/Microsoft.Storage" +
+                "/storageAccounts/{}" +
+                "?api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                storage_account_name,
+                api_version
+            )
         )
-    )
-    return response.status_code
+        return response.status_code
+    else:
+        ctx.logger.info('Propertie deletable set to False.')
+        ctx.logger.info('Not deleting storage account {}.'.format(storage_account_name))
+        return 0
+    
 
 
 def get_provisioning_state(**_):
