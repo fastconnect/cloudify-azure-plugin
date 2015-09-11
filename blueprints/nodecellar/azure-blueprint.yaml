@@ -69,7 +69,13 @@ inputs:
     nodejs_storage_account_name:
         type: string
     account_type:
-        type: string    
+        type: string
+    mongod_storage_account_deletable:
+        default: False
+        type: boolean
+    nodejs_storage_account_deletable:
+        default: False
+        type: boolean  
 node_types:
 
   ###########################################################
@@ -239,6 +245,7 @@ node_templates:
             resource_group_name: {get_input: resource_group_name}
             storage_account_name: {get_input: mongod_storage_account_name}
             account_type: {get_input: account_type}
+            deletable: {get_input: mongod_storage_account_deletable}
 
   nodejs_storage_account:
         type: cloudify.azure.nodes.StorageAccount
@@ -250,6 +257,7 @@ node_templates:
             resource_group_name: {get_input: resource_group_name}
             storage_account_name: {get_input: nodejs_storage_account_name}
             account_type: {get_input: account_type}
+            deletable: {get_input: nodejs_storage_account_deletable}
 
 ###########################################################
 # This outputs section exposes the application endpoint.
