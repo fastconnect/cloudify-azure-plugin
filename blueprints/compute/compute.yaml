@@ -49,6 +49,8 @@ inputs:
     account_type:
         default: 'Standard_LRS'
         type: string
+    compute_disks:
+        default: {}
 
 node_templates:
     compute_node:
@@ -89,3 +91,19 @@ node_templates:
             resource_group_name: {get_input: resource_group_name}
             storage_account_name: {get_input: storage_account_name}
             account_type: {get_input: account_type}
+
+    compute_disk:
+        type: cloudify.azure.nodes.Datadisks
+        properties:
+            subscription_id: { get_input: subscription_id }
+            username: { get_input: username }
+            password: { get_input: password }
+            location: { get_input: location }
+            resource_group_name: {get_input: resource_group_name}
+            storage_account_name: {get_input: storage_account_name}
+            compute_name: {get_input: compute_name}
+            disks: { get_input: compute_disks }
+        relationships:
+            - target: compute_node
+              type: cloudify.azure.relationships.disk_attach_to_instance
+

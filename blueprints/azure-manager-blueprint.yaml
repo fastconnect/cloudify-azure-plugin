@@ -10,7 +10,7 @@ imports:
   - http://www.getcloudify.org/spec/cloudify/3.2.1/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.2.1/plugin.yaml
   # relative import of plugin.yaml that resides in the blueprint directory
-  - ../plugin.yaml
+  - plugin.yaml
 
 inputs:
   subscription_id:
@@ -55,6 +55,8 @@ inputs:
     type: string
   subnet_address_prefix:
     type: string
+  manager_disks:
+    default: {}
 
 node_templates:
   manager_resource_group:
@@ -138,6 +140,21 @@ node_templates:
         type: cloudify.azure.relationships.instance_connected_to_network
       - target: manager_subnet
         type: cloudify.azure.relationships.instance_connected_to_subnet
+
+  manager_disk:
+    type: cloudify.azure.nodes.Datadisks
+    properties:
+      subscription_id: { get_input: subscription_id }
+      username: { get_input: username }
+      password: { get_input: password }
+      location: { get_input: location }
+      resource_group_name: {get_input: resource_group_name}
+      storage_account_name: {get_input: storage_account_name}
+      compute_name: {get_input: compute_name}
+      disks: { get_input: manager_disks }
+    relationships:
+      - target: manager_server
+        type: cloudify.azure.relationships.disk_attach_to_instance
 
   manager:
     type: cloudify.nodes.CloudifyManager
