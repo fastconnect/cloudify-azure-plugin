@@ -17,6 +17,7 @@
 # Built-in Imports
 import os
 import importlib
+import json
 from time import sleep
 
 # Cloudify Imports
@@ -81,17 +82,17 @@ def get_instance_or_source_node_properties():
                     constants.NODE_INSTANCE))
 
 
-def wait_status(ctx, resource, 
-                start_status=constants.CREATING,
-                wait_status=constants.SUCCEEDED
+def wait_status(ctx, resource,
+                expected_status=constants.SUCCEEDED, 
+                timeout=600
                 ):
     """ A helper to send request to Azure. The operation status
     is check to monitor the request. Failures are managed too.
 
     :param ctx: The Cloudify context to log information.
     :param resource: The resource to waiting for.
-    :param start_status: The initial status.
-    :param wait_status: The expected status.
+    :param expected_status: The expected status for the operation.
+    :param timeout: Maximum time to wait in seconds.
     """
 
     module = importlib.import_module('plugin.{}'.format(resource), 
@@ -100,18 +101,76 @@ def wait_status(ctx, resource,
     ctx.logger.debug('Waiting state {} for {}...'.format(wait_status,
                                                         resource)
                     )
-    status = start_status
+    status = 'empty'
+    ttw=0
 
-    while status == start_status :
+    while ((status!= expected_status) or (status != constants.FAILED) or 
+           (ttw <= timeout)):
         status = getattr(module, 'get_provisioning_state')()
-        ctx.logger.info('{} is still {}.'.format(resource, status))
+        ctx.logger.info('{} is {}.'.format(resource, status))
+        ttw += constants.TIME_DELAY
         sleep(constants.TIME_DELAY)
     
-    if status != wait_status :
+    if status != expected_status :
         raise NonRecoverableError(
             'Failed waiting {} for {}: {}.'.format(
                             wait_status, resource, status)
             )
+
+
+class ProviderContext(object):
+
+    def __init__(self, provider_context):
+        self._provider_context = provider_context or {}
+        self._resources = self._provider_context.get('resources', {})
+
+    @property
+    def subscription_id(self):
+        return self._resources.get(constants.SUBSCRIPTION_KEY)
+
+    @property
+    def username(self):
+        return self._resources.get(constants.USERNAME_KEY)
+
+    @property
+    def password(self):
+        return self._resources.get(constants.PASSWORD_KEY)
+
+    @property
+    def location(self):
+        return self._resources.get(constants.LOCATION_KEY)
+
+    @property
+    def resource_group(self):
+        return self._resources.get(constants.RESOURCE_GROUP_KEY)
+
+    @property
+    def storage_account(self):
+        return self._resources.get(constants.STORAGE_ACCOUNT_KEY)
+
+    @property
+    def virtual_network_address(self):
+        return self._resources.get(constants.VIRTUAL_NETWORK_ADDRESS_KEY)
+
+    @property
+    def subnet_address(self):
+        return self._resources.get(constant.SUBNET_ADDRESS_KEY)
+
+    @property
+    def router(self):
+        return self._resources.get('router')
+
+    @property
+    def subnet(self):
+        return self._resources.get('subnet')
+
+    def __repr__(self):
+        info = json.dumps(self._provider_context)
+        return '<' + self.__class__.__name__ + ' ' + info + '>'
+
+
+def provider(ctx):
+    return ProviderContext(ctx.provider_context)
 
 
 class WindowsAzureError(Exception):
