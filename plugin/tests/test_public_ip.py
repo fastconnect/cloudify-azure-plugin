@@ -4,6 +4,7 @@ import test_utils
 
 from plugin import (utils,
                     constants,
+                    resource_group,
                     public_ip
                     )
 
@@ -13,12 +14,20 @@ from cloudify.mocks import MockCloudifyContext
 TIME_DELAY = 20
 
 class TestPublicIP(testtools.TestCase):
+    
+    def __init__(self, *args):
+        super(TestPublicIP, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("CREATE public_ip\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.create(ctx=ctx)
+
 
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
             tests
         """
-
         test_properties = {
             constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
             constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
@@ -78,16 +87,15 @@ class TestPublicIP(testtools.TestCase):
         except utils.WindowsAzureError:
             pass
 
-        ctx.logger.info("END create public_ip  test")
+        ctx.logger.info("END create public_ip test")
 
 
     def test_delete_public_ip(self):
         ctx = self.mock_ctx('testdeleteip')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN create public_ip test")
+        ctx.logger.info("BEGIN public_ip delete test")
 
-        ctx.logger.info("create public_ip")
-        
+        ctx.logger.info("create public_ip")   
         status_code = public_ip.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
@@ -115,13 +123,13 @@ class TestPublicIP(testtools.TestCase):
         except utils.WindowsAzureError:
             pass
 
-        ctx.logger.info("END create public_ip  test")
+        ctx.logger.info("END public_ip delete test")
 
 
     def test_conflict_public_ip(self):
         ctx = self.mock_ctx('testconflictip')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN create public_ip test")
+        ctx.logger.info("BEGIN conflict public_ip test")
 
         ctx.logger.info("create public_ip")
         status_code = public_ip.create(ctx=ctx)
@@ -158,6 +166,13 @@ class TestPublicIP(testtools.TestCase):
 
         ctx.logger.info("delete conflict public_ip")
         self.assertEqual(204, public_ip.delete(ctx=ctx))
+        
+        ctx.logger.info("END conflict public_ip test")
 
-        ctx.logger.info("END create public_ip  test")
+    def __del__(self):
+        super(TestPublicIP, self).__init__(*args)
 
+        ctx = self.mock_ctx('del')
+        ctx.logger.info("DELETE public_ip\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.delete(ctx=ctx)

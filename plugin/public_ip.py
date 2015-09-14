@@ -77,7 +77,6 @@ def create(**_):
             }
         }
 
-    ctx.logger.info('Beginning public_ip creation')
     cntn = connection.AzureConnectionClient()
 
     response = cntn.azure_put(ctx, 

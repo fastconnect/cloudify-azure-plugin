@@ -4,6 +4,7 @@ import test_utils
 
 from plugin import (utils,
                     constants,
+                    resource_group,
                     network
                     )
 
@@ -13,6 +14,14 @@ from cloudify.mocks import MockCloudifyContext
 TIME_DELAY = 20
 
 class TestNetwork(testtools.TestCase):
+
+    def __init__(self, *args):
+        super(TestNetwork, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("CREATE network\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.create(ctx=ctx)
 
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
@@ -70,7 +79,6 @@ class TestNetwork(testtools.TestCase):
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_create_network")
-        #self.assertTrue(False)
 
 
     def test_delete_network(self):
@@ -100,7 +108,6 @@ class TestNetwork(testtools.TestCase):
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_delete_network")
-        #self.assertTrue(False)
 
 
     def test_conflict_network(self):
@@ -133,9 +140,7 @@ class TestNetwork(testtools.TestCase):
             ctx=ctx
         )
         ctx.logger.info("Virtual Network Deleted")
-
         ctx.logger.info("END test_conflict_network")
-        #self.assertTrue(False)
 
 
     def test_create_subnet(self):
@@ -180,16 +185,17 @@ class TestNetwork(testtools.TestCase):
         ctx.logger.info("Subnet Deleted")
 
         self.assertEqual(202, network.delete_network(ctx=ctx))
+        status_network = constants.DELETING
+        try:
+            while status_network == constants.DELETING :
+                current_ctx.set(ctx=ctx)           
+                status_network = network.get_provisioning_state_network(ctx=ctx)
+                time.sleep(TIME_DELAY)
+        except utils.WindowsAzureError:
+            pass
 
-        ctx.logger.info("Checking Virtual Network deleted")
-        current_ctx.set(ctx=ctx)
-        self.assertRaises(utils.WindowsAzureError,
-            network.get_provisioning_state_network,
-            ctx=ctx
-        )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_create_subnet")
-        #self.assertTrue(False)
 
 
     def test_delete_subnet(self):
@@ -243,7 +249,6 @@ class TestNetwork(testtools.TestCase):
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_delete_subnet")
-        #self.assertTrue(False)
 
 
     def test_conflict_subnet(self):
@@ -300,6 +305,12 @@ class TestNetwork(testtools.TestCase):
             ctx=ctx
         )
         ctx.logger.info("Virtual Network Deleted")
-
         ctx.logger.info("END test_conflict_subnet")
-        #self.assertTrue(False)
+
+    def __del__(self, *args):
+        super(TestStorage, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("DELETE network\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.delete(ctx=ctx)

@@ -158,11 +158,9 @@ class TestInstance(testtools.TestCase):
         vm2 = threading.Thread(target=create_vm, args=(ctx2,))
 
         ctx1.logger.info("create VM 1")
-        #instance.create(ctx=ctx1)
         vm1.start()
 
         ctx2.logger.info("create VM 2")
-        #instance.create(ctx=ctx2)
         vm2.start()
 
         vm1.join()
@@ -173,7 +171,7 @@ class TestInstance(testtools.TestCase):
         status_vm1 = constants.CREATING
         status_vm2 = constants.CREATING
         while bool(status_vm1 == constants.CREATING or status_vm2 == constants.CREATING) :
-            #current_ctx.set(ctx=ctx)
+
             current_ctx.set(ctx=ctx1)
             status_vm1 = instance.get_provisioning_state(ctx=ctx1)
             current_ctx.set(ctx=ctx2)
@@ -198,7 +196,7 @@ class TestInstance(testtools.TestCase):
     def test_concurrent_delete(self):
         ctx1 = self.mock_ctx('testconcurrentdelete1')
         ctx2 = self.mock_ctx('testconcurrentdelete2')
-        #current_ctx.set(ctx=ctx)
+
         ctx1.logger.info("BEGIN concurrent delete VM 1 test")
         ctx2.logger.info("BEGIN concurrent delete VM 2 test")
 
@@ -214,7 +212,7 @@ class TestInstance(testtools.TestCase):
         status_vm2 = constants.CREATING
         while bool(status_vm1 == constants.CREATING or
                    status_vm2 == constants.CREATING) :
-            #current_ctx.set(ctx=ctx)
+
             current_ctx.set(ctx=ctx1)
             status_vm1 = instance.get_provisioning_state(ctx=ctx1)
             current_ctx.set(ctx=ctx2)
@@ -235,11 +233,9 @@ class TestInstance(testtools.TestCase):
         vm2 = threading.Thread(target=delete_vm, args=(ctx2,queue2))
 
         ctx1.logger.info("delete VM 1")
-        #self.assertEqual(202, instance.delete(ctx=ctx1))
         vm1.start()
 
         ctx2.logger.info("delete VM 2")
-        #self.assertEqual(202, instance.delete(ctx=ctx2))
         vm2.start()
 
         vm1.join()

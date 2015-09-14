@@ -4,6 +4,7 @@ import test_utils
 
 from plugin import (utils,
                     constants,
+                    resource_group,
                     storage,
                     )
 
@@ -13,6 +14,14 @@ from cloudify.mocks import MockCloudifyContext
 TIME_DELAY = 20
 
 class TestStorage(testtools.TestCase):
+
+    def __init__(self, *args):
+        super(TestStorage, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("CREATE storage_account\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.create(ctx=ctx)
 
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
@@ -45,7 +54,7 @@ class TestStorage(testtools.TestCase):
     def test_create_storage(self):
         ctx = self.mock_ctx('testcreatestorage')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN test_create_storage")
+        ctx.logger.info("BEGIN test create storage")
 
         status_code = storage.create(ctx=ctx)
         ctx.logger.info("status_code : " + str(status_code))
@@ -70,14 +79,14 @@ class TestStorage(testtools.TestCase):
             ctx=ctx
         )
         ctx.logger.info("Storage Account Deleted")
-        ctx.logger.info("END test_create_storage")
- 
 
+        ctx.logger.info("END test create storage")
+ 
 
     def test_delete_storage(self):
         ctx = self.mock_ctx('testdeletestorage')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN test_delete_storage")
+        ctx.logger.info("BEGIN test delete storage")
 
         status_code = storage.create(ctx=ctx)
         ctx.logger.info("status_code : " + str(status_code))
@@ -137,13 +146,14 @@ class TestStorage(testtools.TestCase):
             ctx=ctx
         )
         ctx.logger.info("Storage Account Deleted")
-        ctx.logger.info("END test_delete_storage")
+
+        ctx.logger.info("END test delete storage")
 
 
     def test_conflict_storage(self):
         ctx = self.mock_ctx('testconflictstorage')
         current_ctx.set(ctx=ctx)
-        ctx.logger.info("BEGIN test_conflict_storage")
+        ctx.logger.info("BEGIN test conflict storage")
 
         status_code = storage.create(ctx=ctx)
         ctx.logger.info("status_code : " + str(status_code))
@@ -164,7 +174,7 @@ class TestStorage(testtools.TestCase):
 
         self.assertEqual(200, storage.delete(ctx=ctx))
 
-        ctx.logger.info("check is Storage Account is release")
+        ctx.logger.info("Check is Storage Account is release")
         current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             storage.get_provisioning_state,
@@ -172,4 +182,12 @@ class TestStorage(testtools.TestCase):
         )
         ctx.logger.info("Storage Account Deleted")
 
-        ctx.logger.info("END test_conflict_storage")
+        ctx.logger.info("END test conflict storage")
+
+    def __del__(self, *args):
+        super(TestStorage, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("CREATE storage_account\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.delete(ctx=ctx)

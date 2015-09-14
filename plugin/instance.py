@@ -173,7 +173,7 @@ def create(**_):
 
         ctx.logger.info('VM has been started.')
         if re.search(r'manager', ctx.instance.id):
-            # Get public ip of the manager
+            # Get manager's public ip
             ctx.instance.runtime_properties['public_ip'] = \
                 nic._get_vm_ip(ctx, public=True)
             ctx.logger.info('Public IP manager: {}'
@@ -183,7 +183,7 @@ def create(**_):
                              )
 
         
-        # Get private ip of the agent
+        # Get agent's private ip 
         ip = nic._get_vm_ip(ctx)
 
         ctx.logger.info(
@@ -194,14 +194,13 @@ def create(**_):
         ctx.logger.info('Creation vm failed: {}'.format(ctx.instance.id))
         ctx.logger.info('Error code: {}'.format(e.code))
         ctx.logger.info('Error message: {}'.format(e.message))
-        # deleting nic
+        
         nic.delete(ctx=ctx)
         try:
             utils.wait_status(ctx, 'nic', start_status=constants.DELETING)
         except utils.WindowsAzureError:
             pass
 
-        # deletin puplic ip
         public_ip.delete(ctx=ctx)
         try:
             utils.wait_status(ctx, 'public_ip', 
@@ -245,14 +244,12 @@ def delete(**_):
     except utils.WindowsAzureError:
         pass
 
-    # deleting nic
     nic.delete(ctx=ctx)
     try:
         utils.wait_status(ctx, 'nic', start_status=constants.DELETING)
     except utils.WindowsAzureError:
         pass
 
-    # deletin puplic ip
     public_ip.delete(ctx=ctx)
     try:
         utils.wait_status(ctx, 'public_ip', start_status=constants.DELETING)
