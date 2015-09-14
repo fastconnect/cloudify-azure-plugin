@@ -190,4 +190,4 @@ class TestStorage(testtools.TestCase):
         ctx = self.mock_ctx('init')
         ctx.logger.info("CREATE storage_account\'s required resources")
         current_ctx.set(ctx=ctx)
-        resource_group.create(ctx=ctx)
+        resource_group.delete(ctx=ctx)
