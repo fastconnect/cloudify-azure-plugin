@@ -180,16 +180,16 @@ class TestNIC(testtools.TestCase):
         super(TestNIC, self).__init__(*args)
 
         ctx = self.mock_ctx('init')
-        ctx.logger.info("CREATE public_ip\'s required resources")
+        ctx.logger.info("DELETE public_ip\'s required resources")
 
-        ctx.logger.info("CREATE ressource group")
+        ctx.logger.info("DELETE ressource group")
         current_ctx.set(ctx=ctx)
-        resource_group.create(ctx=ctx)
+        resource_group.delete(ctx=ctx)
 
-        ctx.logger.info("CREATE network")
+        ctx.logger.info("DELETE network")
         current_ctx.set(ctx=ctx)
-        network.create_network(ctx=ctx)
+        network.delete_network(ctx=ctx)
         
-        ctx.logger.info("CREATE subnet")
+        ctx.logger.info("DELETE subnet")
         current_ctx.set(ctx=ctx)
-        network.create_subnet(ctx=ctx)
+        network.delete_subnet(ctx=ctx)
