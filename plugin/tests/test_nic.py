@@ -59,7 +59,7 @@ class TestNIC(testtools.TestCase):
         }
 
         test_runtime = {
-            constants.PUBLIC_IP_KEY: 'nic_test',
+            constants.PUBLIC_IP_KEY: 'public_ip_test',
             constants.NETWORK_INTERFACE_KEY: test_name,
         }
 
