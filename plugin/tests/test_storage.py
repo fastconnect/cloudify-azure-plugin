@@ -4,6 +4,7 @@ import test_utils
 
 from plugin import (utils,
                     constants,
+                    resource_group,
                     storage,
                     )
 
@@ -13,6 +14,14 @@ from cloudify.mocks import MockCloudifyContext
 TIME_DELAY = 20
 
 class TestStorage(testtools.TestCase):
+
+    def __init__(self, *args):
+        super(TestStorage, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("CREATE storage_account\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.create(ctx=ctx)
 
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
@@ -174,3 +183,11 @@ class TestStorage(testtools.TestCase):
         ctx.logger.info("Storage Account Deleted")
 
         ctx.logger.info("END test conflict storage")
+
+    def __del__(self, *args):
+        super(TestStorage, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("CREATE storage_account\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.create(ctx=ctx)
