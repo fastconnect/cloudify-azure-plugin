@@ -153,6 +153,7 @@ def create(**_):
     }
     ctx.logger.debug('JSON: {}'.format(json))
     ctx.logger.info('Beginning vm creation: {}'.format(ctx.instance.id))
+
     try:
         cntn = connection.AzureConnectionClient()
         cntn.azure_put(ctx,

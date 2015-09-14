@@ -40,8 +40,9 @@ def create(**_):
                 lun = 0
                 json_VM['properties']['storageProfile']['dataDisks'] = []
 
-            uri = "http://{}.blob.core.windows.net/vhds/{}.vhd".format(
+            uri = "http://{}.blob.core.windows.net/{}-vhds/{}.vhd".format(
                         ctx.node.properties[constants.STORAGE_ACCOUNT_KEY],
+                        vm_name,
                         disk['name']
                         )
 

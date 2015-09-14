@@ -52,6 +52,9 @@ inputs:
     storage_account_deletable:
         default: False
         type: boolean
+    compute_disks:
+        default: {}
+
 node_templates:
     compute_node:
         type: cloudify.azure.nodes.Instance
@@ -76,11 +79,11 @@ node_templates:
             public_key: { get_input: public_key }
             virtual_network_name: { get_input: virtual_network_name}
             subnet_name: { get_input: subnet_name }
-
+    
         relationships:
           - type: cloudify.azure.relationships.instance_connected_to_storage_account
             target: compute_storage_account
-
+        
     compute_storage_account:
         type: cloudify.azure.nodes.StorageAccount
         properties:
@@ -92,3 +95,19 @@ node_templates:
             storage_account_name: {get_input: storage_account_name}
             account_type: {get_input: account_type}
             deletable: {get_input: storage_account_deletable}
+
+    compute_disk:
+        type: cloudify.azure.nodes.Datadisks
+        properties:
+            subscription_id: { get_input: subscription_id }
+            username: { get_input: username }
+            password: { get_input: password }
+            location: { get_input: location }
+            resource_group_name: {get_input: resource_group_name}
+            storage_account_name: {get_input: storage_account_name}
+            compute_name: {get_input: compute_name}
+            disks: { get_input: compute_disks }
+        relationships:
+            - target: compute_node
+              type: cloudify.azure.relationships.disk_attach_to_instance
+

@@ -155,6 +155,42 @@ node_types:
         delete:
           implementation: azure.plugin.network.delete_subnet
 
+  cloudify.azure.nodes.Datadisks:
+    derived_from: cloudify.nodes.Network
+    properties:
+      subscription_id:
+        type: string
+        default: ''
+      location:
+        type: string
+        default: 'West US'
+      username:
+        type: string
+        default: ''
+      password:
+        type: string
+        default: ''
+      compute_name:
+        type: string
+        default: ''
+      resource_group_name:
+        type: string
+        default: ''
+      storage_account_name:
+        type: string
+        default: ''
+      disks:
+        default: {}
+        description: >
+          A list of disks to attache to the machine. The required inputs are
+          'name', 'caching' (None, ReadOnly or ReadWrite), 'attach' (True or False),
+          and size (in GiB).
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.datadisks.create
+
+
   cloudify.azure.nodes.Instance:
     derived_from: cloudify.nodes.Compute
     properties:
@@ -223,4 +259,7 @@ relationships:
     derived_from: cloudify.relationships.connected_to
 
   cloudify.azure.relationships.instance_connected_to_subnet:
+    derived_from: cloudify.relationships.connected_to
+  
+  cloudify.azure.relationships.disk_attach_to_instance:
     derived_from: cloudify.relationships.connected_to
