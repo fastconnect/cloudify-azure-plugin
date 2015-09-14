@@ -4,6 +4,9 @@ import test_utils
 
 from plugin import (utils,
                     constants,
+                    resource_group,
+                    public_ip,
+                    network,
                     nic
                     )
 
@@ -12,7 +15,33 @@ from cloudify.mocks import MockCloudifyContext
 
 TIME_DELAY = 20
 
+
 class TestNIC(testtools.TestCase):
+    def __init__(self, *args):
+        super(TestNIC, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("CREATE NIC\'s required resources")
+
+        ctx.logger.info("CREATE ressource_group")
+        current_ctx.set(ctx=ctx)
+        resource_group.create(ctx=ctx)
+
+        ctx.logger.info("CREATE public_ip")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[constants.PUBLIC_IP_KEY] = "public_ip_test"
+        public_ip.create(ctx=ctx)
+        
+        ctx.logger.info("CREATE network")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
+        network.create_network(ctx=ctx)
+
+        ctx.logger.info("CREATE subnet")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[constants.SUBNET_ADDRESS_KEY] = "10.0.1.0/24"
+        network.create_subnet(ctx=ctx)
+
 
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
@@ -145,3 +174,22 @@ class TestNIC(testtools.TestCase):
         self.assertEqual(204, nic.delete(ctx=ctx))
 
         ctx.logger.info("END create NIC  test")
+
+
+    def __del__(self):
+        super(TestNIC, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("CREATE public_ip\'s required resources")
+
+        ctx.logger.info("CREATE ressource group")
+        current_ctx.set(ctx=ctx)
+        resource_group.create(ctx=ctx)
+
+        ctx.logger.info("CREATE network")
+        current_ctx.set(ctx=ctx)
+        network.create_network(ctx=ctx)
+        
+        ctx.logger.info("CREATE subnet")
+        current_ctx.set(ctx=ctx)
+        network.create_subnet(ctx=ctx)
