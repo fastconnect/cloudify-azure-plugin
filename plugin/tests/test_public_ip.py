@@ -4,6 +4,7 @@ import test_utils
 
 from plugin import (utils,
                     constants,
+                    resource_group,
                     public_ip
                     )
 
@@ -13,6 +14,15 @@ from cloudify.mocks import MockCloudifyContext
 TIME_DELAY = 20
 
 class TestPublicIP(testtools.TestCase):
+    
+    def __init__(self, *args):
+        super(TestPublicIP, self).__init__(*args)
+
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("CREATE public_ip\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.create(ctx=ctx)
+
 
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
@@ -159,3 +169,10 @@ class TestPublicIP(testtools.TestCase):
         
         ctx.logger.info("END conflict public_ip test")
 
+    def __del__(self):
+        super(TestPublicIP, self).__init__(*args)
+
+        ctx = self.mock_ctx('del')
+        ctx.logger.info("DELETE public_ip\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.delete(ctx=ctx)
