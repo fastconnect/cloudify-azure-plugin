@@ -51,7 +51,8 @@ def create(**_):
     distro_version = ctx.node.properties[constants.SKU_VERSION_KEY]
     storage_account = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     create_option = 'FromImage'
-
+    
+    provider_context = utils.provider(ctx)
     # check availability name
     if not is_available(ctx=ctx):
         ctx.logger.info('VM creation not possible, {} already exist'
@@ -76,6 +77,8 @@ def create(**_):
 
     public_ip_name = "{}_pip".format(vm_name)
     ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = public_ip_name
+
+    utils.wait_status(ctx, 'storage')
 
     # generation of public_ip
     public_ip.create(ctx=ctx)
@@ -153,6 +156,7 @@ def create(**_):
     }
     ctx.logger.debug('JSON: {}'.format(json))
     ctx.logger.info('Beginning vm creation: {}'.format(ctx.instance.id))
+    ctx.logger.info('Provider context: {}'.format(provider_context))
 
     try:
         cntn = connection.AzureConnectionClient()
@@ -197,14 +201,13 @@ def create(**_):
         
         nic.delete(ctx=ctx)
         try:
-            utils.wait_status(ctx, 'nic', start_status=constants.DELETING)
+            utils.wait_status(ctx, 'nic')
         except utils.WindowsAzureError:
             pass
 
         public_ip.delete(ctx=ctx)
         try:
-            utils.wait_status(ctx, 'public_ip', 
-                              start_status=constants.DELETING)
+            utils.wait_status(ctx, 'public_ip')
         except utils.WindowsAzureError:
             pass
 
@@ -240,19 +243,19 @@ def delete(**_):
 
     # wait vm deletion
     try:
-        utils.wait_status(ctx, 'instance', start_status=constants.DELETING)
+        utils.wait_status(ctx, 'instance')
     except utils.WindowsAzureError:
         pass
 
     nic.delete(ctx=ctx)
     try:
-        utils.wait_status(ctx, 'nic', start_status=constants.DELETING)
+        utils.wait_status(ctx, 'nic')
     except utils.WindowsAzureError:
         pass
 
     public_ip.delete(ctx=ctx)
     try:
-        utils.wait_status(ctx, 'public_ip', start_status=constants.DELETING)
+        utils.wait_status(ctx, 'public_ip')
     except utils.WindowsAzureError:
         pass
 

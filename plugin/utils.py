@@ -104,7 +104,7 @@ def wait_status(ctx, resource,
     status = 'empty'
     ttw=0
 
-    while ((status!= expected_status) or (status != constants.FAILED) or 
+    while ((status != expected_status) and (status != constants.FAILED) and 
            (ttw <= timeout)):
         status = getattr(module, 'get_provisioning_state')()
         ctx.logger.info('{} is {}.'.format(resource, status))
@@ -154,15 +154,7 @@ class ProviderContext(object):
 
     @property
     def subnet_address(self):
-        return self._resources.get(constant.SUBNET_ADDRESS_KEY)
-
-    @property
-    def router(self):
-        return self._resources.get('router')
-
-    @property
-    def subnet(self):
-        return self._resources.get('subnet')
+        return self._resources.get(constants.SUBNET_ADDRESS_KEY)
 
     def __repr__(self):
         info = json.dumps(self._provider_context)
