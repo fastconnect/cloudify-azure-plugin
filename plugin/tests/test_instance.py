@@ -5,8 +5,14 @@ import inspect
 import threading
 import Queue
 
+
 from plugin import (utils,
                     constants,
+                    resource_group,
+                    public_ip,
+                    nic,
+                    network,
+                    storage,
                     instance
                     )
 
@@ -17,7 +23,95 @@ from cloudify.exceptions import NonRecoverableError
 TIME_DELAY = 20
 
 class TestInstance(testtools.TestCase):
-    
+
+    @classmethod
+    def setUpClass(self):
+        
+        ctx = self.mock_ctx('init')
+        
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("CREATE ressource_group")
+        resource_group.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "resource_group", constants.SUCCEEDED, 600)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("CREATE storage account")
+        ctx.node.properties[constants.ACCOUNT_TYPE_KEY] = "Standard_LRS"
+        storage.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "storage",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("CREATE network")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
+        network.create_network(ctx=ctx)
+        #waiting for network class refacto 
+        #current_ctx.set(ctx=ctx)
+        #utils.wait_status(ctx, "network",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("CREATE subnet")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[constants.SUBNET_ADDRESS_KEY] = "10.0.1.0/24"
+        network.create_subnet(ctx=ctx)
+        #waiting for network class refacto 
+        #current_ctx.set(ctx=ctx)
+        #utils.wait_status(ctx, "network",constants.SUCCEEDED, 600)
+      
+        ctx.logger.info("CREATE public_ip")
+        current_ctx.set(ctx=ctx)
+        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instancepublic_ip_test"
+        public_ip.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("CREATE NIC")
+        current_ctx.set(ctx=ctx)
+        ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "instancenic_test"
+        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instancepublic_ip_test"
+        nic.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
+        
+    @classmethod
+    def tearDownClass(self):
+        ctx = self.mock_ctx('del')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE nic")
+        ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "instancenic_test"
+        nic.delete(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE public_ip")
+        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instancepublic_ip_test"
+        public_ip.delete(ctx=ctx)
+        
+        status_ip = constants.DELETING
+        try:
+            while status_ip == constants.DELETING :
+                utils.wait_status(ctx, "public_ip","toto", 600)
+                
+        except utils.WindowsAzureError:
+            pass
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE subnet")
+        network.delete_subnet(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE network")
+        network.delete_network(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE storage account")
+        ctx.node.properties[constants.STORAGE_DELETABLE_KEY] = True
+        storage.delete(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE ressource_group")
+        resource_group.delete(ctx=ctx)
+ 
+    @classmethod 
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
             tests
@@ -38,12 +132,12 @@ class TestInstance(testtools.TestCase):
             constants.COMPUTE_PASSWORD_KEY: test_utils.COMPUTE_PASSWORD,
             constants.PUBLIC_KEY_KEY: test_utils.PUBLIC_KEY,
             constants.PRIVATE_KEY_KEY: test_utils.PRIVATE_KEY,
-            constants.STORAGE_ACCOUNT_KEY: 'storageaccounttest3',
+            constants.STORAGE_ACCOUNT_KEY: 'instancestraccounttest',
             constants.CREATE_OPTION_KEY:'FromImage',
-            constants.RESOURCE_GROUP_KEY: 'resource_group_test',
-            constants.VIRTUAL_NETWORK_KEY: 'management_network_test',
-            constants.SUBNET_KEY: 'subnet_test',
-            'resources_prefix': 'boulay',
+            constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test',
+            constants.VIRTUAL_NETWORK_KEY: 'instancevirtual_network_test',
+            constants.SUBNET_KEY: 'instancesubnet_test',
+            'resources_prefix': 'instanceprefix',
         }
 
         return MockCloudifyContext(node_id='test',
@@ -58,10 +152,11 @@ class TestInstance(testtools.TestCase):
         time.sleep(TIME_DELAY)
 
     def test_create(self):
+
         ctx = self.mock_ctx('testcreate')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create VM test: {}".format(ctx.instance.id))
-        ctx.logger.info("create VM")    
+        ctx.logger.info("create VM") 
 
         instance.create(ctx=ctx) 
         
@@ -147,7 +242,6 @@ class TestInstance(testtools.TestCase):
     def test_concurrent_create(self):
         ctx1 = self.mock_ctx('testconcurrentcreate1')
         ctx2 = self.mock_ctx('testconcurrentcreate2')
-        #current_ctx.set(ctx=ctx)
         ctx1.logger.info("BEGIN concurrent create VM 1 test")
         ctx2.logger.info("BEGIN concurrent create VM 2 test")
 
@@ -269,3 +363,7 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("Deleting VM...")
         current_ctx.set(ctx=ctx)
         instance.delete(ctx=ctx)
+    
+
+
+
