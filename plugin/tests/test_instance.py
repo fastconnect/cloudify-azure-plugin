@@ -85,11 +85,8 @@ class TestInstance(testtools.TestCase):
         ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instancepublic_ip_test"
         public_ip.delete(ctx=ctx)
         
-        status_ip = constants.DELETING
         try:
-            while status_ip == constants.DELETING :
-                utils.wait_status(ctx, "public_ip","toto", 600)
-                
+            utils.wait_status(ctx, "public_ip","toto", 600)    
         except utils.WindowsAzureError:
             pass
 
