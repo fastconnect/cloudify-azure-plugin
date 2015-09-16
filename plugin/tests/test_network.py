@@ -15,14 +15,23 @@ TIME_DELAY = 20
 
 class TestNetwork(testtools.TestCase):
 
-    def __init__(self, *args):
-        super(TestNetwork, self).__init__(*args)
-
+    @classmethod
+    def setUpClass(self): 
         ctx = self.mock_ctx('init')
         ctx.logger.info("CREATE network\'s required resources")
         current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
 
+
+    @classmethod
+    def tearDownClass(self):
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("DELETE network\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.delete(ctx=ctx)
+    
+
+    @classmethod
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
             tests
@@ -42,6 +51,7 @@ class TestNetwork(testtools.TestCase):
 
         return MockCloudifyContext(node_id='test',
                                    properties=test_properties)
+
 
     def setUp(self):
         super(TestNetwork, self).setUp()
@@ -306,11 +316,3 @@ class TestNetwork(testtools.TestCase):
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_conflict_subnet")
-
-    def __del__(self, *args):
-        super(TestStorage, self).__init__(*args)
-
-        ctx = self.mock_ctx('init')
-        ctx.logger.info("DELETE network\'s required resources")
-        current_ctx.set(ctx=ctx)
-        resource_group.delete(ctx=ctx)
