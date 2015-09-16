@@ -111,9 +111,6 @@ class TestStorage(testtools.TestCase):
         ctx.logger.info("create storage with deletable propertie set to false")
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
-
-        ctx.logger.info("Storage Account Created")
-        self.assertEqual(constants.SUCCEEDED, status_storage)
         
         ctx.logger.info("not delete storage")
         self.assertEqual(0, storage.delete(ctx=ctx))
