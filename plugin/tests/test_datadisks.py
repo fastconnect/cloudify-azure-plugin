@@ -3,6 +3,11 @@ import testtools
 
 from plugin import (utils,
                     constants,
+                    resource_group,
+                    storage,
+                    network,
+                    public_ip,
+                    nic,
                     datadisks,
                     instance
                     )
@@ -14,6 +19,96 @@ from cloudify.exceptions import NonRecoverableError
 
 class TestDatadisks(testtools.TestCase):
 
+    @classmethod
+    def setUpClass(self):     
+        ctx = self.mock_ctx('disktest','')
+        
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("CREATE ressource_group")
+        resource_group.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "resource_group", constants.SUCCEEDED, 600)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("CREATE storage account")
+        ctx.node.properties[constants.ACCOUNT_TYPE_KEY] = "Standard_LRS"
+        storage.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "storage",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("CREATE network")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
+        network.create_network(ctx=ctx)
+        #waiting for network class refacto 
+        #current_ctx.set(ctx=ctx)
+        #utils.wait_status(ctx, "network",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("CREATE subnet")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[constants.SUBNET_ADDRESS_KEY] = "10.0.1.0/24"
+        network.create_subnet(ctx=ctx)
+        #waiting for network class refacto 
+        #current_ctx.set(ctx=ctx)
+        #utils.wait_status(ctx, "network",constants.SUCCEEDED, 600)
+      
+        ctx.logger.info("CREATE public_ip")
+        current_ctx.set(ctx=ctx)
+        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instancepublic_ip_test"
+        public_ip.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("CREATE NIC")
+        current_ctx.set(ctx=ctx)
+        ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "instancenic_test"
+        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instancepublic_ip_test"
+        nic.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
+
+        
+    @classmethod
+    def tearDownClass(self):
+        ctx = self.mock_ctx('del','')
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE nic")
+        ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "instancenic_test"
+        nic.delete(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE public_ip")
+        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instancepublic_ip_test"
+        public_ip.delete(ctx=ctx)
+        
+        status_ip = constants.DELETING
+        try:
+            while status_ip == constants.DELETING :
+                utils.wait_status(ctx, "public_ip","deleting", 600)
+                
+        except utils.WindowsAzureError:
+            pass
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE subnet")
+        network.delete_subnet(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE network")
+        network.delete_network(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE storage account")
+        ctx.node.properties[constants.STORAGE_DELETABLE_KEY] = True
+        storage.delete(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE ressource_group")
+        resource_group.delete(ctx=ctx)
+
+ 
+    @classmethod 
     def mock_ctx(self, test_name, disk):
         """ Creates a mock context for the instance
             tests
@@ -34,13 +129,13 @@ class TestDatadisks(testtools.TestCase):
             constants.COMPUTE_PASSWORD_KEY: test_utils.COMPUTE_PASSWORD,
             constants.PUBLIC_KEY_KEY: test_utils.PUBLIC_KEY,
             constants.PRIVATE_KEY_KEY: test_utils.PRIVATE_KEY,
-            constants.STORAGE_ACCOUNT_KEY: 'storageaccounttest3',
+            constants.STORAGE_ACCOUNT_KEY: 'diskstorageaccounttest',
             constants.CREATE_OPTION_KEY:'FromImage',
-            constants.RESOURCE_GROUP_KEY: 'resource_group_test',
-            constants.VIRTUAL_NETWORK_KEY: 'management_network_test',
-            constants.SUBNET_KEY: 'subnet_test',
+            constants.RESOURCE_GROUP_KEY: 'diskresource_group_test',
+            constants.VIRTUAL_NETWORK_KEY: 'diskmanagement_network_test',
+            constants.SUBNET_KEY: 'disksubnet_test',
             constants.DISKS_KEY: disk,
-            'resources_prefix': 'boulay',
+            'resources_prefix': 'diskprefix',
         }
 
         return MockCloudifyContext(node_id='test',
