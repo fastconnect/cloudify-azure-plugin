@@ -25,8 +25,7 @@ TIME_DELAY = 20
 class TestInstance(testtools.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        
+    def setUpClass(self):     
         ctx = self.mock_ctx('init')
         
         current_ctx.set(ctx=ctx)
@@ -159,16 +158,8 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("create VM") 
 
         instance.create(ctx=ctx) 
-        
-        ctx.logger.info("check VM status")
-        status_vm = constants.CREATING
-        while status_vm == constants.CREATING :
-            current_ctx.set(ctx=ctx)
-            status_vm = instance.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)    
-        
-        ctx.logger.info("check VM creation success")
-        self.assertEqual(constants.SUCCEEDED, status_vm)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
 
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))
@@ -182,16 +173,8 @@ class TestInstance(testtools.TestCase):
     
         ctx.logger.info("create VM")    
         instance.create(ctx=ctx) 
-
-        ctx.logger.info("check VM status")
-        status_vm = constants.CREATING
-        while status_vm == constants.CREATING :
-            current_ctx.set(ctx=ctx)
-            status_vm = instance.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
-        
-        ctx.logger.info("check VM creation success")
-        self.assertEqual( constants.SUCCEEDED, status_vm)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
         
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))
@@ -205,13 +188,8 @@ class TestInstance(testtools.TestCase):
 
         ctx.logger.info("create VM")
         instance.create(ctx=ctx)
-        
-        ctx.logger.info("check VM creation success")
-        status_vm = constants.CREATING
-        while status_vm == constants.CREATING :
-            current_ctx.set(ctx=ctx)
-            status_vm = instance.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
 
         ctx.logger.info("VM creation conflict")
         self.assertRaises(utils.WindowsAzureError,
