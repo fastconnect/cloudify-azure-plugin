@@ -12,31 +12,13 @@ node_types:
   cloudify.azure.nodes.ResourceGroup:
     derived_from: cloudify.nodes.Root
     properties:
-      subscription_id:
-        description: >
-          Indicates the subscription id required to create resource group
-        type: string
-        default: ''
-      location:
-        description: >
-          location where the resource group will be created
-        type: string
-        default: 'westeurope'
-      username:
-        description: >
-          Indicates the username of the subscription id required to create resource group
-        type: string
-        default: ''
-      password:
-        description: >
-          Indicates the password of the subscription id required to create resource group
-        type: string
-        default: ''
       resource_group_name:
         description: >
           Indicates the name of the resource group to create
         type: string
         default: ''
+      azure_config:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -47,29 +29,6 @@ node_types:
   cloudify.azure.nodes.StorageAccount:
     derived_from: cloudify.nodes.Root
     properties:
-      subscription_id:
-        description: >
-          the subscription id required to create public storage account 
-        type: string
-        default: ''
-      location:
-        description: >
-          location where VM will be provisioned
-        type: string
-        default: 'westeurope'
-      username:
-        description: >
-          Indicates the username of the subscription id required to create storage account
-        type: string
-        default: ''
-      password:
-        description: >
-          Indicates the password of the subscription id required to create storage account
-        type: string
-        default: ''
-      resource_group_name:
-        type: string
-        default: ''
       storage_account_name:
         type: string
         default: ''
@@ -78,11 +37,8 @@ node_types:
           account_type possible [Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS]
         type: string
         default: 'Standard_LRS'
-      deletable:
-        description: >
-          give the ability to keep the storage group
-        type: boolean
-        default: false
+      azure_config:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -93,27 +49,14 @@ node_types:
   cloudify.azure.nodes.Network:
     derived_from: cloudify.nodes.Network
     properties:
-      subscription_id:
-        type: string
-        default: ''
-      location:
-        type: string
-        default: 'West US'
-      username:
-        type: string
-        default: ''
-      password:
-        type: string
-        default: ''
-      resource_group_name:
-        type: string
-        default: ''
       virtual_network_name:
         type: string
         default: ''
       virtual_network_address_prefix:
         type: string
         default: ''
+      azure_config:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -124,21 +67,6 @@ node_types:
   cloudify.azure.nodes.Subnet:
     derived_from: cloudify.nodes.Network
     properties:
-      subscription_id:
-        type: string
-        default: ''
-      location:
-        type: string
-        default: 'West US'
-      username:
-        type: string
-        default: ''
-      password:
-        type: string
-        default: ''
-      resource_group_name:
-        type: string
-        default: ''
       virtual_network_name:
         type: string
         default: ''
@@ -148,6 +76,8 @@ node_types:
       subnet_address_prefix:
         type: string
         default: ''
+      azure_config:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -158,22 +88,7 @@ node_types:
   cloudify.azure.nodes.Datadisks:
     derived_from: cloudify.nodes.Network
     properties:
-      subscription_id:
-        type: string
-        default: ''
-      location:
-        type: string
-        default: 'West US'
-      username:
-        type: string
-        default: ''
-      password:
-        type: string
-        default: ''
       compute_name:
-        type: string
-        default: ''
-      resource_group_name:
         type: string
         default: ''
       storage_account_name:
@@ -184,7 +99,9 @@ node_types:
         description: >
           A list of disks to attache to the machine. The required inputs are
           'name', 'caching' (None, ReadOnly or ReadWrite), 'attach' (True or False),
-          and size (in GiB).
+          and size (in GB).
+      azure_config:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -194,14 +111,6 @@ node_types:
   cloudify.azure.nodes.Instance:
     derived_from: cloudify.nodes.Compute
     properties:
-      subscription_id:
-        type: string
-      username:
-        type: string
-      password:
-        type: string
-      location:   
-        type: string
       publisher_name:
         type: string
       offer:
@@ -222,12 +131,12 @@ node_types:
         type: string
       public_key:
         type: string
-      resource_group_name:
-        type: string
       virtual_network_name:
         type: string
       subnet_name:
         type: string
+      azure_config:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
