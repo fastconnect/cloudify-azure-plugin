@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import random
 import re
+import inspect
 # Local import
 from plugin import (utils,
                     constants,
@@ -18,12 +19,7 @@ TIME_DELAY = 5
 
 @operation
 def create(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, 
-                                 ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, 
-                                 ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.LOCATION_KEY, ctx.node.properties)
     utils.validate_node_property(constants.FLAVOR_KEY, ctx.node.properties)
     utils.validate_node_property(constants.PUBLISHER_KEY, ctx.node.properties)
     utils.validate_node_property(constants.OFFER_KEY, ctx.node.properties)
@@ -39,11 +35,16 @@ def create(**_):
     utils.validate_node_property(constants.PUBLIC_KEY_KEY, 
                                  ctx.node.properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    location = azure_config[constants.LOCATION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+    admin_username = ctx.node.properties[constants.COMPUTE_USER_KEY]
+    admin_password = ctx.node.properties[constants.COMPUTE_PASSWORD_KEY]
+    public_key = ctx.node.properties[constants.PUBLIC_KEY_KEY]
     api_version = constants.AZURE_API_VERSION_06
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
-    location = ctx.node.properties[constants.LOCATION_KEY]
     vm_size = ctx.node.properties[constants.FLAVOR_KEY]
     publisher = ctx.node.properties[constants.PUBLISHER_KEY]
     offer = ctx.node.properties[constants.OFFER_KEY]
@@ -52,7 +53,6 @@ def create(**_):
     storage_account = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     create_option = 'FromImage'
     
-    provider_context = utils.provider(ctx)
     # check availability name
     if not is_available(ctx=ctx):
         ctx.logger.info('VM creation not possible, {} already exist'
@@ -87,10 +87,6 @@ def create(**_):
     # generation of nic
     nic.create(ctx=ctx)
     utils.wait_status(ctx, 'nic')
-
-    admin_username = ctx.node.properties[constants.COMPUTE_USER_KEY]
-    admin_password = ctx.node.properties[constants.COMPUTE_PASSWORD_KEY]
-    public_key = ctx.node.properties[constants.PUBLIC_KEY_KEY]
 
     json = {
         'id': ('/subscriptions/{}/resourceGroups/{}' +
@@ -156,8 +152,7 @@ def create(**_):
     }
     ctx.logger.debug('JSON: {}'.format(json))
     ctx.logger.info('Beginning vm creation: {}'.format(ctx.instance.id))
-    ctx.logger.info('Provider context: {}'.format(provider_context))
-
+    
     try:
         cntn = connection.AzureConnectionClient()
         cntn.azure_put(ctx,
@@ -216,20 +211,18 @@ def create(**_):
 
 @operation
 def delete(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY,
-                                 ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY,
-                                 ctx.node.properties)
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, 
                                  ctx.instance.runtime_properties)
     utils.validate_node_property(constants.PUBLIC_IP_KEY,
                                  ctx.instance.runtime_properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
 
     ctx.logger.info('Deleting vm {}.'.format(vm_name))
     response = connection.AzureConnectionClient().azure_delete(
@@ -273,17 +266,15 @@ def stop(**_):
 
 
 def get_provisioning_state(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY,
-                                 ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, 
-                                 ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_KEY, 
                                  ctx.node.properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
 
     response = connection.AzureConnectionClient().azure_get(
         ctx,
@@ -302,16 +293,14 @@ def get_provisioning_state(**_):
 
 
 def get_nic_virtual_machine_id(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, 
-                                 ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, 
-                                 ctx.node.properties)
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, 
                                  ctx.instance.runtime_properties)
+    
+    azure_config = utils.get_azure_config(ctx)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
     network_interface_name = \
         ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY]
 
@@ -338,15 +327,14 @@ def get_nic_virtual_machine_id(**_):
 
 
 def is_available(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, 
-                                 ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, 
-                                 ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_KEY, 
                                  ctx.node.properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+    location = azure_config[constants.LOCATION_KEY]
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
     api_version = constants.AZURE_API_VERSION_06
 
@@ -371,15 +359,13 @@ def is_available(**_):
     return True
 
 def get_json_from_azure(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, 
-                                 ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, 
-                                 ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_KEY, 
                                  ctx.node.properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 

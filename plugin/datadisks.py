@@ -10,20 +10,18 @@ from cloudify.exceptions import NonRecoverableError
 
 @operation
 def create(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, 
-                                 ctx.node.properties)
     utils.validate_node_property(constants.DISKS_KEY, ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, 
                                  ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, 
-                                 ctx.node.properties)
     
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
     storage_account = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     disks = ctx.node.properties[constants.DISKS_KEY]
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
     ctx.logger.info('Create datadisk')
 

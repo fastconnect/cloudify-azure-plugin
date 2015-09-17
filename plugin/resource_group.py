@@ -8,10 +8,11 @@ from cloudify import ctx
 from cloudify.decorators import operation
 
 def get_provisioning_state(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     api_version = str(constants.AZURE_API_VERSION_04_PREVIEW)
     resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
 
@@ -31,10 +32,11 @@ def get_provisioning_state(**_):
 
 @operation
 def delete(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     api_version = constants.AZURE_API_VERSION_04_PREVIEW
     resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
 
@@ -52,14 +54,14 @@ def delete(**_):
 
 @operation
 def create(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.LOCATION_KEY, ctx.node.properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+    
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    location = azure_config[constants.LOCATION_KEY]
     api_version = constants.AZURE_API_VERSION_04_PREVIEW
     resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
-    location = ctx.node.properties[constants.LOCATION_KEY]
 
     json ={"location": str(location)}
 

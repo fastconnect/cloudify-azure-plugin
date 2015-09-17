@@ -10,13 +10,13 @@ from cloudify.exceptions import NonRecoverableError
 
 
 def get_provisioning_state(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
     public_ip_name = ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
 
     response = connection.AzureConnectionClient().azure_get(
@@ -36,13 +36,13 @@ def get_provisioning_state(**_):
 
 
 def delete(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
     public_ip_name =ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
 
     response = connection.AzureConnectionClient().azure_delete(
@@ -58,15 +58,14 @@ def delete(**_):
 
 
 def create(**_):
-    utils.validate_node_property(constants.SUBSCRIPTION_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.LOCATION_KEY, ctx.node.properties)
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
 
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+    location = azure_config[constants.LOCATION_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
-    location = ctx.node.properties[constants.LOCATION_KEY]
     public_ip_name = ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
     public_ip_allocation_method = "Dynamic"
 
@@ -95,9 +94,12 @@ def create(**_):
 
 
 def get_public_address_id(ctx):
-    subscription_id = ctx.node.properties[constants.SUBSCRIPTION_KEY]
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+    location = azure_config[constants.LOCATION_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
-    resource_group_name = ctx.node.properties[constants.RESOURCE_GROUP_KEY]
     public_ip_name =ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
 
     response = connection.AzureConnectionClient().azure_get(

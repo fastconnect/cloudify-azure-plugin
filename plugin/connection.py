@@ -4,7 +4,9 @@ import re
 import time
 from cloudify import ctx
 from plugin import constants
-from utils import WindowsAzureError
+from utils import (WindowsAzureError,
+                   get_azure_config
+                   )
 
 
 class AzureConnectionClient():
@@ -64,11 +66,13 @@ class AzureConnectionClient():
         if ((AzureConnectionClient.token is None) or 
             (time.gmtime() > AzureConnectionClient.expires_on)) :
 
+            azure_config = get_azure_config(ctx)
+
             payload = {
                 'grant_type': 'password',
                 'client_id': constants.APPLICATION_ID,
-                'username': ctx.node.properties[constants.USERNAME_KEY],
-                'password': ctx.node.properties[constants.PASSWORD_KEY],
+                'username': azure_config[constants.USERNAME_KEY],
+                'password': azure_config[constants.PASSWORD_KEY],
                 'resource': constants.RESOURCE_CONNECTION_URL,
             }
             #ctx.logger.info('Getting token from Azure...')

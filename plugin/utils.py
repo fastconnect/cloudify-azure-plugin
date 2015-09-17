@@ -118,51 +118,11 @@ def wait_status(ctx, resource,
             )
 
 
-class ProviderContext(object):
-
-    def __init__(self, provider_context):
-        self._provider_context = provider_context or {}
-        self._resources = self._provider_context.get('resources', {})
-
-    @property
-    def subscription_id(self):
-        return self._resources.get(constants.SUBSCRIPTION_KEY)
-
-    @property
-    def username(self):
-        return self._resources.get(constants.USERNAME_KEY)
-
-    @property
-    def password(self):
-        return self._resources.get(constants.PASSWORD_KEY)
-
-    @property
-    def location(self):
-        return self._resources.get(constants.LOCATION_KEY)
-
-    @property
-    def resource_group(self):
-        return self._resources.get(constants.RESOURCE_GROUP_KEY)
-
-    @property
-    def storage_account(self):
-        return self._resources.get(constants.STORAGE_ACCOUNT_KEY)
-
-    @property
-    def virtual_network_address(self):
-        return self._resources.get(constants.VIRTUAL_NETWORK_ADDRESS_KEY)
-
-    @property
-    def subnet_address(self):
-        return self._resources.get(constants.SUBNET_ADDRESS_KEY)
-
-    def __repr__(self):
-        info = json.dumps(self._provider_context)
-        return '<' + self.__class__.__name__ + ' ' + info + '>'
-
-
-def provider(ctx):
-    return ProviderContext(ctx.provider_context)
+def get_azure_config(ctx):
+    if ctx.node.properties['azure_config']:
+        return ctx.node.properties['azure_config']
+    else:
+        return ctx.provider_context['azure_config']
 
 
 class WindowsAzureError(Exception):
