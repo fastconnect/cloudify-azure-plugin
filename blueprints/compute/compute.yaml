@@ -5,15 +5,6 @@ imports:
   - plugin.yaml
 
 inputs:
-    subscription_id:
-        type: string
-    username:
-        type: string
-    password:
-        type: string
-    location:   
-        default: 'westeurope'
-        type: string
     publisher_name:
         default: 'Canonical'
         type: string
@@ -44,14 +35,9 @@ inputs:
         type: string
     public_key:
         type: string
-    resource_group_name:
-        type: string
     account_type:
         default: 'Standard_LRS'
         type: string
-    storage_account_deletable:
-        default: False
-        type: boolean
     compute_disks:
         default: {}
 
@@ -62,10 +48,6 @@ node_templates:
             cloudify_agent:
                 default:
                     user: { get_input: compute_user }
-            subscription_id: { get_input: subscription_id }
-            username: { get_input: username }
-            password: { get_input: password }
-            location: { get_input: location }
             publisher_name: { get_input: publisher_name }
             offer: { get_input: offer }
             sku: { get_input: sku }
@@ -75,7 +57,6 @@ node_templates:
             storage_account_name: {get_input: storage_account_name}
             compute_user: {get_input: compute_user}
             compute_password: {get_input: compute_password}
-            resource_group_name: {get_input: resource_group_name}
             public_key: { get_input: public_key }
             virtual_network_name: { get_input: virtual_network_name}
             subnet_name: { get_input: subnet_name }
@@ -87,23 +68,12 @@ node_templates:
     compute_storage_account:
         type: cloudify.azure.nodes.StorageAccount
         properties:
-            subscription_id: { get_input: subscription_id }
-            location: { get_input: location }
-            username: { get_input: username }
-            password: { get_input: password }
-            resource_group_name: {get_input: resource_group_name}
             storage_account_name: {get_input: storage_account_name}
             account_type: {get_input: account_type}
-            deletable: {get_input: storage_account_deletable}
 
     compute_disk:
         type: cloudify.azure.nodes.Datadisks
         properties:
-            subscription_id: { get_input: subscription_id }
-            username: { get_input: username }
-            password: { get_input: password }
-            location: { get_input: location }
-            resource_group_name: {get_input: resource_group_name}
             storage_account_name: {get_input: storage_account_name}
             compute_name: {get_input: compute_name}
             disks: { get_input: compute_disks }
