@@ -62,21 +62,23 @@ node_templates:
   manager_resource_group:
     type: cloudify.azure.nodes.ResourceGroup
     properties:
-      subscription_id: { get_input: subscription_id }
-      username: { get_input: username }
-      password: { get_input: password }
-      location: { get_input: location }
+      #subscription_id: { get_input: subscription_id }
+      #username: { get_input: username }
+      #password: { get_input: password }
+      #location: { get_input: location }
       resource_group_name: {get_input: resource_group_name}
+      azure_config: { get_property: [azure_configuration, azure_config] }
 
   manager_storage_account:
     type: cloudify.azure.nodes.StorageAccount
     properties:
-      subscription_id: { get_input: subscription_id }
-      username: { get_input: username }
-      password: { get_input: password }
-      location: { get_input: location }
-      resource_group_name: {get_input: resource_group_name}
+      #subscription_id: { get_input: subscription_id }
+      #username: { get_input: username }
+      #password: { get_input: password }
+      #location: { get_input: location }
+      #resource_group_name: {get_input: resource_group_name}
       storage_account_name: {get_input: storage_account_name}
+      azure_config: { get_property: [azure_configuration, azure_config] }
     relationships:
       - target: manager_resource_group
         type: cloudify.azure.relationships.storage_account_connected_to_resource_group
@@ -84,13 +86,14 @@ node_templates:
   manager_network:
     type: cloudify.azure.nodes.Network
     properties:
-      subscription_id: { get_input: subscription_id }
-      username: { get_input: username }
-      password: { get_input: password }
-      location: { get_input: location }
-      resource_group_name: {get_input: resource_group_name}
+      #subscription_id: { get_input: subscription_id }
+      #username: { get_input: username }
+      #password: { get_input: password }
+      #location: { get_input: location }
+      #resource_group_name: {get_input: resource_group_name}
       virtual_network_name: {get_input: virtual_network_name}
       virtual_network_address_prefix: {get_input: virtual_network_address_prefix}
+      azure_config: { get_property: [azure_configuration, azure_config] }
     relationships:
       - target: manager_resource_group
         type: cloudify.azure.relationships.network_connected_to_resource_group
@@ -98,25 +101,36 @@ node_templates:
   manager_subnet:
     type: cloudify.azure.nodes.Subnet
     properties:
-      subscription_id: { get_input: subscription_id }
-      username: { get_input: username }
-      password: { get_input: password }
-      location: { get_input: location }
-      resource_group_name: {get_input: resource_group_name}
+      #subscription_id: { get_input: subscription_id }
+      #username: { get_input: username }
+      #password: { get_input: password }
+      #location: { get_input: location }
+      #resource_group_name: {get_input: resource_group_name}
       virtual_network_name: {get_input: virtual_network_name}
       subnet_name: {get_input: subnet_name}
       subnet_address_prefix: {get_input: subnet_address_prefix}
+      azure_config: { get_property: [azure_configuration, azure_config] }
     relationships:
       - target: manager_network
         type: cloudify.azure.relationships.subnet_connected_to_network
 
+  azure_configuration:
+    type: azure_configuration
+    properties:
+      azure_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        subscription_id: { get_input: subscription_id }
+        resource_group_name: { get_input: resource_group_name }
+        location: { get_input: location }
+
   manager_server:
     type: cloudify.azure.nodes.Instance
     properties:
-      subscription_id: { get_input: subscription_id }
-      username: { get_input: username }
-      password: { get_input: password }
-      location: { get_input: location }
+      #subscription_id: { get_input: subscription_id }
+      #username: { get_input: username }
+      #password: { get_input: password }
+      #location: { get_input: location }
       publisher_name: { get_input: publisher_name }
       offer: { get_input: offer }
       sku: { get_input: sku }
@@ -127,9 +141,10 @@ node_templates:
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: {get_input: public_key}
-      resource_group_name: {get_input: resource_group_name}
+      #resource_group_name: {get_input: resource_group_name}
       virtual_network_name: {get_input: virtual_network_name}
       subnet_name: {get_input: subnet_name}
+      azure_config: { get_property: [azure_configuration, azure_config] }
       install_agent: false
     relationships:
       - target: manager_resource_group
@@ -144,14 +159,15 @@ node_templates:
   manager_disk:
     type: cloudify.azure.nodes.Datadisks
     properties:
-      subscription_id: { get_input: subscription_id }
-      username: { get_input: username }
-      password: { get_input: password }
-      location: { get_input: location }
-      resource_group_name: {get_input: resource_group_name}
+      #subscription_id: { get_input: subscription_id }
+      #username: { get_input: username }
+      #password: { get_input: password }
+      #location: { get_input: location }
+      #resource_group_name: {get_input: resource_group_name}
       storage_account_name: {get_input: storage_account_name}
       compute_name: {get_input: compute_name}
       disks: { get_input: manager_disks }
+      azure_config: { get_property: [azure_configuration, azure_config] }
     relationships:
       - target: manager_server
         type: cloudify.azure.relationships.disk_attach_to_instance
@@ -187,7 +203,18 @@ node_templates:
 
     interfaces:
       cloudify.interfaces.lifecycle:
-        create:
+        configure:
+          implementation: fabric.fabric_plugin.tasks.run_task
+          inputs:
+            tasks_file: scripts/configure.py
+            task_name: configure
+            task_properties:
+              azure_config: { get_property: [azure_configuration, azure_config] }
+            fabric_env:
+              user: { get_input: compute_user }
+              key_filename: { get_input: private_key }
+              host_string: { get_attribute: [manager_server, public_ip] }
+        start:
           implementation: fabric.fabric_plugin.tasks.run_module_task
           inputs:
             task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
@@ -207,3 +234,9 @@ node_templates:
               user: { get_input: compute_user }
               key_filename: { get_input: private_key }
               host_string: { get_attribute: [manager_server, public_ip] }
+
+node_types:
+  azure_configuration:
+    derived_from: cloudify.nodes.Root
+    properties:
+      azure_config: {}
