@@ -15,15 +15,23 @@ TIME_DELAY = 20
 
 class TestPublicIP(testtools.TestCase):
     
-    def __init__(self, *args):
-        super(TestPublicIP, self).__init__(*args)
-
+    @classmethod
+    def setUpClass(self):
         ctx = self.mock_ctx('init')
         ctx.logger.info("CREATE public_ip\'s required resources")
         current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
 
 
+    @classmethod
+    def tearDownClass(self):
+        ctx = self.mock_ctx('del')
+        ctx.logger.info("DELETE public_ip\'s required resources")
+        current_ctx.set(ctx=ctx)
+        resource_group.delete(ctx=ctx)
+
+    
+    @classmethod
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
             tests
@@ -33,7 +41,7 @@ class TestPublicIP(testtools.TestCase):
             constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
             constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
             constants.LOCATION_KEY: 'westeurope',
-            constants.RESOURCE_GROUP_KEY: 'resource_group_test',
+            constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test',
         }
 
         test_runtime = {
@@ -44,6 +52,7 @@ class TestPublicIP(testtools.TestCase):
             properties=test_properties,
             runtime_properties=test_runtime,
         )
+
 
     def setUp(self):
         super(TestPublicIP, self).setUp()
@@ -63,27 +72,17 @@ class TestPublicIP(testtools.TestCase):
         status_code = public_ip.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-
-        status_ip = constants.CREATING
-        while status_ip != constants.SUCCEEDED :
-            current_ctx.set(ctx=ctx)
-            ctx.logger.debug(status_ip)
-            status_ip = public_ip.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
-        
-        ctx.logger.debug(status_ip)
-        ctx.logger.info("check public_ip creation success")
-        self.assertEqual( constants.SUCCEEDED, status_ip)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)    
 
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
 
+        status_ip = constants.DELETING
         try:
             while status_ip == constants.DELETING :
                 current_ctx.set(ctx=ctx)
-                ctx.logger.debug(status_ip)           
-                status_ip = public_ip.get_provisioning_state(ctx=ctx)
-                time.sleep(TIME_DELAY)
+                utils.wait_status(ctx, "public_ip","deleting", 600)
         except utils.WindowsAzureError:
             pass
 
@@ -99,16 +98,8 @@ class TestPublicIP(testtools.TestCase):
         status_code = public_ip.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-
-        status_ip = constants.CREATING
-        while status_ip != constants.SUCCEEDED :
-            current_ctx.set(ctx=ctx)
-            ctx.logger.debug(status_ip)
-            status_ip = public_ip.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
-        
-        ctx.logger.info("check public_ip creation success")
-        self.assertEqual( constants.SUCCEEDED, status_ip)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
 
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
@@ -117,9 +108,7 @@ class TestPublicIP(testtools.TestCase):
         try:
             while status_ip == constants.DELETING :
                 current_ctx.set(ctx=ctx)
-                ctx.logger.debug(status_ip)           
-                status_ip = public_ip.get_provisioning_state(ctx=ctx)
-                time.sleep(TIME_DELAY)
+                utils.wait_status(ctx, "public_ip","deleting", 600)
         except utils.WindowsAzureError:
             pass
 
@@ -135,17 +124,8 @@ class TestPublicIP(testtools.TestCase):
         status_code = public_ip.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-
-        status_ip = constants.CREATING
-        while status_ip != constants.SUCCEEDED :
-            current_ctx.set(ctx=ctx)
-            ctx.logger.debug(status_ip)
-            status_ip = public_ip.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
-    
-        ctx.logger.debug(status_ip)
-        ctx.logger.info("check public_ip creation success")
-        self.assertEqual( constants.SUCCEEDED, status_ip)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
 
         status_code = public_ip.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
@@ -158,9 +138,7 @@ class TestPublicIP(testtools.TestCase):
         try:
             while status_ip == constants.DELETING :
                 current_ctx.set(ctx=ctx)
-                ctx.logger.debug(status_ip)           
-                status_ip = public_ip.get_provisioning_state(ctx=ctx)
-                time.sleep(TIME_DELAY)
+                utils.wait_status(ctx, "public_ip","deleting", 600)
         except utils.WindowsAzureError:
             pass
 
@@ -168,11 +146,3 @@ class TestPublicIP(testtools.TestCase):
         self.assertEqual(204, public_ip.delete(ctx=ctx))
         
         ctx.logger.info("END conflict public_ip test")
-
-    def __del__(self):
-        super(TestPublicIP, self).__init__(*args)
-
-        ctx = self.mock_ctx('del')
-        ctx.logger.info("DELETE public_ip\'s required resources")
-        current_ctx.set(ctx=ctx)
-        resource_group.delete(ctx=ctx)

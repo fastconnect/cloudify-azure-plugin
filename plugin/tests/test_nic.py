@@ -17,9 +17,9 @@ TIME_DELAY = 20
 
 
 class TestNIC(testtools.TestCase):
-    def __init__(self, *args):
-        super(TestNIC, self).__init__(*args)
-
+ 
+    @classmethod
+    def setUpClass(self): 
         ctx = self.mock_ctx('init')
         ctx.logger.info("CREATE NIC\'s required resources")
 
@@ -29,7 +29,7 @@ class TestNIC(testtools.TestCase):
 
         ctx.logger.info("CREATE public_ip")
         current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.PUBLIC_IP_KEY] = "public_ip_test"
+        ctx.node.properties[constants.PUBLIC_IP_KEY] = "nic_public_ip_test"
         public_ip.create(ctx=ctx)
         
         ctx.logger.info("CREATE network")
@@ -43,6 +43,24 @@ class TestNIC(testtools.TestCase):
         network.create_subnet(ctx=ctx)
 
 
+    @classmethod
+    def tearDownClass(self):
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("DELETE public_ip\'s required resources")
+
+        ctx.logger.info("DELETE subnet")
+        current_ctx.set(ctx=ctx)
+        network.delete_subnet(ctx=ctx)
+        
+        ctx.logger.info("DELETE network")
+        current_ctx.set(ctx=ctx)
+        network.delete_network(ctx=ctx)
+
+        ctx.logger.info("DELETE ressource group")
+        current_ctx.set(ctx=ctx)
+        resource_group.delete(ctx=ctx)
+    
+    @classmethod
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
             tests
@@ -53,13 +71,13 @@ class TestNIC(testtools.TestCase):
             constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
             constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
             constants.LOCATION_KEY: 'westeurope',
-            constants.RESOURCE_GROUP_KEY: 'resource_group_test',
-            constants.VIRTUAL_NETWORK_KEY: 'management_network_test',
-            constants.SUBNET_KEY: 'subnet_test',
+            constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test',
+            constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test',
+            constants.SUBNET_KEY: 'nic_subnet_test',
         }
 
         test_runtime = {
-            constants.PUBLIC_IP_KEY: 'public_ip_test',
+            constants.PUBLIC_IP_KEY: 'nic_public_ip_test',
             constants.NETWORK_INTERFACE_KEY: test_name,
         }
 
@@ -84,15 +102,8 @@ class TestNIC(testtools.TestCase):
 
         ctx.logger.info("create NIC")
         nic.create(ctx=ctx)
-
-        status_nic = constants.CREATING
-        while status_nic == constants.CREATING :
-            current_ctx.set(ctx=ctx)
-            status_nic = nic.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
-        
-        ctx.logger.info("check NIC creation success")
-        self.assertEqual( constants.SUCCEEDED, status_nic)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)  
 
         ctx.logger.info("delete NIC")
         self.assertEqual(202, nic.delete(ctx=ctx))
@@ -115,15 +126,8 @@ class TestNIC(testtools.TestCase):
         status_code = nic.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-
-        status_nic = constants.CREATING
-        while status_nic == constants.CREATING :
-            current_ctx.set(ctx=ctx)
-            status_nic = nic.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
-        
-        ctx.logger.info("check NIC creation success")
-        self.assertEqual( constants.SUCCEEDED, status_nic)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)  
 
         ctx.logger.info("delete NIC")
         self.assertEqual(202, nic.delete(ctx=ctx))
@@ -146,15 +150,8 @@ class TestNIC(testtools.TestCase):
         status_code = nic.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-
-        status_nic = constants.CREATING
-        while status_nic == constants.CREATING :
-            current_ctx.set(ctx=ctx)
-            status_nic = nic.get_provisioning_state(ctx=ctx)
-            time.sleep(TIME_DELAY)
-        
-        ctx.logger.info("check NIC creation success")
-        self.assertEqual( constants.SUCCEEDED, status_nic)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)  
 
         ctx.logger.info("create NIC conflict")
         status_code = nic.create(ctx=ctx)
@@ -174,22 +171,3 @@ class TestNIC(testtools.TestCase):
         self.assertEqual(204, nic.delete(ctx=ctx))
 
         ctx.logger.info("END create NIC  test")
-
-
-    def __del__(self):
-        super(TestNIC, self).__init__(*args)
-
-        ctx = self.mock_ctx('init')
-        ctx.logger.info("DELETE public_ip\'s required resources")
-
-        ctx.logger.info("DELETE network")
-        current_ctx.set(ctx=ctx)
-        network.delete_network(ctx=ctx)
-        
-        ctx.logger.info("DELETE subnet")
-        current_ctx.set(ctx=ctx)
-        network.delete_subnet(ctx=ctx)
-
-        ctx.logger.info("DELETE ressource group")
-        current_ctx.set(ctx=ctx)
-        resource_group.delete(ctx=ctx)
