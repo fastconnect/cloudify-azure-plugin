@@ -1,4 +1,4 @@
-import testtools
+﻿import testtools
 import time
 import test_utils
 
@@ -67,10 +67,13 @@ class TestNIC(testtools.TestCase):
         """
 
         test_properties = {
-            constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
-            constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
-            constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
-            constants.LOCATION_KEY: 'westeurope',
+            constants.AZURE_CONFIG_KEY:{
+                constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+                constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+                constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+                constants.LOCATION_KEY: 'westeurope',
+                constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test'
+            },
             constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test',
             constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test',
             constants.SUBNET_KEY: 'nic_subnet_test',

@@ -1,4 +1,4 @@
-import testtools
+﻿import testtools
 import requests
 import test_utils
 import time
@@ -21,10 +21,12 @@ class TestConnection(testtools.TestCase):
         return MockCloudifyContext(
             node_id=test_name,
             properties={
-                constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
-                constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
-                constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID
-            }
+                constants.AZURE_CONFIG_KEY:{
+                    constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+                    constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+                    constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID
+                }
+           }
         )
 
     def test_connect(self):
@@ -55,7 +57,8 @@ class TestConnection(testtools.TestCase):
     def test_connect_fails(self):
         ctx = self.get_mock_context('test_connect')
         current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.PASSWORD_KEY] = 'wrong'
+        ctx.node.properties[constants.AZURE_CONFIG_KEY
+                            ][constants.PASSWORD_KEY] = 'wrong'
 
         connection.AzureConnectionClient.token = None
         self.assertRaises(WindowsAzureError, 
@@ -70,14 +73,16 @@ class TestConnection(testtools.TestCase):
         json = azure_connection.azure_get(
                 ctx,
                 'subscriptions/{}?api-version={}'.format(
-                    ctx.node.properties[constants.SUBSCRIPTION_KEY],
+                    ctx.node.properties[constants.AZURE_CONFIG_KEY
+                                        ][constants.SUBSCRIPTION_KEY],
                     constants.AZURE_API_VERSION_01
                     )
                 ).json()
         ctx.logger.debug(json)
         self.assertIsNotNone(json)
         self.assertEqual(json['subscriptionId'], 
-                         ctx.node.properties[constants.SUBSCRIPTION_KEY]
+                         ctx.node.properties[constants.AZURE_CONFIG_KEY
+                                             ][constants.SUBSCRIPTION_KEY]
                          )
 
 
@@ -135,7 +140,8 @@ class TestConnection(testtools.TestCase):
         json = azure_connection.azure_put(
                 ctx,
                 'subscriptions/{}/tagNames/{}?api-version={}'.format(
-                        ctx.node.properties[constants.SUBSCRIPTION_KEY],
+                        ctx.node.properties[constants.AZURE_CONFIG_KEY
+                                           ][constants.SUBSCRIPTION_KEY],
                         'test_tag',
                         constants.AZURE_API_VERSION_01
                         )
@@ -154,7 +160,8 @@ class TestConnection(testtools.TestCase):
                           azure_connection.azure_put,
                           ctx, 
                           'subscriptions/{}/tagName/test tag'.format(
-                                ctx.node.properties[constants.SUBSCRIPTION_KEY]
+                                ctx.node.properties[constants.AZURE_CONFIG_KEY
+                                                 ][constants.SUBSCRIPTION_KEY]
                                 )
                           )
 
@@ -167,7 +174,8 @@ class TestConnection(testtools.TestCase):
         response = azure_connection.azure_delete(
                     ctx,
                     'subscriptions/{}/tagNames/{}?api-version={}'.format(
-                        ctx.node.properties[constants.SUBSCRIPTION_KEY],
+                        ctx.node.properties[constants.AZURE_CONFIG_KEY
+                                           ][constants.SUBSCRIPTION_KEY],
                         'test_tag',
                         constants.AZURE_API_VERSION_01
                         )
@@ -186,6 +194,7 @@ class TestConnection(testtools.TestCase):
                           azure_connection.azure_delete,
                           ctx, 
                           'subscriptions/{}/tagName/test tag'.format(
-                                ctx.node.properties[constants.SUBSCRIPTION_KEY]
+                                ctx.node.properties[constants.AZURE_CONFIG_KEY
+                                                  ][constants.SUBSCRIPTION_KEY]
                                 )
                           )

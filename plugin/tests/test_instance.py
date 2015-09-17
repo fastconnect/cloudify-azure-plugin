@@ -114,10 +114,13 @@ class TestInstance(testtools.TestCase):
         """
 
         test_properties = {
-            constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
-            constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
-            constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
-            constants.LOCATION_KEY: 'westeurope',
+            constants.AZURE_CONFIG_KEY:{
+                constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+                constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+                constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+                constants.LOCATION_KEY: 'westeurope',
+                constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test'
+            },
             constants.PUBLISHER_KEY: 'Canonical',
             constants.OFFER_KEY: 'UbuntuServer',
             constants.SKU_KEY: '12.04.5-LTS',

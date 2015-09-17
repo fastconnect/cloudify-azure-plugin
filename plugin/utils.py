@@ -119,10 +119,10 @@ def wait_status(ctx, resource,
 
 
 def get_azure_config(ctx):
-    if ctx.node.properties['azure_config']:
-        return ctx.node.properties['azure_config']
+    if ctx.node.properties[constants.AZURE_CONFIG_KEY]:
+        return ctx.node.properties[constants.AZURE_CONFIG_KEY]
     else:
-        return ctx.provider_context['azure_config']
+        return ctx.provider_context[constants.AZURE_CONFIG_KEY]
 
 
 class WindowsAzureError(Exception):
