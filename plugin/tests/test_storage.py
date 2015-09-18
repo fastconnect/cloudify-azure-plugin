@@ -1,4 +1,4 @@
-import testtools
+﻿import testtools
 import time
 import test_utils
 
@@ -36,10 +36,13 @@ class TestStorage(testtools.TestCase):
         """
 
         test_properties = {
-            constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
-            constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
-            constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
-            constants.LOCATION_KEY: 'westeurope',
+            constants.AZURE_CONFIG_KEY:{
+                constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+                constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+                constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+                constants.LOCATION_KEY: 'westeurope',
+                constants.RESOURCE_GROUP_KEY: 'storageresource_group_test'
+            },
             constants.RESOURCE_GROUP_KEY: 'storageresource_group_test',
             constants.STORAGE_ACCOUNT_KEY: test_name,
             constants.ACCOUNT_TYPE_KEY: 'Standard_LRS', #Standard_LRS|Standard_ZRS|Standard_GRS|Standard_RAGRS|Premium_LRS
@@ -110,7 +113,7 @@ class TestStorage(testtools.TestCase):
         self.assertTrue(bool((status_code == 200) | (status_code == 202)))
         ctx.logger.info("create storage with deletable propertie set to false")
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "storage", constants.SUCCEEDED, 600)
         
         ctx.logger.info("not delete storage")
         self.assertEqual(0, storage.delete(ctx=ctx))
@@ -141,7 +144,7 @@ class TestStorage(testtools.TestCase):
         ctx.logger.info("status_code : " + str(status_code))
         self.assertTrue(bool((status_code == 200) | (status_code == 202)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "storage",constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "storage", constants.SUCCEEDED, 600)
         ctx.logger.info("Storage Account Created")
 
         ctx.logger.info("Conflict Creating Storage Account")

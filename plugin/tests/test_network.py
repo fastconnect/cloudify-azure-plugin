@@ -1,4 +1,4 @@
-import testtools
+﻿import testtools
 import time
 import test_utils
 
@@ -38,10 +38,13 @@ class TestNetwork(testtools.TestCase):
         """
 
         test_properties = {
-            constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
-            constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
-            constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
-            constants.LOCATION_KEY: 'westeurope',
+            constants.AZURE_CONFIG_KEY:{
+                constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+                constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+                constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+                constants.LOCATION_KEY: 'westeurope',
+                constants.RESOURCE_GROUP_KEY: 'networkresource_group_test'
+            },
             constants.RESOURCE_GROUP_KEY: 'networkresource_group_test',
             constants.VIRTUAL_NETWORK_KEY: test_name,
             constants.VIRTUAL_NETWORK_ADDRESS_KEY: '10.0.0.0/16',

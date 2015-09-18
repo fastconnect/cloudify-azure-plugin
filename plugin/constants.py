@@ -70,6 +70,7 @@ NODE_INSTANCE = 'node-instance'
 RELATIONSHIP_INSTANCE = 'relationship-instance'
 
 # properties keys
+AZURE_CONFIG_KEY = 'azure_config'
 SUBSCRIPTION_KEY = 'subscription_id'
 USERNAME_KEY = 'username'
 PASSWORD_KEY = 'password'
