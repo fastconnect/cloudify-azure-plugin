@@ -9,8 +9,6 @@ from cloudify.decorators import operation
 
 def get_provisioning_state(**_):
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
-
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
@@ -34,7 +32,7 @@ def get_provisioning_state(**_):
 @operation
 def delete(**_):
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
-
+    utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]

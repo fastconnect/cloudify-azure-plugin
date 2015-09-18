@@ -12,7 +12,6 @@ from cloudify.decorators import operation
 def create(**_):
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
     utils.validate_node_property(constants.ACCOUNT_TYPE_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 

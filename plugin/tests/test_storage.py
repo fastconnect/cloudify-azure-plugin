@@ -46,7 +46,7 @@ class TestStorage(testtools.TestCase):
             constants.RESOURCE_GROUP_KEY: 'storageresource_group_test',
             constants.STORAGE_ACCOUNT_KEY: test_name,
             constants.ACCOUNT_TYPE_KEY: 'Standard_LRS', #Standard_LRS|Standard_ZRS|Standard_GRS|Standard_RAGRS|Premium_LRS
-            constants.STORAGE_DELETABLE_KEY: True
+            constants.DELETABLE_KEY: True
         }
 
         return MockCloudifyContext(node_id='test',
@@ -106,20 +106,21 @@ class TestStorage(testtools.TestCase):
         )
         ctx.logger.info("Storage Account Deleted")
 
-        ctx.node.properties[constants.STORAGE_DELETABLE_KEY] = False
+        ctx.node.properties[constants.DELETABLE_KEY] = False
 
         status_code = storage.create(ctx=ctx)
         ctx.logger.info("status_code : " + str(status_code))
         self.assertTrue(bool((status_code == 200) | (status_code == 202)))
         ctx.logger.info("create storage with deletable propertie set to false")
+        
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "storage", constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "storage", constants.SUCCEEDED, 900)
         
         ctx.logger.info("not delete storage")
         self.assertEqual(0, storage.delete(ctx=ctx))
 
         ctx.logger.info("Set deletable propertie to True")
-        ctx.node.properties[constants.STORAGE_DELETABLE_KEY] = True
+        ctx.node.properties[constants.DELETABLE_KEY] = True
 
         ctx.logger.info("Delete storage")
         self.assertEqual(200, storage.delete(ctx=ctx))
