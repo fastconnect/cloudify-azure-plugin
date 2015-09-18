@@ -168,6 +168,7 @@ def create(**_):
 
 def delete(**_):
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.instance.runtime_properties)
+    utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -175,16 +176,25 @@ def delete(**_):
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
     network_interface_name = ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY]
+    deletable = ctx.node.properties[constants.DELETABLE_KEY]
+    
+    if deletable:
+        ctx.logger.info('Propertie deletable set to True.')
+        ctx.logger.info('Deleting NIC {}.'.format(network_interface_name))
 
-    ctx.logger.info('delete NIC : ' + network_interface_name)
-    cntn = connection.AzureConnectionClient()
-    response = cntn.azure_delete(
-      ctx, 
-      ("subscriptions/{}/resourceGroups/{}/providers/microsoft.network" + 
-      "/networkInterfaces/{}?api-version={}").format(subscription_id, 
+        cntn = connection.AzureConnectionClient()
+        response = cntn.azure_delete(
+        ctx, 
+        ("subscriptions/{}/resourceGroups/{}/providers/microsoft.network" + 
+        "/networkInterfaces/{}?api-version={}").format(subscription_id, 
                                                     resource_group_name, 
                                                     network_interface_name, 
                                                     api_version
                                                     )
-      )
-    return response.status_code
+        )
+        return response.status_code
+
+    else:
+        ctx.logger.info('Propertie deletable set to False.')
+        ctx.logger.info('Not deleting NIC {}.'.format(network_interface_name))
+        return 0

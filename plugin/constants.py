@@ -101,4 +101,5 @@ SKU_KEY = 'sku'
 SKU_VERSION_KEY = 'version'
 CREATE_OPTION_KEY = 'create_option'
 DISKS_KEY = 'disks'
-STORAGE_DELETABLE_KEY = 'deletable'
+
+DELETABLE_KEY = 'deletable'

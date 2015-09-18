@@ -54,6 +54,7 @@ def create_network(**_):
 @operation
 def delete_network(**_):
     utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -61,22 +62,30 @@ def delete_network(**_):
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
+    deletable = ctx.node.properties[constants.DELETABLE_KEY]
+    
+    if deletable:
+        ctx.logger.info('Propertie deletable set to True.')
+        ctx.logger.info('Deleting virtual network {}.'.format(virtual_network_name))
+        connect = connection.AzureConnectionClient()
 
-    ctx.logger.info('Deleting Virtual Network')
-    connect = connection.AzureConnectionClient()
-
-    response = connect.azure_delete(ctx,
-        ("subscriptions/{}/resourceGroups/{}/" +
-            "providers/microsoft.network" +
-            "/virtualNetworks/{}" +
-            "?api-version={}").format(
-            subscription_id,
-            resource_group_name,
-            virtual_network_name,
-            api_version
+        response = connect.azure_delete(ctx,
+            ("subscriptions/{}/resourceGroups/{}/" +
+                "providers/microsoft.network" +
+                "/virtualNetworks/{}" +
+                "?api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                virtual_network_name,
+                api_version
+            )
         )
-    )
-    return response.status_code
+        return response.status_code
+
+    else:
+        ctx.logger.info('Propertie deletable set to False.')
+        ctx.logger.info('Not deleting virtual network {}.'.format(virtual_network_name))
+        return 0
 
 
 def get_provisioning_state_network(**_):
@@ -162,25 +171,32 @@ def delete_subnet(**_):
     virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
     subnet_name = ctx.node.properties[constants.SUBNET_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
+    deletable = ctx.node.properties[constants.DELETABLE_KEY]
+    
+    if deletable:
+        ctx.logger.info('Propertie deletable set to True.')
+        ctx.logger.info('Deleting subnet {}.'.format(subnet_name))
 
-    ctx.logger.info('Deleting Subnet')
-    connect = connection.AzureConnectionClient()
-
-    response = connect.azure_delete(ctx,
-        ("subscriptions/{}/resourceGroups/{}/" +
-            "providers/microsoft.network" +
-            "/virtualNetworks/{}" +
-            "/subnets/{}" +
-            "?api-version={}").format(
-            subscription_id,
-            resource_group_name,
-            virtual_network_name,
-            subnet_name,
-            api_version
+        connect = connection.AzureConnectionClient()
+        response = connect.azure_delete(ctx,
+            ("subscriptions/{}/resourceGroups/{}/" +
+                "providers/microsoft.network" +
+                "/virtualNetworks/{}" +
+                "/subnets/{}" +
+                "?api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                virtual_network_name,
+                subnet_name,
+                api_version
+            )
         )
-    )
-    return response.status_code
-
+        return response.status_code
+    else:
+        ctx.logger.info('Propertie deletable set to False.')
+        ctx.logger.info('Not deleting subnet {}.'.format(subnet_name))
+        return 0
+  
 
 def get_provisioning_state_subnet(**_):
     utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
