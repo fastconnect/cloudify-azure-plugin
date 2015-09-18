@@ -67,9 +67,6 @@ node_types:
   cloudify.azure.nodes.Subnet:
     derived_from: cloudify.nodes.Network
     properties:
-      #virtual_network_name:
-      #  type: string
-      #  default: ''
       subnet_name:
         type: string
         default: ''
