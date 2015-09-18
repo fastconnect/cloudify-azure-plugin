@@ -60,16 +60,16 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: azure.plugin.network.create_network
+          implementation: azure.plugin.network.create
         delete:
-          implementation: azure.plugin.network.delete_network
+          implementation: azure.plugin.network.delete
 
   cloudify.azure.nodes.Subnet:
     derived_from: cloudify.nodes.Network
     properties:
-      virtual_network_name:
-        type: string
-        default: ''
+      #virtual_network_name:
+      #  type: string
+      #  default: ''
       subnet_name:
         type: string
         default: ''
@@ -80,10 +80,10 @@ node_types:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
-        create:
-          implementation: azure.plugin.network.create_subnet
+        start:
+          implementation: azure.plugin.subnet.create
         delete:
-          implementation: azure.plugin.network.delete_subnet
+          implementation: azure.plugin.network.delete
 
   cloudify.azure.nodes.Datadisks:
     derived_from: cloudify.nodes.Network
@@ -157,6 +157,10 @@ relationships:
 
   cloudify.azure.relationships.subnet_connected_to_network:
     derived_from: cloudify.relationships.connected_to
+    source_interfaces: 
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: azure.plugin.subnet.preconfigure_subnet_connected_to_network
 
   cloudify.azure.relationships.instance_connected_to_resource_group:
     derived_from: cloudify.relationships.contained_in

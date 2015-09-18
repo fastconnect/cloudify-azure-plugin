@@ -62,20 +62,12 @@ node_templates:
   manager_resource_group:
     type: cloudify.azure.nodes.ResourceGroup
     properties:
-      #subscription_id: { get_input: subscription_id }
-      #username: { get_input: username }
-      #password: { get_input: password }
-      #location: { get_input: location }
       resource_group_name: {get_input: resource_group_name}
       azure_config: { get_property: [azure_configuration, azure_config] }
 
   manager_storage_account:
     type: cloudify.azure.nodes.StorageAccount
     properties:
-      #subscription_id: { get_input: subscription_id }
-      #username: { get_input: username }
-      #password: { get_input: password }
-      #location: { get_input: location }
       #resource_group_name: {get_input: resource_group_name}
       storage_account_name: {get_input: storage_account_name}
       azure_config: { get_property: [azure_configuration, azure_config] }
@@ -86,10 +78,6 @@ node_templates:
   manager_network:
     type: cloudify.azure.nodes.Network
     properties:
-      #subscription_id: { get_input: subscription_id }
-      #username: { get_input: username }
-      #password: { get_input: password }
-      #location: { get_input: location }
       #resource_group_name: {get_input: resource_group_name}
       virtual_network_name: {get_input: virtual_network_name}
       virtual_network_address_prefix: {get_input: virtual_network_address_prefix}
@@ -101,12 +89,7 @@ node_templates:
   manager_subnet:
     type: cloudify.azure.nodes.Subnet
     properties:
-      #subscription_id: { get_input: subscription_id }
-      #username: { get_input: username }
-      #password: { get_input: password }
-      #location: { get_input: location }
-      #resource_group_name: {get_input: resource_group_name}
-      virtual_network_name: {get_input: virtual_network_name}
+      #virtual_network_name: {get_input: virtual_network_name}
       subnet_name: {get_input: subnet_name}
       subnet_address_prefix: {get_input: subnet_address_prefix}
       azure_config: { get_property: [azure_configuration, azure_config] }
@@ -127,10 +110,6 @@ node_templates:
   manager_server:
     type: cloudify.azure.nodes.Instance
     properties:
-      #subscription_id: { get_input: subscription_id }
-      #username: { get_input: username }
-      #password: { get_input: password }
-      #location: { get_input: location }
       publisher_name: { get_input: publisher_name }
       offer: { get_input: offer }
       sku: { get_input: sku }
@@ -141,7 +120,6 @@ node_templates:
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: {get_input: public_key}
-      #resource_group_name: {get_input: resource_group_name}
       virtual_network_name: {get_input: virtual_network_name}
       subnet_name: {get_input: subnet_name}
       azure_config: { get_property: [azure_configuration, azure_config] }
