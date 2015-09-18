@@ -75,11 +75,13 @@ class TestDatadisks(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE nic")
         ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "instancenic_test"
+        ctx.node.properties[constants.DELETABLE_KEY] = True
         nic.delete(ctx=ctx)
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE public_ip")
         ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instancepublic_ip_test"
+        ctx.node.properties[constants.DELETABLE_KEY] = True
         public_ip.delete(ctx=ctx)
         
         status_ip = constants.DELETING
@@ -100,7 +102,6 @@ class TestDatadisks(testtools.TestCase):
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE storage account")
-        ctx.node.properties[constants.STORAGE_DELETABLE_KEY] = True
         storage.delete(ctx=ctx)
 
         current_ctx.set(ctx=ctx)
@@ -139,6 +140,8 @@ class TestDatadisks(testtools.TestCase):
             constants.SUBNET_KEY: 'disksubnet_test',
             constants.DISKS_KEY: disk,
             'resources_prefix': 'diskprefix',
+            constants.DELETABLE_KEY: True
+
         }
 
         return MockCloudifyContext(node_id='test',

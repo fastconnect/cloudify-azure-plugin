@@ -42,9 +42,10 @@ class TestPublicIP(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test'
+                constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test',
             },
-            constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test'
+            constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test',
+            constants.DELETABLE_KEY: True
         }
 
         test_runtime = {
@@ -81,9 +82,7 @@ class TestPublicIP(testtools.TestCase):
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
 
-        status_ip = constants.DELETING
         try:
-            while status_ip == constants.DELETING :
                 current_ctx.set(ctx=ctx)
                 utils.wait_status(ctx, "public_ip","deleting", 600)
         except utils.WindowsAzureError:
@@ -107,11 +106,32 @@ class TestPublicIP(testtools.TestCase):
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
         
-        status_ip = constants.DELETING
         try:
-            while status_ip == constants.DELETING :
-                current_ctx.set(ctx=ctx)
-                utils.wait_status(ctx, "public_ip","deleting", 600)
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "public_ip","deleting", 600)
+        except utils.WindowsAzureError:
+            pass
+
+        ctx.logger.info("create public ip with deletable propertie set to false")
+        ctx.node.properties[constants.DELETABLE_KEY] = False
+        status_code = public_ip.create(ctx=ctx)
+        ctx.logger.debug("status_code = " + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)  
+
+        ctx.logger.info("not delete public ip")
+        self.assertEqual(0, public_ip.delete(ctx=ctx))
+
+        ctx.logger.info("Set deletable propertie to True")
+        ctx.node.properties[constants.DELETABLE_KEY] = True
+
+        ctx.logger.info("delete public ip")
+        self.assertEqual(202, public_ip.delete(ctx=ctx))
+
+        try:
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "public_ip","deleting", 600)
         except utils.WindowsAzureError:
             pass
 
@@ -136,12 +156,9 @@ class TestPublicIP(testtools.TestCase):
 
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
-
-        status_ip = constants.DELETING
         try:
-            while status_ip == constants.DELETING :
-                current_ctx.set(ctx=ctx)
-                utils.wait_status(ctx, "public_ip","deleting", 600)
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "public_ip","deleting", 600)
         except utils.WindowsAzureError:
             pass
 

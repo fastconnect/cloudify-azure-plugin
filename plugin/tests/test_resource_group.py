@@ -25,9 +25,10 @@ class TestResourceGroup(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: test_name
+                constants.RESOURCE_GROUP_KEY: test_name,
             },
-            constants.RESOURCE_GROUP_KEY: test_name
+            constants.RESOURCE_GROUP_KEY: test_name,
+            constants.DELETABLE_KEY: True
         }
 
         return MockCloudifyContext(node_id = 'test',
@@ -55,12 +56,10 @@ class TestResourceGroup(testtools.TestCase):
 
         ctx.logger.info("delete resource_group")
         self.assertEqual(202, resource_group.delete(ctx=ctx))
-
-        status_resource_group = constants.DELETING
         try:
-            while status_resource_group == constants.DELETING :
-                current_ctx.set(ctx=ctx)
-                utils.wait_status(ctx, "resource_group","deleting", 600)
+
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "resource_group","deleting", 600)
         except utils.WindowsAzureError:
             pass
 
@@ -82,16 +81,37 @@ class TestResourceGroup(testtools.TestCase):
         ctx.logger.info("delete resource_group")
         self.assertEqual(202, resource_group.delete(ctx=ctx))
 
-        status_resource_group = constants.DELETING
         try:
-            while status_resource_group == constants.DELETING :
-                current_ctx.set(ctx=ctx)
-                utils.wait_status(ctx, "resource_group","deleting", 600)
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "resource_group","deleting", 600)
+        except utils.WindowsAzureError:
+            pass
+
+
+        ctx.logger.info("create resource_group with deletable propertie set to false")
+        ctx.node.properties[constants.DELETABLE_KEY] = False
+        status_code = resource_group.create(ctx=ctx)
+        ctx.logger.debug("status_code = " + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "resource_group",constants.SUCCEEDED, 600)  
+
+        ctx.logger.info("not delete resource_group")
+        self.assertEqual(0, resource_group.delete(ctx=ctx))
+
+        ctx.logger.info("Set deletable propertie to True")
+        ctx.node.properties[constants.DELETABLE_KEY] = True
+
+        ctx.logger.info("delete resource_group")
+        self.assertEqual(202, resource_group.delete(ctx=ctx))
+
+        try:
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "resource_group","deleting", 600)
         except utils.WindowsAzureError:
             pass
 
         ctx.logger.info("END resource_group delete test")
-
 
     def test_conflict_resource_group(self):
         ctx = self.mock_ctx('conflictgroup')
@@ -113,11 +133,9 @@ class TestResourceGroup(testtools.TestCase):
         ctx.logger.info("delete resource_group")
         self.assertEqual(202, resource_group.delete(ctx=ctx))
         
-        status_resource_group = constants.DELETING
         try:
-            while status_resource_group == constants.DELETING :
-                current_ctx.set(ctx=ctx)
-                utils.wait_status(ctx, "resource_group","deleting", 600)
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "resource_group","deleting", 600)
         except utils.WindowsAzureError:
             pass
 

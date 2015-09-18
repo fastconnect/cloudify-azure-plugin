@@ -100,7 +100,6 @@ class TestInstance(testtools.TestCase):
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE storage account")
-        ctx.node.properties[constants.STORAGE_DELETABLE_KEY] = True
         storage.delete(ctx=ctx)
 
         current_ctx.set(ctx=ctx)
@@ -137,6 +136,7 @@ class TestInstance(testtools.TestCase):
             constants.VIRTUAL_NETWORK_KEY: 'instancevirtual_network_test',
             constants.SUBNET_KEY: 'instancesubnet_test',
             'resources_prefix': 'instanceprefix',
+            constants.DELETABLE_KEY: True
         }
 
         return MockCloudifyContext(node_id='test',

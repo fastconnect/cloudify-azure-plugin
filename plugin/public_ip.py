@@ -37,6 +37,7 @@ def get_provisioning_state(**_):
 
 def delete(**_):
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
+    utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -45,17 +46,27 @@ def delete(**_):
     api_version = constants.AZURE_API_VERSION_06
     public_ip_name =ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
 
-    response = connection.AzureConnectionClient().azure_delete(
-      ctx, 
-      ("subscriptions/{}/resourceGroups/{}/providers/microsoft.network" + 
-      "/publicIPAddresses/{}?api-version={}").format(subscription_id, 
+    deletable = ctx.node.properties[constants.DELETABLE_KEY]
+    
+    if deletable:
+        ctx.logger.info('Propertie deletable set to True.')
+        ctx.logger.info('Deleting public ip {}.'.format(public_ip_name))
+        response = connection.AzureConnectionClient().azure_delete(
+        ctx, 
+        ("subscriptions/{}/resourceGroups/{}/providers/microsoft.network" + 
+        "/publicIPAddresses/{}?api-version={}").format(subscription_id, 
                                                     resource_group_name, 
                                                     public_ip_name, 
                                                     api_version
                                                     )
-      )
-    return response.status_code
+        )
+        return response.status_code
+    else:
+        ctx.logger.info('Propertie deletable set to False.')
+        ctx.logger.info('Not deleting public ip {}.'.format(public_ip_name))
+        return 0
 
+   
 
 def create(**_):
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)

@@ -77,6 +77,7 @@ class TestNIC(testtools.TestCase):
             constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test',
             constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test',
             constants.SUBNET_KEY: 'nic_subnet_test',
+            constants.DELETABLE_KEY: True
         }
 
         test_runtime = {
@@ -130,16 +131,39 @@ class TestNIC(testtools.TestCase):
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)  
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)  
 
         ctx.logger.info("delete NIC")
         self.assertEqual(202, nic.delete(ctx=ctx))
 
-        ctx.logger.info("check is NIC is release")
+        ctx.logger.info("check is nic is release")
         self.assertRaises(utils.WindowsAzureError,
                          nic.get_provisioning_state,
                          ctx=ctx
                          )
+        ctx.logger.info("create nic with deletable propertie set to false")
+        ctx.node.properties[constants.DELETABLE_KEY] = False
+        status_code = nic.create(ctx=ctx)
+        ctx.logger.debug("status_code = " + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)  
+
+        ctx.logger.info("not delete nic")
+        self.assertEqual(0, nic.delete(ctx=ctx))
+
+        ctx.logger.info("Set deletable propertie to True")
+        ctx.node.properties[constants.DELETABLE_KEY] = True
+
+        ctx.logger.info("delete nic")
+        self.assertEqual(202, nic.delete(ctx=ctx))
+
+        try:
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "nic","deleting", 600)
+        except utils.WindowsAzureError:
+            pass
+
 
         ctx.logger.info("END delete NIC test")
 
@@ -154,7 +178,7 @@ class TestNIC(testtools.TestCase):
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)  
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)  
 
         ctx.logger.info("create NIC conflict")
         status_code = nic.create(ctx=ctx)

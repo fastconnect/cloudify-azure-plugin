@@ -63,7 +63,7 @@ def create(**_):
 @operation
 def delete(**_):
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.STORAGE_DELETABLE_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -71,7 +71,7 @@ def delete(**_):
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     storage_account_name = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
-    deletable = ctx.node.properties[constants.STORAGE_DELETABLE_KEY]
+    deletable = ctx.node.properties[constants.DELETABLE_KEY]
 
     if deletable:
         ctx.logger.info('Propertie deletable set to True.')
