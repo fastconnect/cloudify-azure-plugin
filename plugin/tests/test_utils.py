@@ -2,9 +2,9 @@
 from cloudify.mocks import MockCloudifyContext
 
 
-AZURE_USERNAME = 'api@victoroudinfastconnect.onmicrosoft.com'
-SUBSCRIPTION_ID = '18d68acb-caef-42cb-9dde-050ed320998c'
-AZURE_PASSWORD = '123@c!0udify'
+AZURE_USERNAME = 'victor.oudin@gauvainfastconnect.onmicrosoft.com'
+SUBSCRIPTION_ID = '60123fbd-f39d-4266-9860-c9ac381572cb'
+AZURE_PASSWORD = '2oS@dInB64'
 COMPUTE_USER = 'administrateur'
 COMPUTE_PASSWORD = 'Cloud?db'
 PUBLIC_KEY = """---- BEGIN SSH2 PUBLIC KEY ----
