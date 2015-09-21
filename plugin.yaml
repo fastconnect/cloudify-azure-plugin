@@ -82,6 +82,22 @@ node_types:
         delete:
           implementation: azure.plugin.network.delete
 
+  cloudify.azure.nodes.PublicIP:
+    derived_from: cloudify.nodes.VirtualIP
+    properties:
+      public_ip_name:
+        type: string
+        default: ''
+      public_ip_allocation_method:
+        type: string
+        defualt: 'Dynamic'
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.pulic_ip.create
+        delete:
+          implementation: azure.plugin.pulic_ip.delete
+
   cloudify.azure.nodes.Datadisks:
     derived_from: cloudify.nodes.Root
     properties:
