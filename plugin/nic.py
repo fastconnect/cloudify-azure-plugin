@@ -106,6 +106,7 @@ def get_provisioning_state(**_):
     return status_nic
 
 
+@operation
 def create(**_):
     utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
     utils.validate_node_property(constants.SUBNET_KEY, ctx.node.properties)
@@ -166,6 +167,8 @@ def create(**_):
                     )
     return response.status_code
 
+
+@operation
 def delete(**_):
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.instance.runtime_properties)
     utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)

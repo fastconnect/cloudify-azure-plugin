@@ -80,7 +80,20 @@ node_types:
         start:
           implementation: azure.plugin.subnet.create
         delete:
-          implementation: azure.plugin.network.delete
+          implementation: azure.plugin.subnet.delete
+
+  cloudify.azure.nodes.NetworkInterfaceCard:
+    derived_from: cloudify.nodes.Root
+    properties:
+      network_interface_name:
+        type: string
+        default: ''
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.nic.create
+        delete:
+          implementation: azure.plugin.nic.delete
 
   cloudify.azure.nodes.PublicIP:
     derived_from: cloudify.nodes.VirtualIP
