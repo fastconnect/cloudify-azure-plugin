@@ -1,4 +1,4 @@
-plugin\tests\test_utils.py
+test_utils.py
 
 *.py[cod]
 
