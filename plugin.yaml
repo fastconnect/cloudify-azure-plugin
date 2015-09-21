@@ -83,7 +83,7 @@ node_types:
           implementation: azure.plugin.network.delete
 
   cloudify.azure.nodes.Datadisks:
-    derived_from: cloudify.nodes.Network
+    derived_from: cloudify.nodes.Root
     properties:
       compute_name:
         type: string
