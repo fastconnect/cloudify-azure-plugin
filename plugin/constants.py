@@ -104,3 +104,20 @@ CREATE_OPTION_KEY = 'create_option'
 DISKS_KEY = 'disks'
 
 DELETABLE_KEY = 'deletable'
+
+# RELATIONSHIPS KEYS
+STORAGE_ACCOUNT_CONNECTED_TO_RESOURCE_GROUP = \
+    'cloudify.azure.relationships.storage_account_connected_to_resource_group'
+NETWORK_CONNECTED_TO_RESOURCE_GROUP = \
+    'cloudify.azure.relationships.network_connected_to_resource_group'
+SUBNET_CONNECTED_TO_NETWORK = \
+    'cloudify.azure.relationships.subnet_connected_to_network'
+INSTANCE_CONNECTED_TO_RESOURCE_GROUP = \
+    'cloudify.azure.relationships.instance_connected_to_resource_group'
+INSTANCE_CONNECTED_TO_STORAGE_ACCOUNT = \
+    'cloudify.azure.relationships.instance_connected_to_storage_account'
+INSTANCE_CONNECTED_TO_NETWORK = \
+    'cloudify.azure.relationships.instance_connected_to_network'
+INSTANCE_CONNECTED_TO_SUBNET = \
+    'cloudify.azure.relationships.instance_connected_to_subnet'
+DISK_ATTACH_TO_INSTANCE = 'cloudify.azure.relationships.disk_attach_to_instance'
