@@ -67,20 +67,20 @@ def delete(**_):
     if deletable:
         ctx.logger.info('Propertie deletable set to True.')
         ctx.logger.info('Deleting virtual network {}.'.format(virtual_network_name))
-    connect = connection.AzureConnectionClient()
+        connect = connection.AzureConnectionClient()
 
-    response = connect.azure_delete(ctx,
-        ("subscriptions/{}/resourceGroups/{}/" +
-            "providers/microsoft.network" +
-            "/virtualNetworks/{}" +
-            "?api-version={}").format(
-            subscription_id,
-            resource_group_name,
-            virtual_network_name,
-            api_version
+        response = connect.azure_delete(ctx,
+            ("subscriptions/{}/resourceGroups/{}/" +
+                "providers/microsoft.network" +
+                "/virtualNetworks/{}" +
+                "?api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                virtual_network_name,
+                api_version
+            )
         )
-    )
-    return response.status_code
+        return response.status_code
 
     else:
         ctx.logger.info('Propertie deletable set to False.')
