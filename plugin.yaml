@@ -8,6 +8,7 @@ plugins:
     executor: central_deployment_agent
     source: cloudify-azure-plugin
 
+
 node_types:
   cloudify.azure.nodes.ResourceGroup:
     derived_from: cloudify.nodes.Root
@@ -77,7 +78,7 @@ node_types:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
-        start:
+        create:
           implementation: azure.plugin.subnet.create
         delete:
           implementation: azure.plugin.network.delete
@@ -103,7 +104,6 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: azure.plugin.datadisks.create
-
 
   cloudify.azure.nodes.Instance:
     derived_from: cloudify.nodes.Compute
@@ -145,6 +145,7 @@ node_types:
         delete:
           implementation: azure.plugin.instance.delete
 
+
 relationships:
   cloudify.azure.relationships.storage_account_connected_to_resource_group:
     derived_from: cloudify.relationships.contained_in
@@ -154,10 +155,6 @@ relationships:
 
   cloudify.azure.relationships.subnet_connected_to_network:
     derived_from: cloudify.relationships.connected_to
-    source_interfaces: 
-      cloudify.interfaces.relationship_lifecycle:
-        preconfigure:
-          implementation: azure.plugin.subnet.preconfigure_subnet_connected_to_network
 
   cloudify.azure.relationships.instance_connected_to_resource_group:
     derived_from: cloudify.relationships.contained_in

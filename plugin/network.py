@@ -21,6 +21,10 @@ def create(**_):
     virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
     virtual_network_address_prefix = ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
+    
+    # Place the network name in runtime_properties for relationships
+    ctx.instance.runtime_properties[constants.VIRTUAL_NETWORK_KEY] = \
+                ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
 
     json ={
         "location": str(location),
@@ -67,20 +71,20 @@ def delete(**_):
     if deletable:
         ctx.logger.info('Propertie deletable set to True.')
         ctx.logger.info('Deleting virtual network {}.'.format(virtual_network_name))
-    connect = connection.AzureConnectionClient()
+        connect = connection.AzureConnectionClient()
 
-    response = connect.azure_delete(ctx,
-        ("subscriptions/{}/resourceGroups/{}/" +
-            "providers/microsoft.network" +
-            "/virtualNetworks/{}" +
-            "?api-version={}").format(
-            subscription_id,
-            resource_group_name,
-            virtual_network_name,
-            api_version
+        response = connect.azure_delete(ctx,
+            ("subscriptions/{}/resourceGroups/{}/" +
+                "providers/microsoft.network" +
+                "/virtualNetworks/{}" +
+                "?api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                virtual_network_name,
+                api_version
+            )
         )
-    )
-    return response.status_code
+        return response.status_code
 
     else:
         ctx.logger.info('Propertie deletable set to False.')
