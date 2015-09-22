@@ -82,6 +82,26 @@ def get_instance_or_source_node_properties():
                     constants.NODE_INSTANCE))
 
 
+def get_target_property(ctx, relationship_name, property_name):
+    # FIX: this function will only return the first property found for
+    # the first corresponding relationship found. Maybe return an array
+    # of properties if more than one relationship correspond.
+    if ctx.instance.relationships:
+        for relationship in ctx.instance.relationships:
+            if relationship.type == relationship_name:
+                for property in relationship.target.instance.runtime_properties:
+                    if property_name == property:
+                        return relationship.target.instance.runtime_properties[property]
+        raise NonRecoverableError(
+                'Relationship property {} for {} has not been found.'.format(
+                        property_name, ctx.node.name)
+                )
+    else:
+        raise NonRecoverableError('Missing relationship for {}.'.format(
+                                                        ctx.node.name)
+                                  )
+
+
 def wait_status(ctx, resource,
                 expected_status=constants.SUCCEEDED, 
                 timeout=600
