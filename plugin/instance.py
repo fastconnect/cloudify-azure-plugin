@@ -34,6 +34,8 @@ def create(**_):
                                  ctx.node.properties)
     utils.validate_node_property(constants.PUBLIC_KEY_KEY, 
                                  ctx.node.properties)
+    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY,
+                                 ctx.instance.runtime_properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -69,24 +71,10 @@ def create(**_):
                                             os_disk_name
                                             )
 
-
-    # generation of nic and public ip name
-    network_interface_name = "{}_nic".format(vm_name)
-    ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = \
-        network_interface_name
-
-    public_ip_name = "{}_pip".format(vm_name)
-    ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = public_ip_name
-
     utils.wait_status(ctx, 'storage')
-
-    # generation of public_ip
-    public_ip.create(ctx=ctx)
-    utils.wait_status(ctx, 'public_ip')
-
-    # generation of nic
-    nic.create(ctx=ctx)
     utils.wait_status(ctx, 'nic')
+
+    nic_id = nic.get_id(ctx)
 
     json = {
         'id': ('/subscriptions/{}/resourceGroups/{}' +
@@ -135,21 +123,15 @@ def create(**_):
                 }
             },
             'networkProfile': {
-                'networkInterfaces':
-                    [
-                        {
-                            'id': ('/subscriptions/{}/resourcegroups/{}' +
-                                   '/providers/Microsoft.Network' +
-                                   '/networkInterfaces/{}').format(
-                                       subscription_id,
-                                       resource_group_name,
-                                       network_interface_name
-                                      )
-                        }
-                    ]
+                'networkInterfaces':[
+                    {
+                        'id': str(nic_id)
+                    }
+                ]
             }
         }
     }
+
     ctx.logger.debug('JSON: {}'.format(json))
     ctx.logger.info('Beginning vm creation: {}'.format(ctx.instance.id))
     
@@ -193,18 +175,6 @@ def create(**_):
         ctx.logger.info('Creation vm failed: {}'.format(ctx.instance.id))
         ctx.logger.info('Error code: {}'.format(e.code))
         ctx.logger.info('Error message: {}'.format(e.message))
-        
-        nic.delete(ctx=ctx)
-        try:
-            utils.wait_status(ctx, 'nic')
-        except utils.WindowsAzureError:
-            pass
-
-        public_ip.delete(ctx=ctx)
-        try:
-            utils.wait_status(ctx, 'public_ip')
-        except utils.WindowsAzureError:
-            pass
 
         raise utils.WindowsAzureError(e.code, e.message)
 
@@ -212,10 +182,6 @@ def create(**_):
 @operation
 def delete(**_):
     utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, 
-                                 ctx.instance.runtime_properties)
-    utils.validate_node_property(constants.PUBLIC_IP_KEY,
-                                 ctx.instance.runtime_properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -237,18 +203,6 @@ def delete(**_):
     # wait vm deletion
     try:
         utils.wait_status(ctx, 'instance')
-    except utils.WindowsAzureError:
-        pass
-
-    nic.delete(ctx=ctx)
-    try:
-        utils.wait_status(ctx, 'nic')
-    except utils.WindowsAzureError:
-        pass
-
-    public_ip.delete(ctx=ctx)
-    try:
-        utils.wait_status(ctx, 'public_ip')
     except utils.WindowsAzureError:
         pass
 
@@ -382,3 +336,10 @@ def get_json_from_azure(**_):
                     )
 
     return response.json()
+
+@operation
+def preconfigure_instance_connected_to_nic(**_):
+    # source: instance
+    # target: nic
+    ctx.source.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = \
+        ctx.target.node.properties[constants.NETWORK_INTERFACE_KEY]
