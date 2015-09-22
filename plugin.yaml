@@ -90,7 +90,7 @@ node_types:
         default: ''
     interfaces:
       cloudify.interfaces.lifecycle:
-        create:
+        start:
           implementation: azure.plugin.nic.create
         delete:
           implementation: azure.plugin.nic.delete
@@ -188,6 +188,13 @@ relationships:
         preconfigure:
           implementation: azure.plugin.subnet.preconfigure_subnet_connected_to_network
 
+  cloudify.azure.relationships.nic_connected_to_subnet:
+    derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: azure.plugin.nic.preconfigure_nic_connected_to_subnet
+
   cloudify.azure.relationships.instance_connected_to_resource_group:
     derived_from: cloudify.relationships.contained_in
 
@@ -199,6 +206,13 @@ relationships:
 
   cloudify.azure.relationships.instance_connected_to_subnet:
     derived_from: cloudify.relationships.connected_to
+
+  cloudify.azure.relationships.instance_connected_to_nic:
+    derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: azure.plugin.instance.preconfigure_instance_connected_to_nic
   
   cloudify.azure.relationships.disk_attach_to_instance:
     derived_from: cloudify.relationships.connected_to
