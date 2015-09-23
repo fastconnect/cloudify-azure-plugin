@@ -1,6 +1,7 @@
 ﻿import testtools
 import time
 import test_utils
+import test_mockcontext
 
 from plugin import (utils,
                     constants,
@@ -10,11 +11,10 @@ from plugin import (utils,
                     )
 
 from cloudify.state import current_ctx
-from cloudify.mocks import MockCloudifyContext
 
 TIME_DELAY = 20
 
-class Testsubnet(testtools.TestCase):
+class TestSubnet(testtools.TestCase):
 
     @classmethod
     def setUpClass(self): 
@@ -27,31 +27,30 @@ class Testsubnet(testtools.TestCase):
 
         ctx.logger.info("CREATE network")
         current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
+        ctx.node.properties[
+            constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
         network.create(ctx=ctx)
-
 
     @classmethod
     def tearDownClass(self):
         ctx = self.mock_ctx('del')
         ctx.logger.info("DELETE subnet\'s required resources")
+
+        ctx.logger.info("DELETE network")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[
+            constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
+        network.create(ctx=ctx)
         
         ctx.logger.info("DELETE resource_group")
         current_ctx.set(ctx=ctx)
         resource_group.delete(ctx=ctx)
-
-        ctx.logger.info("DELETE network")
-        current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
-        network.create(ctx=ctx)
-
 
     @classmethod
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
             tests
         """
-
         test_properties = {
             constants.AZURE_CONFIG_KEY:{
                 constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
@@ -71,18 +70,31 @@ class Testsubnet(testtools.TestCase):
             constants.VIRTUAL_NETWORK_KEY: 'subnetnetwork_test'
         }
 
-        return MockCloudifyContext(node_id='test',
-                                   properties=test_properties)
+        test_relationships = [ 
+                                {
+                                'node_id': 'test',
+                                'relationship_type':\
+                                    constants.SUBNET_CONNECTED_TO_NETWORK,
+                                'relationship_properties': \
+                                    {constants.VIRTUAL_NETWORK_KEY: \
+                                                    'subnetnetwork_test'}
+                                }
+                             ]
+
+        return test_mockcontext.MockCloudifyContextRelationships(
+                                node_id='test',
+                                properties=test_properties,
+                                runtime_properties=test_runtime,
+                                relationships=test_relationships
+                                )
 
 
     def setUp(self):
-        super(Testsubnet, self).setUp()
-
+        super(TestSubnet, self).setUp()
 
     def tearDown(self):
-        super(Testsubnet, self).tearDown()
+        super(TestSubnet, self).tearDown()
         time.sleep(TIME_DELAY)
-
 
     def test_create(self):
         ctx = self.mock_ctx('testcreatesubnet')
@@ -114,8 +126,6 @@ class Testsubnet(testtools.TestCase):
             pass
 
         ctx.logger.info("END test_create")
-
-
 
     def test_delete_subnet(self):
         ctx = self.mock_ctx('testdeletesubnet')
@@ -178,7 +188,6 @@ class Testsubnet(testtools.TestCase):
             pass
 
         ctx.logger.info("END test_delete_subnet")
-
 
     def test_conflict_subnet(self):
         ctx = self.mock_ctx('testconflictsubnet')
