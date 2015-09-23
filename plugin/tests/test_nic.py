@@ -1,6 +1,7 @@
 ﻿import testtools
 import time
 import test_utils
+import test_mockcontext
 
 from plugin import (utils,
                     constants,
@@ -88,9 +89,25 @@ class TestNIC(testtools.TestCase):
             constants.NETWORK_INTERFACE_KEY: test_name,
         }
 
-        return MockCloudifyContext(node_id='test',
+        test_relationships = [
+            {
+                'node_id': 'test',
+                'relationship_type': constants.SUBNET_CONNECTED_TO_NETWORK,
+                'relationship_properties': \
+                {constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test'}
+            },
+            {
+                'node_id': 'test',
+                'relationship_type': constants.NIC_CONNECTED_TO_SUBNET,
+                'relationship_properties':\
+                    {constants.SUBNET_KEY: 'nic_subnet_test'}
+            }
+        ]
+
+        return test_mockcontext.MockCloudifyContextRelationships(node_id='test',
             properties=test_properties,
-            runtime_properties=test_runtime
+            runtime_properties=test_runtime,
+            relationships=test_relationships
         )
 
     def setUp(self):

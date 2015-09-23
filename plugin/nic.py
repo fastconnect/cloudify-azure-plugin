@@ -198,12 +198,6 @@ def delete(**_):
         return 0
 
 
-@operation
-def preconfigure_nic_connected_to_subnet(**_):
-    ctx.source.instance.runtime_properties[constants.SUBNET_KEY] = \
-        ctx.target.node.properties[constants.SUBNET_KEY]
-
-
 def get_id(ctx):
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY,
                                  ctx.instance.runtime_properties)
