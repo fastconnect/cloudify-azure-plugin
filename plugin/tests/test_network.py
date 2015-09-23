@@ -70,7 +70,10 @@ class TestNetwork(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN test_create")
 
-        self.assertEqual(201, network.create(ctx=ctx))
+        status_code = network.create(ctx=ctx)
+        ctx.logger.debug("status_code = " + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+        current_ctx.set(ctx=ctx)
 
         status_network = constants.CREATING
         while status_network != constants.SUCCEEDED :
@@ -87,8 +90,9 @@ class TestNetwork(testtools.TestCase):
         ctx.logger.info("Checking Virtual Network deleted")
         current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
-            network.get_provisioning_state,
-            ctx=ctx
+            utils.wait_status,
+            ctx,
+            'network'
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_create")
