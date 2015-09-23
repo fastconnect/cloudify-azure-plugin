@@ -35,6 +35,7 @@ def get_provisioning_state(**_):
     return status_public_ip
 
 
+@operation
 def delete(**_):
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
     utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
@@ -66,8 +67,8 @@ def delete(**_):
         ctx.logger.info('Not deleting public ip {}.'.format(public_ip_name))
         return 0
 
-   
 
+@operation
 def create(**_):
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
 

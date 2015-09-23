@@ -4,6 +4,7 @@ from plugin import (utils,
                     connection,
                     )
 from public_ip import get_public_address_id
+from subnet import get_id as get_subnet_id
 
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
@@ -106,9 +107,9 @@ def get_provisioning_state(**_):
     return status_nic
 
 
+@operation
 def create(**_):
-    utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.SUBNET_KEY, ctx.node.properties)
+    utils.validate_node_property(constants.SUBNET_KEY, ctx.instance.runtime_properties)
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.instance.runtime_properties)
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
 
@@ -118,11 +119,10 @@ def create(**_):
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     location = azure_config[constants.LOCATION_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    virtual_network_name = ctx.node.properties[constants.VIRTUAL_NETWORK_KEY]
-    subnet_name = ctx.node.properties[constants.SUBNET_KEY]
     network_interface_name = ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY]
     public_ip_name = ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
     private_ip_allocation_method = "Dynamic"
+    subnet_id = get_subnet_id(ctx)
     public_ip_id = get_public_address_id(ctx)
 
     json ={
@@ -133,11 +133,7 @@ def create(**_):
                     "name": str(public_ip_name),
                     "properties": {
                         "subnet": {
-                            "id": "/subscriptions/{}/resourceGroups/{}/providers/microsoft.network/virtualNetworks/{}/subnets/{}"
-                                .format(subscription_id, 
-                                        resource_group_name, 
-                                        virtual_network_name,
-                                        subnet_name)
+                            "id": str(subnet_id)
                         },
                         "privateIPAllocationMethod": str(private_ip_allocation_method),
                         "publicIPAddress":{  
@@ -166,6 +162,8 @@ def create(**_):
                     )
     return response.status_code
 
+
+@operation
 def delete(**_):
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.instance.runtime_properties)
     utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
@@ -198,3 +196,35 @@ def delete(**_):
         ctx.logger.info('Propertie deletable set to False.')
         ctx.logger.info('Not deleting NIC {}.'.format(network_interface_name))
         return 0
+
+
+@operation
+def preconfigure_nic_connected_to_subnet(**_):
+    ctx.source.instance.runtime_properties[constants.SUBNET_KEY] = \
+        ctx.target.node.properties[constants.SUBNET_KEY]
+
+
+def get_id(ctx):
+    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY,
+                                 ctx.instance.runtime_properties)
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+    api_version = constants.AZURE_API_VERSION_06
+    network_interface_name = ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY]
+
+    response = connection.AzureConnectionClient().azure_get(
+        ctx,
+        ('subscriptions/{}' +
+         '/resourceGroups/{}' +
+         '/providers/microsoft.network' +
+         '/networkInterfaces/{}' +
+         '?api-version={}').format(
+            subscription_id,
+            resource_group_name,
+            network_interface_name,
+            api_version
+        )
+    )
+    return response.json()['id']

@@ -7,6 +7,7 @@ from plugin import (utils,
                     resource_group,
                     public_ip,
                     network,
+                    subnet,
                     nic
                     )
 
@@ -35,12 +36,12 @@ class TestNIC(testtools.TestCase):
         ctx.logger.info("CREATE network")
         current_ctx.set(ctx=ctx)
         ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
-        network.create_network(ctx=ctx)
+        network.create(ctx=ctx)
 
         ctx.logger.info("CREATE subnet")
         current_ctx.set(ctx=ctx)
         ctx.node.properties[constants.SUBNET_ADDRESS_KEY] = "10.0.1.0/24"
-        network.create_subnet(ctx=ctx)
+        subnet.create(ctx=ctx)
 
 
     @classmethod
@@ -50,11 +51,11 @@ class TestNIC(testtools.TestCase):
 
         ctx.logger.info("DELETE subnet")
         current_ctx.set(ctx=ctx)
-        network.delete_subnet(ctx=ctx)
+        subnet.delete(ctx=ctx)
         
         ctx.logger.info("DELETE network")
         current_ctx.set(ctx=ctx)
-        network.delete_network(ctx=ctx)
+        network.delete(ctx=ctx)
 
         ctx.logger.info("DELETE ressource group")
         current_ctx.set(ctx=ctx)
@@ -81,6 +82,8 @@ class TestNIC(testtools.TestCase):
         }
 
         test_runtime = {
+            constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test',
+            constants.SUBNET_KEY: 'nic_subnet_test',
             constants.PUBLIC_IP_KEY: 'nic_public_ip_test',
             constants.NETWORK_INTERFACE_KEY: test_name,
         }
@@ -113,6 +116,7 @@ class TestNIC(testtools.TestCase):
         self.assertEqual(202, nic.delete(ctx=ctx))
 
         ctx.logger.info("check is NIC is release")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
                          nic.get_provisioning_state,
                          ctx=ctx
@@ -137,6 +141,7 @@ class TestNIC(testtools.TestCase):
         self.assertEqual(202, nic.delete(ctx=ctx))
 
         ctx.logger.info("check is nic is release")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
                          nic.get_provisioning_state,
                          ctx=ctx
@@ -189,6 +194,7 @@ class TestNIC(testtools.TestCase):
         self.assertEqual(202, nic.delete(ctx=ctx))
 
         ctx.logger.info("check is NIC is release")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
                          nic.get_provisioning_state,
                          ctx=ctx
