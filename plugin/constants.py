@@ -107,17 +107,20 @@ DELETABLE_KEY = 'deletable'
 
 # RELATIONSHIPS KEYS
 STORAGE_ACCOUNT_CONNECTED_TO_RESOURCE_GROUP = \
-    'cloudify.azure.relationships.storage_account_connected_to_resource_group'
+    'cloudify.azure.relationships.storage_account_contained_in_resource_group'
 NETWORK_CONNECTED_TO_RESOURCE_GROUP = \
-    'cloudify.azure.relationships.network_connected_to_resource_group'
+    'cloudify.azure.relationships.network_contained_in_resource_group'
 SUBNET_CONNECTED_TO_NETWORK = \
     'cloudify.azure.relationships.subnet_connected_to_network'
+NIC_CONNECTED_TO_SUBNET = \
+    'cloudify.azure.relationships.nic_connected_to_subnet'
+NIC_CONNECTED_TO_PUBLIC_IP = \
+    'cloudify.azure.relationships.nic_connected_to_public_ip'
 INSTANCE_CONNECTED_TO_RESOURCE_GROUP = \
-    'cloudify.azure.relationships.instance_connected_to_resource_group'
+    'cloudify.azure.relationships.instance_contained_in_resource_group'
 INSTANCE_CONNECTED_TO_STORAGE_ACCOUNT = \
-    'cloudify.azure.relationships.instance_connected_to_storage_account'
-INSTANCE_CONNECTED_TO_NETWORK = \
-    'cloudify.azure.relationships.instance_connected_to_network'
-INSTANCE_CONNECTED_TO_SUBNET = \
-    'cloudify.azure.relationships.instance_connected_to_subnet'
+    'cloudify.azure.relationships.instance_depends_on_storage_account'
+INSTANCE_CONNECTED_TO_NIC = \
+    'cloudify.azure.relationships.instance_connected_to_nic'
 DISK_ATTACH_TO_INSTANCE = 'cloudify.azure.relationships.disk_attach_to_instance'
+
