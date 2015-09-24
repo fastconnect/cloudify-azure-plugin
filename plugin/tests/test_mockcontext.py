@@ -1,4 +1,4 @@
-from cloudify.mocks import (MockCloudifyContext,
+﻿from cloudify.mocks import (MockCloudifyContext,
                             MockNodeInstanceContext,
                            )
 
