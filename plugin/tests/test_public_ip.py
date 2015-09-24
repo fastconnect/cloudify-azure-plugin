@@ -47,9 +47,9 @@ class TestPublicIP(testtools.TestCase):
             constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test',
             constants.DELETABLE_KEY: True
         }
-
+        #should not be empty
         test_runtime = {
-            constants.PUBLIC_IP_KEY: test_name,
+            'not': 'empty'
         }
 
         return MockCloudifyContext(node_id='test',

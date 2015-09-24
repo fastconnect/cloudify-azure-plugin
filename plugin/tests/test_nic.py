@@ -81,10 +81,12 @@ class TestNIC(testtools.TestCase):
             constants.SUBNET_KEY: 'nic_subnet_test',
             constants.NETWORK_INTERFACE_KEY: test_name,
             constants.DELETABLE_KEY: True
-        }
 
+        }
+        #should not be empty 
         test_runtime = {
-            constants.PUBLIC_IP_KEY: 'nic_public_ip_test'
+            constants.PUBLIC_IP_KEY: \
+                    'nic_public_ip_test'
         }
 
         test_relationships = [
@@ -102,6 +104,16 @@ class TestNIC(testtools.TestCase):
                         constants.SUBNET_KEY: 'nic_subnet_test',
                         constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test'
                     }
+            },
+            {
+                'node_id': 'test',
+                'relationship_type':\
+                    constants.NIC_CONNECTED_TO_PUBLIC_IP,
+                'relationship_properties': \
+                {
+                    constants.PUBLIC_IP_KEY: \
+                    'nic_public_ip_test'
+                }
             }
         ]
 
@@ -142,7 +154,34 @@ class TestNIC(testtools.TestCase):
         
         ctx.logger.info("END create NIC test")
 
+    def test_add_public_ip(self):
+        ctx = self.mock_ctx('testaddpublicip')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN attach public_ip to NIC test")
 
+        ctx.logger.info("create NIC")
+        nic.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)  
+
+        ctx.logger.info("attach public_ip to NIC")
+        nic.add_public_ip(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)  
+
+
+        ctx.logger.info("delete NIC")
+        self.assertEqual(202, nic.delete(ctx=ctx))
+
+        ctx.logger.info("check is NIC is release")
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(utils.WindowsAzureError,
+                         nic.get_provisioning_state,
+                         ctx=ctx
+                         )
+        
+        ctx.logger.info("END create NIC test")
+    
     def test_delete(self):
         ctx = self.mock_ctx('testdeletenic')
         current_ctx.set(ctx=ctx)
