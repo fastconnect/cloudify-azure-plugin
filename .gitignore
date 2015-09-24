@@ -64,3 +64,7 @@ nosetests.xml
 # PyCharm
 .idea
 plugin/.idea
+
+# credential
+plugin/connection.py
+plugin/tests/test_utils.py
