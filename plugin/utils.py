@@ -118,7 +118,7 @@ def wait_status(ctx, resource,
     module = importlib.import_module('plugin.{}'.format(resource), 
                                      package=None
                                      )
-    ctx.logger.debug('Waiting state {} for {}...'.format(wait_status,
+    ctx.logger.debug('Waiting state {} for {}...'.format(expected_status,
                                                         resource)
                     )
     status = 'empty'
@@ -134,7 +134,7 @@ def wait_status(ctx, resource,
     if status != expected_status :
         raise NonRecoverableError(
             'Failed waiting {} for {}: {}.'.format(
-                            wait_status, resource, status)
+                            expected_status, resource, status)
             )
 
 

@@ -81,8 +81,8 @@ class AzureConnectionClient():
             #ctx.logger.info('Token\'s been successfully taken from Azure')
             AzureConnectionClient.token = json['access_token']
             AzureConnectionClient.expires_on = time.gmtime(float(json['expires_on']))
-        else:
-            ctx.logger.debug('Token\'s been already taken. Reusing it.')
+        #else:
+         #   ctx.logger.debug('Token\'s been already taken. Reusing it.')
 
 
     def _azure_response(self, response):

@@ -105,7 +105,7 @@ def create(**_):
     return response.status_code
 
 
-def get_public_address_id(ctx):
+def get_id(ctx):
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]

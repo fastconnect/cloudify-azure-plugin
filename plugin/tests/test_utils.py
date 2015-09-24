@@ -2,6 +2,7 @@
 AZURE_USERNAME = 'louis.devandiere@gauvainfastconnect.onmicrosoft.com'
 SUBSCRIPTION_ID = '60123fbd-f39d-4266-9860-c9ac381572cb'
 AZURE_PASSWORD = 'F@stConnect92'
+
 COMPUTE_USER = 'administrateur'
 COMPUTE_PASSWORD = 'Cloud?db'
 PUBLIC_KEY = """---- BEGIN SSH2 PUBLIC KEY ----
@@ -39,4 +40,3 @@ AIABfPypznjcBgmEpwEaCOSlrvpPYKlw4DEecyFYluACG9OR79LBPFyBl6GuP7qH
 niyuCcdMJ9owk3c4O3/C5YWQmapwkymUnGoABmVqfehdeJ96dIuNYLl3pvUYGYzF
 4gTqTpTEmSxShVTV5JVkWV8HK2Yrmu5CKMTCNzOmn67wmw==
 Private-MAC: 53f9634ff34570f0b455ab5543f2cdb30a3f5769"""
-

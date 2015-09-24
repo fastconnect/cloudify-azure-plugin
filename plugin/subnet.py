@@ -28,6 +28,12 @@ def create(**_):
     subnet_address_prefix = ctx.node.properties[constants.SUBNET_ADDRESS_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
+    # Place the network name in runtime_properties for relationships
+    ctx.instance.runtime_properties[constants.VIRTUAL_NETWORK_KEY] = \
+        virtual_network_name
+    ctx.instance.runtime_properties[constants.SUBNET_KEY] = \
+        subnet_name
+
     json = {
         "properties": {
           "addressPrefix": str(subnet_address_prefix)
@@ -69,24 +75,31 @@ def delete(**_):
                                         )
     subnet_name = ctx.node.properties[constants.SUBNET_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
+    deletable = ctx.node.properties[constants.DELETABLE_KEY]
 
-    ctx.logger.info('Deleting Subnet')
-    connect = connection.AzureConnectionClient()
+    if deletable:
+        ctx.logger.info('Propertie deletable set to True.')
+        ctx.logger.info('Deleting subnet {}.'.format(subnet_name))
+        connect = connection.AzureConnectionClient()
 
-    response = connect.azure_delete(ctx,
-        ("subscriptions/{}/resourceGroups/{}/" +
-            "providers/microsoft.network" +
-            "/virtualNetworks/{}" +
-            "/subnets/{}" +
-            "?api-version={}").format(
-            subscription_id,
-            resource_group_name,
-            virtual_network_name,
-            subnet_name,
-            api_version
+        response = connect.azure_delete(ctx,
+            ("subscriptions/{}/resourceGroups/{}/" +
+                "providers/microsoft.network" +
+                "/virtualNetworks/{}" +
+                "/subnets/{}" +
+                "?api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                virtual_network_name,
+                subnet_name,
+                api_version
+            )
         )
-    )
-    return response.status_code
+        return response.status_code
+    else:
+        ctx.logger.info('Propertie deletable set to False.')
+        ctx.logger.info('Not deleting subnet {}.'.format(subnet_name))
+        return 0
 
 
 def get_provisioning_state(**_):
@@ -126,19 +139,23 @@ def get_provisioning_state(**_):
     return status_storage
 
 
-def get_id(ctx):
-    utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY,
-                                 ctx.instance.runtime_properties)
-    utils.validate_node_property(constants.SUBNET_KEY,
-                                 ctx.instance.runtime_properties)
+def get_id(**_):
+    # get the subnet id for the nic relationship
     azure_config = utils.get_azure_config(ctx)
-
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+
     api_version = constants.AZURE_API_VERSION_05_preview
-    virtual_network_name = ctx.instance.runtime_properties[
-        constants.VIRTUAL_NETWORK_KEY]
-    subnet_name = ctx.instance.runtime_properties[constants.SUBNET_KEY]
+    virtual_network_name = utils.get_target_property(
+        ctx,
+        constants.NIC_CONNECTED_TO_SUBNET,
+        constants.VIRTUAL_NETWORK_KEY
+    )
+    subnet_name = utils.get_target_property(
+        ctx,
+        constants.NIC_CONNECTED_TO_SUBNET,
+        constants.SUBNET_KEY
+    )
 
     response = connection.AzureConnectionClient().azure_get(
         ctx,
