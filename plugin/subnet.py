@@ -75,24 +75,31 @@ def delete(**_):
                                         )
     subnet_name = ctx.node.properties[constants.SUBNET_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
+    deletable = ctx.node.properties[constants.DELETABLE_KEY]
 
-    ctx.logger.info('Deleting Subnet')
-    connect = connection.AzureConnectionClient()
+    if deletable:
+        ctx.logger.info('Propertie deletable set to True.')
+        ctx.logger.info('Deleting subnet {}.'.format(subnet_name))
+        connect = connection.AzureConnectionClient()
 
-    response = connect.azure_delete(ctx,
-        ("subscriptions/{}/resourceGroups/{}/" +
-            "providers/microsoft.network" +
-            "/virtualNetworks/{}" +
-            "/subnets/{}" +
-            "?api-version={}").format(
-            subscription_id,
-            resource_group_name,
-            virtual_network_name,
-            subnet_name,
-            api_version
+        response = connect.azure_delete(ctx,
+            ("subscriptions/{}/resourceGroups/{}/" +
+                "providers/microsoft.network" +
+                "/virtualNetworks/{}" +
+                "/subnets/{}" +
+                "?api-version={}").format(
+                subscription_id,
+                resource_group_name,
+                virtual_network_name,
+                subnet_name,
+                api_version
+            )
         )
-    )
-    return response.status_code
+        return response.status_code
+    else:
+        ctx.logger.info('Propertie deletable set to False.')
+        ctx.logger.info('Not deleting subnet {}.'.format(subnet_name))
+        return 0
 
 
 def get_provisioning_state(**_):

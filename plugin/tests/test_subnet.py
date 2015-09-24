@@ -47,7 +47,7 @@ class TestSubnet(testtools.TestCase):
         resource_group.delete(ctx=ctx)
 
     @classmethod
-    def mock_ctx(self, test_name):
+    def mock_ctx(self, test_name, cdir='10.0.1.0/24'):
         """ Creates a mock context for the instance
             tests
         """
@@ -61,7 +61,7 @@ class TestSubnet(testtools.TestCase):
             },
             constants.RESOURCE_GROUP_KEY: 'subnetresource_group_test',
             constants.SUBNET_KEY: test_name,
-            constants.SUBNET_ADDRESS_KEY: '10.0.1.0/24',
+            constants.SUBNET_ADDRESS_KEY: cdir,
             constants.VIRTUAL_NETWORK_KEY: 'subnetnetwork_test',
             constants.DELETABLE_KEY: True
         }
@@ -96,9 +96,9 @@ class TestSubnet(testtools.TestCase):
         super(TestSubnet, self).tearDown()
         time.sleep(TIME_DELAY)
 
-    def test_create(self):
-        ctx = self.mock_ctx('testcreatesubnet')
-        ctx.logger.info("BEGIN test_create")
+    def test_create_subnet(self):
+        ctx = self.mock_ctx('testcreatesubnet', cdir='10.0.2.0/24')
+        ctx.logger.info("BEGIN test_create_subnet")
 
         current_ctx.set(ctx=ctx)
         status_code = subnet.create(ctx=ctx)
@@ -115,7 +115,9 @@ class TestSubnet(testtools.TestCase):
         ctx.logger.info("Subnet Created")
         self.assertEqual(constants.SUCCEEDED, status_subnet)
 
-        self.assertEqual(202, subnet.delete(ctx=ctx))
+
+
+
         status_subnet = constants.DELETING
         try:
             while status_subnet == constants.DELETING :
@@ -125,10 +127,10 @@ class TestSubnet(testtools.TestCase):
         except utils.WindowsAzureError:
             pass
 
-        ctx.logger.info("END test_create")
+        ctx.logger.info("END test_create_subnet")
 
     def test_delete_subnet(self):
-        ctx = self.mock_ctx('testdeletesubnet')
+        ctx = self.mock_ctx('testdeletesubnet', cdir='10.0.3.0/24')
         ctx.logger.info("BEGIN test_delete_subnet")
         current_ctx.set(ctx=ctx)
         status_code = subnet.create(ctx=ctx)
@@ -145,7 +147,9 @@ class TestSubnet(testtools.TestCase):
         ctx.logger.info("Subnet Created")
         self.assertEqual(constants.SUCCEEDED, status_subnet)
 
-        self.assertEqual(202, subnet.delete_subnet(ctx=ctx))
+        status_code = subnet.delete(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 202) or (status_code == 204)))
 
         ctx.logger.info("Checking Subnet deleted")
         current_ctx.set(ctx=ctx)
@@ -175,7 +179,9 @@ class TestSubnet(testtools.TestCase):
         ctx.node.properties[constants.DELETABLE_KEY] = True
 
         ctx.logger.info("delete subnet")
-        self.assertEqual(202, subnet.delete(ctx=ctx))
+        status_code = subnet.delete(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 202) or (status_code == 204)))
 
         status_subnet = constants.DELETING
         try:
@@ -190,7 +196,7 @@ class TestSubnet(testtools.TestCase):
         ctx.logger.info("END test_delete_subnet")
 
     def test_conflict_subnet(self):
-        ctx = self.mock_ctx('testconflictsubnet')
+        ctx = self.mock_ctx('testconflictsubnet', cdir='10.0.4.0/24')
         ctx.logger.info("BEGIN test_conflict_subnet")
 
         current_ctx.set(ctx=ctx)
@@ -212,7 +218,9 @@ class TestSubnet(testtools.TestCase):
         self.assertNotEqual(201, subnet.create(ctx=ctx))
         ctx.logger.info("Conflict detected")
 
-        self.assertEqual(202, subnet.delete_subnet(ctx=ctx))
+        status_code = subnet.delete(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 202) or (status_code == 204)))
 
         status_subnet = constants.DELETING
         try:
@@ -232,7 +240,9 @@ class TestSubnet(testtools.TestCase):
         )
         ctx.logger.info("Subnet Deleted")
 
-        self.assertEqual(202, subnet.delete(ctx=ctx))
+        status_code = subnet.delete(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 202) or (status_code == 204)))
 
         status_subnet = constants.DELETING
         try:
