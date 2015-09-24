@@ -20,6 +20,9 @@ node_types:
         default: ''
       azure_config:
         default: {}
+      deletable:
+        type: boolean
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -40,6 +43,9 @@ node_types:
         default: 'Standard_LRS'
       azure_config:
         default: {}
+      deletable:
+        type: boolean
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -58,6 +64,9 @@ node_types:
         default: ''
       azure_config:
         default: {}
+      deletable:
+        type: boolean
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -89,6 +98,9 @@ node_types:
       network_interface_name:
         type: string
         default: ''
+      deletable:
+        type: boolean
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         start:
@@ -104,7 +116,7 @@ node_types:
         default: ''
       public_ip_allocation_method:
         type: string
-        defualt: 'Dynamic'
+        default: 'Dynamic'
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
