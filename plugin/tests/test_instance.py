@@ -1,6 +1,7 @@
 ﻿import testtools
 import time
 import test_utils
+import test_mockcontext
 import inspect
 import threading
 import Queue
@@ -119,10 +120,16 @@ class TestInstance(testtools.TestCase):
         resource_group.delete(ctx=ctx)
  
     @classmethod 
-    def mock_ctx(self, test_name):
+    def mock_ctx(self, test_name, id=None):
         """ Creates a mock context for the instance
             tests
         """
+        if id != None:
+            nic_name = 'instance_nic_test_{}'.format(id)
+            public_ip_name = 'instance_public_ip_test_{}'.format(id)
+        else:
+            nic_name = 'instance_nic_test'
+            public_ip_name = 'instance_public_ip_test'
 
         test_properties = {
             constants.AZURE_CONFIG_KEY:{
@@ -148,20 +155,42 @@ class TestInstance(testtools.TestCase):
             constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test',
             constants.SUBNET_KEY: 'instancesubnet_test',
             'resources_prefix': 'instanceprefix',
-            constants.NETWORK_INTERFACE_KEY: 'instance_nic_test',
+            constants.NETWORK_INTERFACE_KEY: nic_name,
             constants.DELETABLE_KEY: True
         }
 
         test_runtime = {
-            constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test',
-            constants.SUBNET_KEY: 'instancesubnet_test',
-            constants.PUBLIC_IP_KEY: 'instance_public_ip_test',
-            constants.NETWORK_INTERFACE_KEY: 'instance_nic_test'
+            constants.PUBLIC_IP_KEY: public_ip_name
         }
 
-        return MockCloudifyContext(node_id='test',
+        test_relationships = [
+            {
+                'node_id': 'test',
+                'relationship_type': constants.SUBNET_CONNECTED_TO_NETWORK,
+                'relationship_properties': \
+                {constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test'}
+            },
+            {
+                'node_id': 'test',
+                'relationship_type': constants.NIC_CONNECTED_TO_SUBNET,
+                'relationship_properties':\
+                    {
+                        constants.SUBNET_KEY: 'instancesubnet_test',
+                        constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test'
+                     }
+            },
+            {
+                'node_id': 'test',
+                'relationship_type': constants.INSTANCE_CONNECTED_TO_NIC,
+                'relationship_properties':\
+                    {constants.NETWORK_INTERFACE_KEY: nic_name}
+            }
+        ]
+
+        return test_mockcontext.MockCloudifyContextRelationships(node_id='test',
             properties=test_properties,
-            runtime_properties=test_runtime
+            runtime_properties=test_runtime,
+            relationships=test_relationships
         )
 
     def setUp(self):
@@ -239,39 +268,31 @@ class TestInstance(testtools.TestCase):
         current_ctx.set(ctx=ctx)
 
     def test_concurrent_create_instance(self):
-        ctx1 = self.mock_ctx('testconcurrentcreate1')
-        ctx2 = self.mock_ctx('testconcurrentcreate2')
+        ctx1 = self.mock_ctx('testconcurrentcreate1', id=1)
+        ctx2 = self.mock_ctx('testconcurrentcreate2', id=2)
         ctx1.logger.info("BEGIN concurrent create VM 1 test")
         ctx2.logger.info("BEGIN concurrent create VM 2 test")
 
         ctx1.logger.info("CREATE public_ip 1")
         current_ctx.set(ctx=ctx1)
-        ctx1.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_1"
         public_ip.create(ctx=ctx1)
         current_ctx.set(ctx=ctx1)
         utils.wait_status(ctx1, "public_ip",constants.SUCCEEDED, 600)
 
         ctx2.logger.info("CREATE public_ip 2")
         current_ctx.set(ctx=ctx2)
-        ctx2.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_2"
         public_ip.create(ctx=ctx2)
         current_ctx.set(ctx=ctx2)
         utils.wait_status(ctx2, "public_ip",constants.SUCCEEDED, 600)
 
         ctx1.logger.info("CREATE nic 1")
         current_ctx.set(ctx=ctx1)
-        ctx1.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "ins_con_nic_test_1"
-        ctx1.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_1"
-        ctx1.instance.runtime_properties[constants.SUBNET_KEY] = "instancesubnet_test"
         nic.create(ctx=ctx1)
         current_ctx.set(ctx=ctx1)
         utils.wait_status(ctx1, "nic",constants.SUCCEEDED, 600)
 
         ctx2.logger.info("CREATE nic 2")
         current_ctx.set(ctx=ctx2)
-        ctx2.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "ins_con_nic_test_2"
-        ctx2.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_2"
-        ctx2.instance.runtime_properties[constants.SUBNET_KEY] = "instancesubnet_test"
         nic.create(ctx=ctx2)
         current_ctx.set(ctx=ctx2)
         utils.wait_status(ctx2, "nic",constants.SUCCEEDED, 600)
@@ -316,62 +337,50 @@ class TestInstance(testtools.TestCase):
 
         current_ctx.set(ctx=ctx1)
         ctx1.logger.info("DELETE nic 1")
-        ctx1.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "ins_con_nic_test_1"
         nic.delete(ctx=ctx1)
 
         current_ctx.set(ctx=ctx2)
         ctx2.logger.info("DELETE nic 2")
-        ctx2.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "ins_con_nic_test_2"
         nic.delete(ctx=ctx2)
 
         current_ctx.set(ctx=ctx1)
         ctx1.logger.info("DELETE public_ip 1")
-        ctx1.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_1"
         public_ip.delete(ctx=ctx1)
 
         current_ctx.set(ctx=ctx2)
         ctx2.logger.info("DELETE public_ip 2")
-        ctx2.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_2"
         public_ip.delete(ctx=ctx2)
 
         ctx1.logger.info("END concurrent create VM 1 test")
         ctx2.logger.info("END concurrent create VM 2 test")
 
     def test_concurrent_delete_instance(self):
-        ctx1 = self.mock_ctx('testconcurrentdelete1')
-        ctx2 = self.mock_ctx('testconcurrentdelete2')
+        ctx1 = self.mock_ctx('testconcurrentdelete1', id=1)
+        ctx2 = self.mock_ctx('testconcurrentdelete2', id=2)
 
         ctx1.logger.info("BEGIN concurrent delete VM 1 test")
         ctx2.logger.info("BEGIN concurrent delete VM 2 test")
 
         ctx1.logger.info("CREATE public_ip 1")
         current_ctx.set(ctx=ctx1)
-        ctx1.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_1"
         public_ip.create(ctx=ctx1)
         current_ctx.set(ctx=ctx1)
         utils.wait_status(ctx1, "public_ip",constants.SUCCEEDED, 600)
 
         ctx2.logger.info("CREATE public_ip 2")
         current_ctx.set(ctx=ctx2)
-        ctx2.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_2"
         public_ip.create(ctx=ctx2)
         current_ctx.set(ctx=ctx2)
         utils.wait_status(ctx2, "public_ip",constants.SUCCEEDED, 600)
 
         ctx1.logger.info("CREATE nic 1")
         current_ctx.set(ctx=ctx1)
-        ctx1.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "ins_con_nic_test_1"
-        ctx1.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_1"
-        ctx1.instance.runtime_properties[constants.SUBNET_KEY] = "instancesubnet_test"
         nic.create(ctx=ctx1)
         current_ctx.set(ctx=ctx1)
         utils.wait_status(ctx1, "nic",constants.SUCCEEDED, 600)
 
         ctx2.logger.info("CREATE nic 2")
         current_ctx.set(ctx=ctx2)
-        ctx2.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "ins_con_nic_test_2"
-        ctx2.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_2"
-        ctx2.instance.runtime_properties[constants.SUBNET_KEY] = "instancesubnet_test"
         nic.create(ctx=ctx2)
         current_ctx.set(ctx=ctx2)
         utils.wait_status(ctx2, "nic",constants.SUCCEEDED, 600)
@@ -421,22 +430,18 @@ class TestInstance(testtools.TestCase):
 
         current_ctx.set(ctx=ctx1)
         ctx1.logger.info("DELETE nic 1")
-        ctx1.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "ins_con_nic_test_1"
         nic.delete(ctx=ctx1)
 
         current_ctx.set(ctx=ctx2)
         ctx2.logger.info("DELETE nic 2")
-        ctx2.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "ins_con_nic_test_2"
         nic.delete(ctx=ctx2)
 
         current_ctx.set(ctx=ctx1)
         ctx1.logger.info("DELETE public_ip 1")
-        ctx1.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_1"
         public_ip.delete(ctx=ctx1)
 
         current_ctx.set(ctx=ctx2)
         ctx2.logger.info("DELETE public_ip 2")
-        ctx2.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "ins_con_pub_ip_test_2"
         public_ip.delete(ctx=ctx2)
 
         ctx1.logger.info("END concurrent delete VM 1 test")

@@ -176,10 +176,10 @@ node_types:
 
 
 relationships:
-  cloudify.azure.relationships.storage_account_connected_to_resource_group:
+  cloudify.azure.relationships.storage_account_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
-  cloudify.azure.relationships.network_connected_to_resource_group:
+  cloudify.azure.relationships.network_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.subnet_connected_to_network:
@@ -187,29 +187,18 @@ relationships:
 
   cloudify.azure.relationships.nic_connected_to_subnet:
     derived_from: cloudify.relationships.connected_to
-    source_interfaces:
-      cloudify.interfaces.relationship_lifecycle:
-        preconfigure:
-          implementation: azure.plugin.nic.preconfigure_nic_connected_to_subnet
 
-  cloudify.azure.relationships.instance_connected_to_resource_group:
+  cloudify.azure.relationships.nic_connected_to_public_ip:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.azure.relationships.instance_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
-  cloudify.azure.relationships.instance_connected_to_storage_account:
+  cloudify.azure.relationships.instance_depends_on_storage_account:
     derived_from: cloudify.relationships.depends_on
-
-  cloudify.azure.relationships.instance_connected_to_network:
-    derived_from: cloudify.relationships.connected_to
-
-  cloudify.azure.relationships.instance_connected_to_subnet:
-    derived_from: cloudify.relationships.connected_to
 
   cloudify.azure.relationships.instance_connected_to_nic:
     derived_from: cloudify.relationships.connected_to
-    source_interfaces:
-      cloudify.interfaces.relationship_lifecycle:
-        preconfigure:
-          implementation: azure.plugin.instance.preconfigure_instance_connected_to_nic
   
   cloudify.azure.relationships.disk_attach_to_instance:
     derived_from: cloudify.relationships.connected_to

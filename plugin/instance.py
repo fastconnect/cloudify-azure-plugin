@@ -34,8 +34,6 @@ def create(**_):
                                  ctx.node.properties)
     utils.validate_node_property(constants.PUBLIC_KEY_KEY, 
                                  ctx.node.properties)
-    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY,
-                                 ctx.instance.runtime_properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -288,7 +286,6 @@ def is_available(**_):
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
-    location = azure_config[constants.LOCATION_KEY]
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
     api_version = constants.AZURE_API_VERSION_06
 
@@ -336,10 +333,3 @@ def get_json_from_azure(**_):
                     )
 
     return response.json()
-
-@operation
-def preconfigure_instance_connected_to_nic(**_):
-    # source: instance
-    # target: nic
-    ctx.source.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = \
-        ctx.target.node.properties[constants.NETWORK_INTERFACE_KEY]
