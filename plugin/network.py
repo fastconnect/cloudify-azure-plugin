@@ -71,6 +71,7 @@ def delete(**_):
     if deletable:
         ctx.logger.info('Propertie deletable set to True.')
         ctx.logger.info('Deleting virtual network {}.'.format(virtual_network_name))
+
         connect = connection.AzureConnectionClient()
 
         response = connect.azure_delete(ctx,

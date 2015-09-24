@@ -83,7 +83,7 @@ def create(**_):
                        json=json_VM
                        )
 
-            utils.wait_status(ctx, 'instance', constants.UPDATING)
+            utils.wait_status(ctx, 'instance', constants.SUCCEEDED)
 
     except utils.WindowsAzureError as e:
     # Do not interrup deployment if maximum number of disks has been reached
