@@ -98,12 +98,14 @@ node_types:
       network_interface_name:
         type: string
         default: ''
+      azure_config:
+        default: {}
       deletable:
         type: boolean
         default: true
     interfaces:
       cloudify.interfaces.lifecycle:
-        start:
+        create:
           implementation: azure.plugin.nic.create
         delete:
           implementation: azure.plugin.nic.delete
@@ -117,12 +119,17 @@ node_types:
       public_ip_allocation_method:
         type: string
         default: 'Dynamic'
+      azure_config:
+        default: {}
+      deletable:
+        type: boolean
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: azure.plugin.pulic_ip.create
+          implementation: azure.plugin.public_ip.create
         delete:
-          implementation: azure.plugin.pulic_ip.delete
+          implementation: azure.plugin.public_ip.delete
 
   cloudify.azure.nodes.Datadisks:
     derived_from: cloudify.nodes.Root
@@ -169,10 +176,6 @@ node_types:
         type: string
       public_key:
         type: string
-      virtual_network_name:
-        type: string
-      subnet_name:
-        type: string
       azure_config:
         default: {}
     interfaces:
@@ -202,6 +205,10 @@ relationships:
 
   cloudify.azure.relationships.nic_connected_to_public_ip:
     derived_from: cloudify.relationships.connected_to
+    source_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: azure.plugin.nic.add_public_ip
 
   cloudify.azure.relationships.instance_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in

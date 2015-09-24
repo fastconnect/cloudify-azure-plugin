@@ -109,19 +109,14 @@ def create(**_):
     return response.status_code
 
 
-def get_id(ctx):
+def get_id(**_):
     # get the public_id for the nic relationship
-    azure_config = utils.get_azure_config(ctx)
-    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
-    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
-    location = azure_config[constants.LOCATION_KEY]
+    #azure_config = utils.get_azure_config(ctx)
+    subscription_id = ctx.target.node.properties[constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.target.node.properties[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
-    public_ip_name = utils.get_target_property(
-        ctx,
-        constants.NIC_CONNECTED_TO_PUBLIC_IP,
-        constants.PUBLIC_IP_KEY
-    )
+    public_ip_name = ctx.target.node.properties[constants.PUBLIC_IP_KEY]
 
     response = connection.AzureConnectionClient().azure_get(
                               ctx, 

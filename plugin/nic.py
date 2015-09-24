@@ -127,6 +127,8 @@ def create(**_):
     # Place the network name in runtime_properties for relationships
     ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = \
         network_interface_name
+    ctx.instance.runtime_properties['subnet_id'] = \
+        subnet_id
 
     json ={
         "location": str(location),
@@ -164,16 +166,15 @@ def create(**_):
 
 @operation
 def add_public_ip(**_):
-    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.node.properties)
-    azure_config = utils.get_azure_config(ctx)
+    #azure_config = utils.get_azure_config(ctx)
 
-    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
-    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
-    location = azure_config[constants.LOCATION_KEY]
+    subscription_id = ctx.source.node.properties[constants.AZURE_CONFIG_KEY][constants.SUBSCRIPTION_KEY]
+    resource_group_name = ctx.source.node.properties[constants.AZURE_CONFIG_KEY][constants.RESOURCE_GROUP_KEY]
+    location = ctx.source.node.properties[constants.AZURE_CONFIG_KEY][constants.LOCATION_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    network_interface_name = ctx.node.properties[constants.NETWORK_INTERFACE_KEY]
+    network_interface_name = ctx.source.node.properties[constants.NETWORK_INTERFACE_KEY]
     private_ip_allocation_method = "Dynamic"
-    subnet_id = get_subnet_id(ctx=ctx)
+    subnet_id = ctx.source.node.properties['subnet_id']
     public_ip_id = get_public_ip_id(ctx=ctx)
 
     json ={

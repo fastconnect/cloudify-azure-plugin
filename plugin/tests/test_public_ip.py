@@ -45,6 +45,7 @@ class TestPublicIP(testtools.TestCase):
                 constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test',
             },
             constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test',
+            constants.PUBLIC_IP_KEY: test_name,
             constants.DELETABLE_KEY: True
         }
         #should not be empty

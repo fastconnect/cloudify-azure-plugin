@@ -18,6 +18,7 @@ virtual_network_address_prefix: ''
 subnet_name: ''
 subnet_address_prefix: ''
 network_interface_name: ''
+public_ip_name: ''
 
 # To add disks to the machine, make a list of disk with these properties:
 # name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)

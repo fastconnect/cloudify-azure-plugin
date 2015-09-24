@@ -70,7 +70,6 @@ def create(**_):
                                             )
 
     utils.wait_status(ctx, 'storage')
-    utils.wait_status(ctx, 'nic')
 
     nic_id = nic.get_id(ctx)
 
