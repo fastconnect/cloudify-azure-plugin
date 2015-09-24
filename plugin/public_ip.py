@@ -10,7 +10,7 @@ from cloudify.exceptions import NonRecoverableError
 
 
 def get_provisioning_state(**_):
-    utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
+    utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -37,7 +37,7 @@ def get_provisioning_state(**_):
 
 @operation
 def delete(**_):
-    utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
+    utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.node.properties)
     utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
@@ -45,7 +45,7 @@ def delete(**_):
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    public_ip_name =ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
+    public_ip_name =ctx.node.properties[constants.PUBLIC_IP_KEY]
 
     deletable = ctx.node.properties[constants.DELETABLE_KEY]
     
@@ -70,7 +70,7 @@ def delete(**_):
 
 @operation
 def create(**_):
-    utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
+    utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -78,9 +78,13 @@ def create(**_):
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     location = azure_config[constants.LOCATION_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    public_ip_name = ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
+    public_ip_name = ctx.node.properties[constants.PUBLIC_IP_KEY] 
     public_ip_allocation_method = "Dynamic"
 
+    # Place the public_ip name in runtime_properties for relationships
+    ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = \
+        public_ip_name
+    
     json ={
        "location": str(location),
        "properties": {
@@ -106,13 +110,18 @@ def create(**_):
 
 
 def get_id(ctx):
+    # get the public_id for the nic relationship
     azure_config = utils.get_azure_config(ctx)
-
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     location = azure_config[constants.LOCATION_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
-    public_ip_name =ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
+
+    public_ip_name = utils.get_target_property(
+        ctx,
+        constants.NIC_CONNECTED_TO_PUBLIC_IP,
+        constants.PUBLIC_IP_KEY
+    )
 
     response = connection.AzureConnectionClient().azure_get(
                               ctx, 

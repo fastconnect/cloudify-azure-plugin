@@ -113,8 +113,7 @@ def get_provisioning_state(**_):
 @operation
 def create(**_):
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.instance.runtime_properties)
-
+    
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
@@ -122,10 +121,8 @@ def create(**_):
     location = azure_config[constants.LOCATION_KEY]
     api_version = constants.AZURE_API_VERSION_06
     network_interface_name = ctx.node.properties[constants.NETWORK_INTERFACE_KEY]
-    public_ip_name = ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY]
     private_ip_allocation_method = "Dynamic"
     subnet_id = get_subnet_id(ctx=ctx)
-    public_ip_id = get_public_ip_id(ctx)
 
     # Place the network name in runtime_properties for relationships
     ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = \
@@ -136,15 +133,12 @@ def create(**_):
         "properties": {
             "ipConfigurations": [
                 {
-                    "name": str(public_ip_name),
+                    "name": str(network_interface_name),
                     "properties": {
                         "subnet": {
                             "id": str(subnet_id)
                         },
-                        "privateIPAllocationMethod": str(private_ip_allocation_method),
-                        "publicIPAddress":{  
-                            "id": str(public_ip_id)
-                        },
+                        "privateIPAllocationMethod": str(private_ip_allocation_method)
                     }
                 }
             ]
@@ -168,7 +162,61 @@ def create(**_):
                     )
     return response.status_code
 
+@operation
+def add_public_ip(**_):
+    utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.node.properties)
+    azure_config = utils.get_azure_config(ctx)
 
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+    location = azure_config[constants.LOCATION_KEY]
+    api_version = constants.AZURE_API_VERSION_06
+    network_interface_name = ctx.node.properties[constants.NETWORK_INTERFACE_KEY]
+    private_ip_allocation_method = "Dynamic"
+    subnet_id = get_subnet_id(ctx=ctx)
+    public_ip_id = get_public_ip_id(ctx=ctx)
+
+    json ={
+        "location": str(location),
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": str(network_interface_name),
+                    "properties": {
+                        "subnet": {
+                            "id": str(subnet_id)
+                        },
+                        "privateIPAllocationMethod": str(private_ip_allocation_method),
+                        "publicIPAddress":{  
+                            "id": str(public_ip_id)
+                        },
+                    }
+                }
+            ]
+        }
+    }
+
+    ctx.logger.info('Update NIC : ' + network_interface_name + " (ADD public_ip)")
+    cntn = connection.AzureConnectionClient()
+
+    response = cntn.azure_put(ctx, 
+                   ("subscriptions/{}/resourcegroups/{}/" +
+                    "providers/microsoft.network" +
+                    "/networkInterfaces/{}" +
+                    "?api-version={}").format(
+                                            subscription_id, 
+                                            resource_group_name, 
+                                            network_interface_name, 
+                                            api_version
+                                            ),
+                    json=json
+                    )
+    return response.status_code
+
+#TODO not implemented yet
+#@operation
+#def remove_public_ip(**_):
+    
 @operation
 def delete(**_):
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.node.properties)
