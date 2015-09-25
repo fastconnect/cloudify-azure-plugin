@@ -114,6 +114,9 @@ node_templates:
     properties:
       public_ip_name: {get_input: public_ip_name}
       azure_config: { get_property: [azure_configuration, azure_config] }
+    relationships:
+      - target: manager_resource_group
+        type: cloudify.relationships.contained_in
 
   azure_configuration:
     type: azure_configuration
