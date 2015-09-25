@@ -139,10 +139,24 @@ def wait_status(ctx, resource,
 
 
 def get_azure_config(ctx):
-    if ctx.node.properties[constants.AZURE_CONFIG_KEY]:
+    ctx.logger.info('Azure config {}'.format(ctx.type))
+    if ctx.type == 'node-instance':
+        ctx.logger.info('Azure config node_instance')
+        if ctx.node.properties[constants.AZURE_CONFIG_KEY]:
+            return ctx.node.properties[constants.AZURE_CONFIG_KEY]
+        else:
+            return ctx.provider_context[constants.AZURE_CONFIG_KEY]
+    elif ctx.type == 'relationship-instance':
+        ctx.logger.info('Azure config relationship_instance')
+        if ctx.source.node.properties[constants.AZURE_CONFIG_KEY]:
+            return ctx.source.node.properties[constants.AZURE_CONFIG_KEY]
+        else:
+            return ctx.provider_context[constants.AZURE_CONFIG_KEY]
+    elif ctx.type == 'deployment':
+        ctx.logger.info('Azure config deployment')
         return ctx.node.properties[constants.AZURE_CONFIG_KEY]
-    else:
-        return ctx.provider_context[constants.AZURE_CONFIG_KEY]
+    
+
 
 
 class WindowsAzureError(Exception):
