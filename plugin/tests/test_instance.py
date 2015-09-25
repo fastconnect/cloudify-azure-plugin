@@ -61,14 +61,14 @@ class TestInstance(testtools.TestCase):
       
         ctx.logger.info("CREATE public_ip")
         current_ctx.set(ctx=ctx)
-        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
+        ctx.node.properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
         public_ip.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
 
         ctx.logger.info("CREATE NIC")
         current_ctx.set(ctx=ctx)
-        ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "instance_nic_test"
+        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] = "instance_nic_test"
         ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
         ctx.instance.runtime_properties[constants.SUBNET_KEY] = "instancesubnet_test"
         nic.create(ctx=ctx)
@@ -80,7 +80,7 @@ class TestInstance(testtools.TestCase):
         ctx = self.mock_ctx('del')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE nic")
-        ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "instance_nic_test"
+        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] = "instance_nic_test"
         nic.delete(ctx=ctx)
 
         try:
@@ -91,7 +91,7 @@ class TestInstance(testtools.TestCase):
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE public_ip")
-        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
+        ctx.node.properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
         public_ip.delete(ctx=ctx)
         
         try:
