@@ -31,10 +31,10 @@ class TestNIC(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
 
-        ctx.logger.info("CREATE public_ip")
-        current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.PUBLIC_IP_KEY] = "nic_public_ip_test"
-        public_ip.create(ctx=ctx)
+        # ctx.logger.info("CREATE public_ip")
+        # current_ctx.set(ctx=ctx)
+        # ctx.node.properties[constants.PUBLIC_IP_KEY] = "nic_public_ip_test"
+        # public_ip.create(ctx=ctx)
         
         ctx.logger.info("CREATE network")
         current_ctx.set(ctx=ctx)
@@ -50,7 +50,7 @@ class TestNIC(testtools.TestCase):
     @classmethod
     def tearDownClass(self):
         ctx = self.mock_ctx('init')
-        ctx.logger.info("DELETE public_ip\'s required resources")
+        # ctx.logger.info("DELETE public_ip\'s required resources")
 
         ctx.logger.info("DELETE subnet")
         current_ctx.set(ctx=ctx)
@@ -106,14 +106,14 @@ class TestNIC(testtools.TestCase):
                         constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test'
                     }
             },
-            {
-                'node_id': 'test',
-                'relationship_type': constants.NIC_CONNECTED_TO_PUBLIC_IP,
-                'relationship_properties': \
-                {
-                    constants.PUBLIC_IP_KEY: 'nic_public_ip_test'
-                }
-            }
+            # {
+            #     'node_id': 'test',
+            #     'relationship_type': constants.NIC_CONNECTED_TO_PUBLIC_IP,
+            #     'relationship_properties': \
+            #     {
+            #         constants.PUBLIC_IP_KEY: 'nic_public_ip_test'
+            #     }
+            # }
         ]
 
         return test_mockcontext.MockCloudifyContextRelationships(node_id='test',
@@ -122,51 +122,51 @@ class TestNIC(testtools.TestCase):
             relationships=test_relationships
         )
 
-    @classmethod
-    def mock_relationship_ctx(self, test_name):
-        """ Creates a mock relationship context for the nic
-            tests
-        """
-
-        source = MockContext({
-            'node': MockContext({
-                'properties': {
-                    constants.AZURE_CONFIG_KEY:{
-                        constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
-                        constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
-                        constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
-                        constants.LOCATION_KEY: 'westeurope',
-                        constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test'
-                    },
-                    constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test',
-                    constants.NETWORK_INTERFACE_KEY: test_name,
-                    constants.DELETABLE_KEY: True
-                }
-            })
-        })
-
-        target = MockContext({
-            'node': MockContext({
-                'properties': {
-                    constants.AZURE_CONFIG_KEY:{
-                        constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
-                        constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
-                        constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
-                        constants.LOCATION_KEY: 'westeurope',
-                        constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test'
-                    },
-                    constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test',
-                    constants.PUBLIC_IP_KEY: 'nic_public_ip_test',
-                    constants.DELETABLE_KEY: True
-                }
-            })
-        })
-
-        return test_mockcontext.MockCloudifyContextRelationships(
-            node_id='test',
-            source=source,
-            target=target
-        )
+    # @classmethod
+    # def mock_relationship_ctx(self, test_name):
+    #     """ Creates a mock relationship context for the nic
+    #         tests
+    #     """
+    #
+    #     source = MockContext({
+    #         'node': MockContext({
+    #             'properties': {
+    #                 constants.AZURE_CONFIG_KEY:{
+    #                     constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+    #                     constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+    #                     constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+    #                     constants.LOCATION_KEY: 'westeurope',
+    #                     constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test'
+    #                 },
+    #                 constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test',
+    #                 constants.NETWORK_INTERFACE_KEY: test_name,
+    #                 constants.DELETABLE_KEY: True
+    #             }
+    #         })
+    #     })
+    #
+    #     target = MockContext({
+    #         'node': MockContext({
+    #             'properties': {
+    #                 constants.AZURE_CONFIG_KEY:{
+    #                     constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+    #                     constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+    #                     constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+    #                     constants.LOCATION_KEY: 'westeurope',
+    #                     constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test'
+    #                 },
+    #                 constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test',
+    #                 constants.PUBLIC_IP_KEY: 'nic_public_ip_test',
+    #                 constants.DELETABLE_KEY: True
+    #             }
+    #         })
+    #     })
+    #
+    #     return test_mockcontext.MockCloudifyContextRelationships(
+    #         node_id='test',
+    #         source=source,
+    #         target=target
+    #     )
 
     def setUp(self):
         super(TestNIC, self).setUp()

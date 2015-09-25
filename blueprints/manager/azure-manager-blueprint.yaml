@@ -114,6 +114,9 @@ node_templates:
     properties:
       public_ip_name: {get_input: public_ip_name}
       azure_config: { get_property: [azure_configuration, azure_config] }
+    relationships:
+      - target: manager_resource_group
+        type: cloudify.azure.relationships.public_ip_contained_in_resource_group
 
   azure_configuration:
     type: azure_configuration
@@ -124,6 +127,9 @@ node_templates:
         subscription_id: { get_input: subscription_id }
         resource_group_name: { get_input: resource_group_name }
         location: { get_input: location }
+        virtual_network_name: {get_input: virtual_network_name}
+        subnet_name: {get_input: subnet_name}
+        storage_account_name: {get_input: storage_account_name}
 
   manager_server:
     type: cloudify.azure.nodes.Instance

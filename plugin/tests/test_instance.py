@@ -59,12 +59,12 @@ class TestInstance(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "subnet",constants.SUCCEEDED, 600)
       
-        ctx.logger.info("CREATE public_ip")
-        current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
-        public_ip.create(ctx=ctx)
-        current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
+        # ctx.logger.info("CREATE public_ip")
+        # current_ctx.set(ctx=ctx)
+        # ctx.node.properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
+        # public_ip.create(ctx=ctx)
+        # current_ctx.set(ctx=ctx)
+        # utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
 
         ctx.logger.info("CREATE NIC")
         current_ctx.set(ctx=ctx)
@@ -89,16 +89,16 @@ class TestInstance(testtools.TestCase):
         except utils.WindowsAzureError:
             pass
 
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE public_ip")
-        ctx.node.properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
-        public_ip.delete(ctx=ctx)
-        
-        try:
-            current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, "public_ip","wait exception", 600)    
-        except utils.WindowsAzureError:
-            pass
+        # current_ctx.set(ctx=ctx)
+        # ctx.logger.info("DELETE public_ip")
+        # ctx.node.properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
+        # public_ip.delete(ctx=ctx)
+        #
+        # try:
+        #     current_ctx.set(ctx=ctx)
+        #     utils.wait_status(ctx, "public_ip","wait exception", 600)
+        # except utils.WindowsAzureError:
+        #     pass
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE subnet")
@@ -126,10 +126,10 @@ class TestInstance(testtools.TestCase):
         """
         if id != None:
             nic_name = 'instance_nic_test_{}'.format(id)
-            public_ip_name = 'instance_public_ip_test_{}'.format(id)
+            # public_ip_name = 'instance_public_ip_test_{}'.format(id)
         else:
             nic_name = 'instance_nic_test'
-            public_ip_name = 'instance_public_ip_test'
+            # public_ip_name = 'instance_public_ip_test'
 
         test_properties = {
             constants.AZURE_CONFIG_KEY:{
@@ -160,7 +160,8 @@ class TestInstance(testtools.TestCase):
         }
 
         test_runtime = {
-            constants.PUBLIC_IP_KEY: public_ip_name
+            # constants.PUBLIC_IP_KEY: public_ip_name
+            'not': 'empty'
         }
 
         test_relationships = [
@@ -273,17 +274,17 @@ class TestInstance(testtools.TestCase):
         ctx1.logger.info("BEGIN concurrent create VM 1 test")
         ctx2.logger.info("BEGIN concurrent create VM 2 test")
 
-        ctx1.logger.info("CREATE public_ip 1")
-        current_ctx.set(ctx=ctx1)
-        public_ip.create(ctx=ctx1)
-        current_ctx.set(ctx=ctx1)
-        utils.wait_status(ctx1, "public_ip",constants.SUCCEEDED, 600)
-
-        ctx2.logger.info("CREATE public_ip 2")
-        current_ctx.set(ctx=ctx2)
-        public_ip.create(ctx=ctx2)
-        current_ctx.set(ctx=ctx2)
-        utils.wait_status(ctx2, "public_ip",constants.SUCCEEDED, 600)
+        # ctx1.logger.info("CREATE public_ip 1")
+        # current_ctx.set(ctx=ctx1)
+        # public_ip.create(ctx=ctx1)
+        # current_ctx.set(ctx=ctx1)
+        # utils.wait_status(ctx1, "public_ip",constants.SUCCEEDED, 600)
+        #
+        # ctx2.logger.info("CREATE public_ip 2")
+        # current_ctx.set(ctx=ctx2)
+        # public_ip.create(ctx=ctx2)
+        # current_ctx.set(ctx=ctx2)
+        # utils.wait_status(ctx2, "public_ip",constants.SUCCEEDED, 600)
 
         ctx1.logger.info("CREATE nic 1")
         current_ctx.set(ctx=ctx1)
@@ -343,13 +344,13 @@ class TestInstance(testtools.TestCase):
         ctx2.logger.info("DELETE nic 2")
         nic.delete(ctx=ctx2)
 
-        current_ctx.set(ctx=ctx1)
-        ctx1.logger.info("DELETE public_ip 1")
-        public_ip.delete(ctx=ctx1)
-
-        current_ctx.set(ctx=ctx2)
-        ctx2.logger.info("DELETE public_ip 2")
-        public_ip.delete(ctx=ctx2)
+        # current_ctx.set(ctx=ctx1)
+        # ctx1.logger.info("DELETE public_ip 1")
+        # public_ip.delete(ctx=ctx1)
+        #
+        # current_ctx.set(ctx=ctx2)
+        # ctx2.logger.info("DELETE public_ip 2")
+        # public_ip.delete(ctx=ctx2)
 
         ctx1.logger.info("END concurrent create VM 1 test")
         ctx2.logger.info("END concurrent create VM 2 test")
@@ -361,17 +362,17 @@ class TestInstance(testtools.TestCase):
         ctx1.logger.info("BEGIN concurrent delete VM 1 test")
         ctx2.logger.info("BEGIN concurrent delete VM 2 test")
 
-        ctx1.logger.info("CREATE public_ip 1")
-        current_ctx.set(ctx=ctx1)
-        public_ip.create(ctx=ctx1)
-        current_ctx.set(ctx=ctx1)
-        utils.wait_status(ctx1, "public_ip",constants.SUCCEEDED, 600)
-
-        ctx2.logger.info("CREATE public_ip 2")
-        current_ctx.set(ctx=ctx2)
-        public_ip.create(ctx=ctx2)
-        current_ctx.set(ctx=ctx2)
-        utils.wait_status(ctx2, "public_ip",constants.SUCCEEDED, 600)
+        # ctx1.logger.info("CREATE public_ip 1")
+        # current_ctx.set(ctx=ctx1)
+        # public_ip.create(ctx=ctx1)
+        # current_ctx.set(ctx=ctx1)
+        # utils.wait_status(ctx1, "public_ip",constants.SUCCEEDED, 600)
+        #
+        # ctx2.logger.info("CREATE public_ip 2")
+        # current_ctx.set(ctx=ctx2)
+        # public_ip.create(ctx=ctx2)
+        # current_ctx.set(ctx=ctx2)
+        # utils.wait_status(ctx2, "public_ip",constants.SUCCEEDED, 600)
 
         ctx1.logger.info("CREATE nic 1")
         current_ctx.set(ctx=ctx1)
@@ -436,13 +437,13 @@ class TestInstance(testtools.TestCase):
         ctx2.logger.info("DELETE nic 2")
         nic.delete(ctx=ctx2)
 
-        current_ctx.set(ctx=ctx1)
-        ctx1.logger.info("DELETE public_ip 1")
-        public_ip.delete(ctx=ctx1)
-
-        current_ctx.set(ctx=ctx2)
-        ctx2.logger.info("DELETE public_ip 2")
-        public_ip.delete(ctx=ctx2)
+        # current_ctx.set(ctx=ctx1)
+        # ctx1.logger.info("DELETE public_ip 1")
+        # public_ip.delete(ctx=ctx1)
+        #
+        # current_ctx.set(ctx=ctx2)
+        # ctx2.logger.info("DELETE public_ip 2")
+        # public_ip.delete(ctx=ctx2)
 
         ctx1.logger.info("END concurrent delete VM 1 test")
         ctx2.logger.info("END concurrent delete VM 2 test")
