@@ -146,16 +146,18 @@ def get_id(**_):
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
 
     api_version = constants.AZURE_API_VERSION_05_preview
-    virtual_network_name = utils.get_target_property(
-        ctx,
-        constants.NIC_CONNECTED_TO_SUBNET,
-        constants.VIRTUAL_NETWORK_KEY
-    )
-    subnet_name = utils.get_target_property(
-        ctx,
-        constants.NIC_CONNECTED_TO_SUBNET,
-        constants.SUBNET_KEY
-    )
+    virtual_network_name = azure_config[constants.VIRTUAL_NETWORK_KEY]
+    subnet_name = azure_config[constants.SUBNET_KEY]
+    # virtual_network_name = utils.get_target_property(
+    #     ctx,
+    #     constants.NIC_CONNECTED_TO_SUBNET,
+    #     constants.VIRTUAL_NETWORK_KEY
+    # )
+    # subnet_name = utils.get_target_property(
+    #     ctx,
+    #     constants.NIC_CONNECTED_TO_SUBNET,
+    #     constants.SUBNET_KEY
+    # )
 
     response = connection.AzureConnectionClient().azure_get(
         ctx,

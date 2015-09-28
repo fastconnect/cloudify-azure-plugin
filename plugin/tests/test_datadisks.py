@@ -1,5 +1,6 @@
 ﻿import test_utils
 import testtools
+import test_mockcontext
 
 from plugin import (utils,
                     constants,
@@ -26,21 +27,21 @@ class TestDatadisks(testtools.TestCase):
         ctx.logger.info("CREATE ressource_group")
         resource_group.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "resource_group", constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "resource_group", constants.SUCCEEDED, timeout=600)
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("CREATE storage account")
         ctx.node.properties[constants.ACCOUNT_TYPE_KEY] = "Standard_LRS"
         storage.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "storage",constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "storage",constants.SUCCEEDED, timeout=600)
 
         ctx.logger.info("CREATE network")
         current_ctx.set(ctx=ctx)
         ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
         network.create(ctx=ctx) 
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "network",constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "network",constants.SUCCEEDED, timeout=600)
 
         ctx.logger.info("CREATE subnet")
         current_ctx.set(ctx=ctx)
@@ -49,62 +50,26 @@ class TestDatadisks(testtools.TestCase):
 
         subnet.create(ctx=ctx) 
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "subnet",constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "subnet",constants.SUCCEEDED, timeout=600)
       
-        ctx.logger.info("CREATE public_ip")
-        current_ctx.set(ctx=ctx)
-        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "diskpublic_ip_test"
-        public_ip.create(ctx=ctx)
-        current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
+        # TODO waiting for ctx relashionship fix
+        #ctx.logger.info("CREATE public_ip")
+        #current_ctx.set(ctx=ctx)
+        #public_ip.create(ctx=ctx)
+        #current_ctx.set(ctx=ctx)
+        #utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, timeout=600)
 
         ctx.logger.info("CREATE NIC")
         current_ctx.set(ctx=ctx)
-        ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "disknic_test"
-        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "diskpublic_ip_test"
+       
         nic.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, timeout=600)
 
         
     @classmethod
     def tearDownClass(self):
         ctx = self.mock_ctx('del','')
-
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE nic")
-        ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = "disknic_test"
-        ctx.node.properties[constants.DELETABLE_KEY] = True
-        nic.delete(ctx=ctx)
-
-        try:
-            utils.wait_status(ctx, "nic","wait for exception", 600)          
-        except utils.WindowsAzureError:
-            pass
-     
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE public_ip")
-        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "diskpublic_ip_test"
-        ctx.node.properties[constants.DELETABLE_KEY] = True
-        public_ip.delete(ctx=ctx)
-        
-        try:
-            utils.wait_status(ctx, "public_ip","wait for exception", 600)          
-        except utils.WindowsAzureError:
-            pass
-
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE subnet")
-        ctx.instance.runtime_properties[constants.VIRTUAL_NETWORK_KEY] = "diskvirtualnetwork_test"
-        subnet.delete(ctx=ctx)
-
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE network")
-        network.delete(ctx=ctx)
-
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE storage account")
-        storage.delete(ctx=ctx)
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE ressource_group")
@@ -152,8 +117,47 @@ class TestDatadisks(testtools.TestCase):
             constants.NETWORK_INTERFACE_KEY: 'disknic_test'
         }
 
-        return MockCloudifyContext(node_id='test',
-                                   properties=test_properties)
+        test_relationships = [
+            {
+                'node_id': 'test',
+                'relationship_type': constants.SUBNET_CONNECTED_TO_NETWORK,
+                'relationship_properties': \
+                {constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test'}
+            },
+            {
+                'node_id': 'test',
+                'relationship_type': constants.NIC_CONNECTED_TO_SUBNET,
+                'relationship_properties':\
+                    {
+                        constants.SUBNET_KEY: 'disksubnet_test',
+                        constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test'
+                     }
+            },
+            {
+                'node_id': 'test',
+                'relationship_type': constants.INSTANCE_CONNECTED_TO_NIC,
+                'relationship_properties':\
+                    {
+                        constants.NETWORK_INTERFACE_KEY: 'disknic_test'
+                    }
+            },
+            {
+                'node_id': 'test',
+                'relationship_type':\
+                    constants.NIC_CONNECTED_TO_PUBLIC_IP,
+                'relationship_properties': \
+                {
+                    constants.PUBLIC_IP_KEY: \
+                        'nic_public_ip_test'
+                }
+}
+        ]
+
+        return test_mockcontext.MockCloudifyContextRelationships(node_id='test',
+            properties=test_properties,
+            runtime_properties=test_runtime,
+            relationships=test_relationships
+        )
 
     def test_create_datadisk(self):
         disk = [{'name': 'disk_1',
@@ -170,7 +174,7 @@ class TestDatadisks(testtools.TestCase):
         instance.create(ctx=ctx)
         
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, 'instance', constants.CREATING, 900)
+        utils.wait_status(ctx, 'instance', constants.CREATING, timeout=900)
 
         current_ctx.set(ctx=ctx)
         datadisks.create(ctx=ctx)
@@ -192,7 +196,12 @@ class TestDatadisks(testtools.TestCase):
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN delete VM test: {}".format(test_name)) 
-        self.assertEqual(202, instance.delete(ctx=ctx))
+        
+        try:
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+        except utils.WindowsAzureError:
+            pass
 
     def test_create_dataDisks(self):
         disks = [{'name': 'disks_1',
@@ -212,7 +221,7 @@ class TestDatadisks(testtools.TestCase):
         ctx.logger.info("BEGIN create VM test: {}".format(test_name))
         instance.create(ctx=ctx) 
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 900)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, timeout=900)
 
         current_ctx.set(ctx=ctx)
         datadisks.create(ctx=ctx)
@@ -240,7 +249,7 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, 900)
+            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -267,7 +276,7 @@ class TestDatadisks(testtools.TestCase):
         instance.create(ctx=ctx)
         
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, 'instance')
+        utils.wait_status(ctx, 'instance', timeout=900)
 
         current_ctx.set(ctx=ctx)
         datadisks.create(ctx=ctx)
@@ -297,11 +306,12 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING)
+            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
     def test_fail_create_datadisk(self):
+        #attach true trigger the test fail
         disk = [{'name': 'disk_fail_1',
                  'size': 100,
                  'attach': True,
@@ -316,7 +326,7 @@ class TestDatadisks(testtools.TestCase):
         instance.create(ctx=ctx)
         
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, 'instance')
+        utils.wait_status(ctx, 'instance',timeout=900)
 
         current_ctx.set(ctx=ctx)
         self.assertRaises(NonRecoverableError,
@@ -330,7 +340,7 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING)
+            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -350,7 +360,7 @@ class TestDatadisks(testtools.TestCase):
         instance.create(ctx=ctx)
         
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, 'instance')
+        utils.wait_status(ctx, 'instance', timeout=900)
 
         current_ctx.set(ctx=ctx)
         datadisks.create(ctx=ctx)
@@ -361,7 +371,7 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING)
+            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -398,7 +408,7 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING)
+            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 

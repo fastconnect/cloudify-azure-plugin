@@ -5,79 +5,83 @@ imports:
   - plugin.yaml
 
 inputs:
-    publisher_name:
-        default: 'Canonical'
-        type: string
-    offer:
-        default: 'UbuntuServer'
-        type: string
-    sku:
-        default: 12.04.5-LTS
-        type: string
-    version:
-        default: 'latest'
-        type: string
-    flavor_id:
-        default: 'Standard_A1'
-        type: string
-    compute_name:
-        type: string
-    virtual_network_name:
-        type: string
-    subnet_name:
-        type: string
-    storage_account_name:
-        type: string
-    compute_user:
-        default: 'administrateur'
-        type: string
-    compute_password:
-        type: string
-    public_key:
-        type: string
-    account_type:
-        default: 'Standard_LRS'
-        type: string
-    compute_disks:
-        default: {}
+  publisher_name:
+    default: 'Canonical'
+    type: string
+  offer:
+    default: 'UbuntuServer'
+    type: string
+  sku:
+    default: 12.04.5-LTS
+    type: string
+  version:
+    default: 'latest'
+    type: string
+  flavor_id:
+    default: 'Standard_A1'
+    type: string
+  compute_name:
+    type: string
+  network_interface_name:
+    type: string
+  public_ip_name:
+    type: string
+  storage_account_name:
+    type: string
+  compute_user:
+    default: 'administrateur'
+    type: string
+  compute_password:
+    type: string
+  public_key:
+    type: string
+  account_type:
+    default: 'Standard_LRS'
+    type: string
+  compute_disks:
+    default: {}
 
 node_templates:
-    compute_node:
-        type: cloudify.azure.nodes.Instance
-        properties:
-            cloudify_agent:
-                default:
-                    user: { get_input: compute_user }
-            publisher_name: { get_input: publisher_name }
-            offer: { get_input: offer }
-            sku: { get_input: sku }
-            version: { get_input: version }
-            flavor_id: { get_input: flavor_id }
-            compute_name: {get_input: compute_name}
-            storage_account_name: {get_input: storage_account_name}
-            compute_user: {get_input: compute_user}
-            compute_password: {get_input: compute_password}
-            public_key: { get_input: public_key }
-            virtual_network_name: { get_input: virtual_network_name}
-            subnet_name: { get_input: subnet_name }
-    
-        relationships:
-          - type: cloudify.azure.relationships.instance_connected_to_storage_account
-            target: compute_storage_account
-        
-    compute_storage_account:
-        type: cloudify.azure.nodes.StorageAccount
-        properties:
-            storage_account_name: {get_input: storage_account_name}
-            account_type: {get_input: account_type}
+  compute_instance:
+    type: cloudify.azure.nodes.Instance
+    properties:
+      cloudify_agent:
+        default:
+          user: { get_input: compute_user }
+      publisher_name: { get_input: publisher_name }
+      offer: { get_input: offer }
+      sku: { get_input: sku }
+      version: { get_input: version }
+      flavor_id: { get_input: flavor_id }
+      compute_name: {get_input: compute_name}
+      storage_account_name: {get_input: storage_account_name}
+      compute_user: {get_input: compute_user}
+      compute_password: {get_input: compute_password}
+      public_key: { get_input: public_key }
+    relationships:
+      - target: compute_nic
+        type: cloudify.azure.relationships.instance_connected_to_nic
 
-    compute_disk:
-        type: cloudify.azure.nodes.Datadisks
-        properties:
-            storage_account_name: {get_input: storage_account_name}
-            compute_name: {get_input: compute_name}
-            disks: { get_input: compute_disks }
-        relationships:
-            - target: compute_node
-              type: cloudify.azure.relationships.disk_attach_to_instance
+  compute_nic:
+    type: cloudify.azure.nodes.NetworkInterfaceCard
+    properties:
+      network_interface_name: {get_input: network_interface_name}
+    relationships:
+      - target: compute_public_ip
+        type: cloudify.azure.relationships.nic_connected_to_public_ip
+
+  compute_public_ip:
+    type: cloudify.azure.nodes.PublicIP
+    properties:
+      public_ip_name: {get_input: public_ip_name}
+
+  compute_disk:
+    type: cloudify.azure.nodes.Datadisks
+    properties:
+      storage_account_name: {get_input: storage_account_name}
+      compute_name: {get_input: compute_name}
+      disks: { get_input: compute_disks }
+    relationships:
+      - target: compute_instance
+        type: cloudify.azure.relationships.disk_attach_to_instance
 
