@@ -14,7 +14,8 @@ from plugin import (utils,
 
 from cloudify.state import current_ctx
 from cloudify.mocks import (MockContext,
-                            MockCloudifyContext
+                            MockCloudifyContext,
+                            MockNodeInstanceContext
                             )
 
 TIME_DELAY = 20
@@ -123,12 +124,26 @@ class TestNIC(testtools.TestCase):
         )
 
     @classmethod
-    def mock_relationship_ctx(self, test_name):
+    def mock_relationship_ctx(self, test_name, subnet_id):
         """ Creates a mock relationship context for the nic
             tests
         """
+        prop = {constants.AZURE_CONFIG_KEY: {
+                            constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
+                            constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
+                            constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
+                            constants.LOCATION_KEY: 'westeurope',
+                            constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test'
+                        },
+                        constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test',
+                        constants.NETWORK_INTERFACE_KEY: test_name,
+                        constants.DELETABLE_KEY: True
+                    }
+        run_prop = {'subnet_id': subnet_id}
 
-        source = MockContext({
+        source = MockCloudifyContext(properties=prop, runtime_properties=run_prop)
+        '''
+        MockContext({
             'node': MockContext({
                 'properties': {
                     constants.AZURE_CONFIG_KEY:{
@@ -142,13 +157,15 @@ class TestNIC(testtools.TestCase):
                     constants.NETWORK_INTERFACE_KEY: test_name,
                     constants.DELETABLE_KEY: True
                 }
+            }),
+            'instance': MockContext({
+                'runtime_properties': {
+                        'subnet_id': subnet_id
+                    }
             })
         })
-
-        target = MockContext({
-            'node': MockContext({
-                'properties': {
-                    constants.AZURE_CONFIG_KEY:{
+        '''
+        prop = {constants.AZURE_CONFIG_KEY:{
                         constants.SUBSCRIPTION_KEY: test_utils.SUBSCRIPTION_ID,
                         constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                         constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
@@ -158,15 +175,18 @@ class TestNIC(testtools.TestCase):
                     constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test',
                     constants.PUBLIC_IP_KEY: 'nic_public_ip_test',
                     constants.DELETABLE_KEY: True
-                }
-            })
-        })
+            }
+        run_prop = {'prop1': 'prop'}
 
-        return test_mockcontext.MockCloudifyContextRelationships(
-            node_id='test',
-            source=source,
-            target=target
-        )
+        target = MockCloudifyContext(properties=prop, runtime_properties=run_prop)
+
+        return MockCloudifyContext(
+                    node_id='test_rel',
+                    node_name='test_rel',
+                    properties={},
+                    source=source,
+                    target=target
+                )
 
     def setUp(self):
         super(TestNIC, self).setUp()
@@ -199,37 +219,37 @@ class TestNIC(testtools.TestCase):
         
         ctx.logger.info("END create NIC test")
 
-    # def test_add_public_ip(self):
-    #     ctx = self.mock_ctx('testaddpublicip')
-    #     current_ctx.set(ctx=ctx)
-    #     ctx.logger.info("BEGIN attach public_ip to NIC test")
-    #
-    #     ctx.logger.info("create NIC")
-    #     nic.create(ctx=ctx)
-    #     current_ctx.set(ctx=ctx)
-    #     utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
-    #
-    #     ctx.logger.info("attach public_ip to NIC")
-    #
-    #
-    #     relation_ctx=self.mock_relationship_ctx('testaddpublicip')
-    #     current_ctx.set(ctx=relation_ctx)
-    #     nic.add_public_ip(ctx=relation_ctx)
-    #
-    #     current_ctx.set(ctx=ctx)
-    #     utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
-    #
-    #     ctx.logger.info("delete NIC")
-    #     self.assertEqual(202, nic.delete(ctx=ctx))
-    #
-    #     ctx.logger.info("check is NIC is release")
-    #     current_ctx.set(ctx=ctx)
-    #     self.assertRaises(utils.WindowsAzureError,
-    #                      nic.get_provisioning_state,
-    #                      ctx=ctx
-    #                      )
-    #
-    #     ctx.logger.info("END create NIC test")
+    def test_add_public_ip(self):
+        ctx = self.mock_ctx('testaddpublicip')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN attach public_ip to NIC test")
+    
+        ctx.logger.info("create NIC")
+        nic.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
+    
+        ctx.logger.info("attach public_ip to NIC: {}".format(ctx.instance.runtime_properties['subnet_id']))
+
+        ctx_rel = self.mock_relationship_ctx('testaddpublicip', str(ctx.instance.runtime_properties['subnet_id']))
+        current_ctx.set(ctx=ctx_rel)
+        ctx_rel.logger.info("Source node NIC key: {}".format(ctx_rel.source.node.properties[constants.NETWORK_INTERFACE_KEY]))
+        nic.add_public_ip(ctx=ctx_rel)
+
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
+        
+        ctx.logger.info("delete NIC")
+        self.assertEqual(202, nic.delete(ctx=ctx))
+    
+        ctx.logger.info("check is NIC is release")
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(utils.WindowsAzureError,
+                          nic.get_provisioning_state,
+                          ctx=ctx
+                          )
+    
+        ctx.logger.info("END create NIC test")
     
     def test_delete(self):
         ctx = self.mock_ctx('testdeletenic')
