@@ -14,7 +14,8 @@ from plugin import (utils,
 
 from cloudify.state import current_ctx
 from cloudify.mocks import (MockContext,
-                            MockCloudifyContext
+                            MockCloudifyContext,
+                            MockNodeInstanceContext
                             )
 
 TIME_DELAY = 20
@@ -199,37 +200,37 @@ class TestNIC(testtools.TestCase):
         
         ctx.logger.info("END create NIC test")
 
-    # def test_add_public_ip(self):
-    #     ctx = self.mock_ctx('testaddpublicip')
-    #     current_ctx.set(ctx=ctx)
-    #     ctx.logger.info("BEGIN attach public_ip to NIC test")
-    #
-    #     ctx.logger.info("create NIC")
-    #     nic.create(ctx=ctx)
-    #     current_ctx.set(ctx=ctx)
-    #     utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
-    #
-    #     ctx.logger.info("attach public_ip to NIC")
-    #
-    #
-    #     relation_ctx=self.mock_relationship_ctx('testaddpublicip')
-    #     current_ctx.set(ctx=relation_ctx)
-    #     nic.add_public_ip(ctx=relation_ctx)
-    #
-    #     current_ctx.set(ctx=ctx)
-    #     utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
-    #
-    #     ctx.logger.info("delete NIC")
-    #     self.assertEqual(202, nic.delete(ctx=ctx))
-    #
-    #     ctx.logger.info("check is NIC is release")
-    #     current_ctx.set(ctx=ctx)
-    #     self.assertRaises(utils.WindowsAzureError,
-    #                      nic.get_provisioning_state,
-    #                      ctx=ctx
-    #                      )
-    #
-    #     ctx.logger.info("END create NIC test")
+    def test_add_public_ip(self):
+        ctx = self.mock_ctx('testaddpublicip')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN attach public_ip to NIC test")
+    
+        ctx.logger.info("create NIC")
+        nic.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
+    
+        ctx.logger.info("attach public_ip to NIC: {}".format(ctx.instance.runtime_properties['subnet_id']))
+
+        ctx_rel = self.mock_relationship_ctx('testaddpublicip', str(ctx.instance.runtime_properties['subnet_id']))
+        current_ctx.set(ctx=ctx_rel)
+        ctx_rel.logger.info("Source node NIC key: {}".format(ctx_rel.source.node.properties[constants.NETWORK_INTERFACE_KEY]))
+        nic.add_public_ip(ctx=ctx_rel)
+
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
+        
+        ctx.logger.info("delete NIC")
+        self.assertEqual(202, nic.delete(ctx=ctx))
+    
+        ctx.logger.info("check is NIC is release")
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(utils.WindowsAzureError,
+                          nic.get_provisioning_state,
+                          ctx=ctx
+                          )
+    
+        ctx.logger.info("END create NIC test")
     
     def test_delete(self):
         ctx = self.mock_ctx('testdeletenic')
