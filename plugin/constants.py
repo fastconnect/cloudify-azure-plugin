@@ -103,6 +103,9 @@ SKU_VERSION_KEY = 'version'
 CREATE_OPTION_KEY = 'create_option'
 DISKS_KEY = 'disks'
 
+AVAILABILITY_SET_KEY = 'availability_set_name'
+AVAILABILITY_ID_KEY = 'availability_set_id'
+
 DELETABLE_KEY = 'deletable'
 
 # RELATIONSHIPS KEYS
