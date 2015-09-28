@@ -21,61 +21,52 @@ imports:
 #####################################################################################
 
 inputs:
-    subscription_id:
-        type: string
-    username:
-        type: string
-    password:
-        type: string
-    location:   
-        default: 'westeurope'
-        type: string
-    publisher_name:
-        default: 'Canonical'
-        type: string
-    offer:
-        default: 'UbuntuServer'
-        type: string
-    sku:
-        default: 12.04.5-LTS
-        type: string
-    version:
-        default: 'latest'
-        type: string
-    flavor_id:
-        default: 'Standard_A1'
-        type: string
-    node_js_compute_name:
-        default: 'node-js-host'
-        type: string
-    mongod_compute_name:
-        default: 'mongod-host'
-        type: string
-    virtual_network_name:
-        type: string
-    subnet_name:
-        type: string
-    compute_user:
-        default: 'administrateur'
-        type: string
-    compute_password:
-        type: string
-    public_key:
-        type: string
-    resource_group_name:
-        type: string
-    mongod_storage_account_name:
-        type: string
-    nodejs_storage_account_name:
-        type: string
-    account_type:
-        type: string
-    mongod_storage_account_deletable:
-        default: False
-        type: boolean
-    nodejs_storage_account_deletable:
-        default: False
-        type: boolean  
+  publisher_name:
+    default: 'Canonical'
+    type: string
+  offer:
+    default: 'UbuntuServer'
+    type: string
+  sku:
+    default: '14.04.3-LTS'
+    type: string
+  version:
+    default: 'latest'
+    type: string
+  flavor_id:
+    default: 'Standard_A1'
+    type: string
+  node_js_compute_name:
+    default: 'node-js-host'
+    type: string
+  mongod_compute_name:
+    default: 'mongod-host'
+    type: string
+  mongod_network_interface_name:
+    default: 'mongod_nic'
+    type: string
+  nodejs_network_interface_name:
+    default: 'nodejs_nic'
+    type: string
+  nodejs_public_ip_name:
+    default: 'nodejs_public_ip'
+    type: string
+  compute_user:
+    default: 'administrateur'
+    type: string
+  compute_password:
+    default: 'Azerty@01'
+    type: string
+  public_key:
+    type: string
+  storage_account_name:
+    type: string
+  account_type:
+    default: 'Standard_LRS'
+    type: string
+  mongod_disks:
+    default: {}
+
 node_types:
 
   ###########################################################
@@ -99,15 +90,15 @@ node_types:
       ###########################################################
 
       cloudify.interfaces.monitoring_agent:
-          install:
-            implementation: diamond.diamond_agent.tasks.install
-            inputs:
-              diamond_config:
-                default:
-                  interval: 1
-          start: diamond.diamond_agent.tasks.start
-          stop: diamond.diamond_agent.tasks.stop
-          uninstall: diamond.diamond_agent.tasks.uninstall
+        install:
+          implementation: diamond.diamond_agent.tasks.install
+          inputs:
+            diamond_config:
+              default:
+                interval: 1
+        start: diamond.diamond_agent.tasks.start
+        stop: diamond.diamond_agent.tasks.stop
+        uninstall: diamond.diamond_agent.tasks.uninstall
 
       ###########################################################
       # Adding some collectors. These collectors are necessary
@@ -115,62 +106,82 @@ node_types:
       ###########################################################
 
       cloudify.interfaces.monitoring:
-          start:
-            implementation: diamond.diamond_agent.tasks.add_collectors
-            inputs:
-              collectors_config:
-                default:
-                  CPUCollector: {}
-                  MemoryCollector: {}
-                  LoadAverageCollector: {}
-                  DiskUsageCollector:
-                    config:
-                      devices: x?vd[a-z]+[0-9]*$
-                  NetworkCollector: {}
+        start:
+          implementation: diamond.diamond_agent.tasks.add_collectors
+          inputs:
+            collectors_config:
+              default:
+                CPUCollector: {}
+                MemoryCollector: {}
+                LoadAverageCollector: {}
+                DiskUsageCollector:
+                  config:
+                    devices: x?vd[a-z]+[0-9]*$
+                NetworkCollector: {}
 
 node_templates:
 
   mongod_host:
     type: nodecellar.nodes.MonitoredServer
     properties:
-      subscription_id: { get_input: subscription_id }
-      username: { get_input: username }
-      password: { get_input: password }
-      location: { get_input: location }
       publisher_name: { get_input: publisher_name }
       offer: { get_input: offer }
       sku: { get_input: sku }
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: mongod_compute_name}
-      virtual_network_name: { get_input: virtual_network_name}
-      subnet_name: { get_input: subnet_name }
       storage_account_name: {get_input: mongod_storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
-      resource_group_name: {get_input: resource_group_name}
       public_key: { get_input: public_key }
+    relationships:
+      - target: mongod_nic
+        type: cloudify.azure.relationships.instance_connected_to_nic
 
   nodejs_host:
     type: nodecellar.nodes.MonitoredServer
     properties:
-      subscription_id: { get_input: subscription_id }
-      username: { get_input: username }
-      password: { get_input: password }
-      location: { get_input: location }
       publisher_name: { get_input: publisher_name }
       offer: { get_input: offer }
       sku: { get_input: sku }
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: node_js_compute_name}
-      virtual_network_name: { get_input: virtual_network_name}
-      subnet_name: { get_input: subnet_name }
       storage_account_name: {get_input: nodejs_storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
-      resource_group_name: {get_input: resource_group_name}
       public_key: { get_input: public_key }
+    relationships:
+      - target: nodejs_nic
+        type: cloudify.azure.relationships.instance_connected_to_nic
+
+  mongod_nic:
+    type: cloudify.azure.nodes.NetworkInterfaceCard
+    properties:
+      network_interface_name: {get_input: mongod_network_interface_name}
+
+  nodejs_nic:
+    type: cloudify.azure.nodes.NetworkInterfaceCard
+    properties:
+      network_interface_name: {get_input: nodejs_network_interface_name}
+    relationships:
+      - target: nodejs_public_ip
+        type: cloudify.azure.relationships.nic_connected_to_public_ip
+
+  nodejs_public_ip:
+    type: cloudify.azure.nodes.PublicIP
+    properties:
+      public_ip_name: {get_input: nodejs_public_ip_name}
+
+  mongod_disk:
+    type: cloudify.azure.nodes.Datadisks
+    properties:
+      storage_account_name: {get_input: storage_account_name}
+      compute_name: {get_input: mongod_compute_name}
+      disks: { get_input: mongod_disks }
+    relationships:
+      - target: mongod_host
+        type: cloudify.azure.relationships.disk_attach_to_instance
 
   mongod:
     type: nodecellar.nodes.MongoDatabase
@@ -193,13 +204,13 @@ node_templates:
       ###########################################################
 
       cloudify.interfaces.monitoring:
-          start:
-            implementation: diamond.diamond_agent.tasks.add_collectors
-            inputs:
-              collectors_config:
-                MongoDBCollector:
-                  config:
-                    hosts: "localhost:27017"
+        start:
+          implementation: diamond.diamond_agent.tasks.add_collectors
+          inputs:
+            collectors_config:
+              MongoDBCollector:
+                config:
+                  hosts: "localhost:27017"
     relationships:
       - type: cloudify.relationships.contained_in
         target: mongod_host
@@ -233,31 +244,6 @@ node_templates:
 
       - type: node_contained_in_nodejs
         target: nodejs
-
-
-  mongod_storage_account:
-        type: cloudify.azure.nodes.StorageAccount
-        properties:
-            subscription_id: { get_input: subscription_id }
-            location: { get_input: location }
-            username: { get_input: username }
-            password: { get_input: password }
-            resource_group_name: {get_input: resource_group_name}
-            storage_account_name: {get_input: mongod_storage_account_name}
-            account_type: {get_input: account_type}
-            deletable: {get_input: mongod_storage_account_deletable}
-
-  nodejs_storage_account:
-        type: cloudify.azure.nodes.StorageAccount
-        properties:
-            subscription_id: { get_input: subscription_id }
-            location: { get_input: location }
-            username: { get_input: username }
-            password: { get_input: password }
-            resource_group_name: {get_input: resource_group_name}
-            storage_account_name: {get_input: nodejs_storage_account_name}
-            account_type: {get_input: account_type}
-            deletable: {get_input: nodejs_storage_account_deletable}
 
 ###########################################################
 # This outputs section exposes the application endpoint.

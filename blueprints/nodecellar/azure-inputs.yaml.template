@@ -1,6 +1,3 @@
-subscription_id: ''
-username: ''
-password: ''
 flavor_id: ''
 publisher_name: ''
 offer: ''
@@ -11,11 +8,15 @@ compute_user: ''
 compute_password: ''
 public_key: |
 
-resource_group_name: ''
-virtual_network_name: ''
-subnet_name: ''
-account_type: ''
-mongod_storage_account_name: ''
-nodejs_storage_account_name: ''
-mongod_storage_account_deletable: false
-nodejs_storage_account_deletable: false
+storage_account_name: ''
+mongod_network_interface_name: ''
+nodejs_network_interface_name: ''
+nodejs_public_ip_name: ''
+
+# mongod_disks: ''
+# To add disks to the machine, make a list of disk with these properties:
+# name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)
+# Example:
+# disks:
+#   - { name: 'datadisk-1', size: 100, attache: False, caching: 'None' }
+#   - { name: 'datadisk-2', size: 500, attache: False, caching: 'ReadWrite' }

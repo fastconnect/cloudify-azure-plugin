@@ -12,7 +12,7 @@ inputs:
     default: 'UbuntuServer'
     type: string
   sku:
-    default: 12.04.5-LTS
+    default: '14.04.3-LTS'
     type: string
   version:
     default: 'latest'
