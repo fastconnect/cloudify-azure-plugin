@@ -30,6 +30,24 @@ node_types:
         delete:
           implementation: azure.plugin.resource_group.delete
 
+  cloudify.azure.nodes.AvailabilitySet:
+    derived_from: cloudify.nodes.Root
+    properties:
+      availability_set_name:
+        type: string
+        default: ''
+      azure_config:
+        default: {}
+      deletable:
+        type: boolean
+        default: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.availability_set.create
+        delete:
+          implementation: azure.plugin.availability_set.delete
+
   cloudify.azure.nodes.StorageAccount:
     derived_from: cloudify.nodes.Root
     properties:
@@ -198,6 +216,9 @@ relationships:
     derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.network_contained_in_resource_group:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.azure.relationships.availability_set_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.subnet_connected_to_network:
