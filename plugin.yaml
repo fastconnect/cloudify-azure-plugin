@@ -215,10 +215,10 @@ relationships:
   cloudify.azure.relationships.storage_account_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
-  cloudify.azure.relationships.network_contained_in_resource_group:
+  cloudify.azure.relationships.availability_set_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
-  cloudify.azure.relationships.availability_set_contained_in_resource_group:
+  cloudify.azure.relationships.network_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.subnet_connected_to_network:
@@ -238,6 +238,9 @@ relationships:
     derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.instance_contained_in_resource_group:
+    derived_from: cloudify.relationships.contained_in
+
+  cloudify.azure.relationships.instance_contained_in_availability_set:
     derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.instance_depends_on_storage_account:

@@ -147,8 +147,6 @@ node_templates:
       azure_config: { get_property: [azure_configuration, azure_config] }
       install_agent: false
     relationships:
-      - target: manager_resource_group
-        type: cloudify.azure.relationships.instance_contained_in_resource_group
       - target: manager_storage_account
         type: cloudify.azure.relationships.instance_depends_on_storage_account
       - target: manager_nic

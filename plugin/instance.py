@@ -129,6 +129,18 @@ def create(**_):
         }
     }
 
+    try:
+        ctx.logger.debug("Search for an availability_set")
+        availability_set_id = utils.get_target_property(ctx,
+            constants.INSTANCE_CONTAINED_IN_AVAILABILITY_SET,
+            constants.AVAILABILITY_ID_KEY
+        )
+        ctx.logger.debug("availability_set found: {}".format(availability_set_id))
+        json['properties']['availabilitySet']={'id': str(availability_set_id)}
+    except:
+        ctx.logger.debug('Instance not contained in an availability set')
+        pass
+
     ctx.logger.debug('JSON: {}'.format(json))
     ctx.logger.info('Beginning vm creation: {}'.format(ctx.instance.id))
     

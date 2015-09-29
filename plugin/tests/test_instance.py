@@ -10,6 +10,7 @@ import Queue
 from plugin import (utils,
                     constants,
                     resource_group,
+                    availability_set,
                     public_ip,
                     nic,
                     network,
@@ -137,7 +138,9 @@ class TestInstance(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test'
+                constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test',
+                constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test',
+                constants.SUBNET_KEY: 'instancesubnet_test',
             },
             constants.PUBLISHER_KEY: 'Canonical',
             constants.OFFER_KEY: 'UbuntuServer',
@@ -152,6 +155,7 @@ class TestInstance(testtools.TestCase):
             constants.STORAGE_ACCOUNT_KEY: 'instancestraccounttest',
             constants.CREATE_OPTION_KEY:'FromImage',
             constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test',
+            constants.AVAILABILITY_SET_KEY: 'instanceavailability_set_test',
             constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test',
             constants.SUBNET_KEY: 'instancesubnet_test',
             'resources_prefix': 'instanceprefix',
@@ -203,7 +207,7 @@ class TestInstance(testtools.TestCase):
         time.sleep(TIME_DELAY)
 
     def test_create_instance(self):
-        ctx = self.mock_ctx('testcreate')
+        ctx = self.mock_ctx('testcreateinstance')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create VM test: {}".format(ctx.instance.id))
         ctx.logger.info("create VM") 
@@ -217,8 +221,47 @@ class TestInstance(testtools.TestCase):
 
         ctx.logger.info("END create VM test")
 
+    def test_add_availability_set_instance(self):
+        ctx = self.mock_ctx('testaddavailabilityinstance')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN add availability set VM test: {}".format(ctx.instance.id))
+
+        ctx.logger.info("create availability_set")
+        self.assertEqual(200, availability_set.create(ctx=ctx))
+        ctx.logger.debug("availability_set_id = {}".format(
+            ctx.instance.runtime_properties[constants.AVAILABILITY_ID_KEY]))
+
+        ctx.instance.relationships.append(test_mockcontext.MockRelationshipContext(node_id='test',
+            runtime_properties={
+                constants.AVAILABILITY_ID_KEY:\
+                     ctx.instance.runtime_properties[constants.AVAILABILITY_ID_KEY]
+            },
+            type=constants.INSTANCE_CONTAINED_IN_AVAILABILITY_SET)
+        )
+
+        ctx.logger.info("create VM")
+        instance.create(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
+
+        current_ctx.set(ctx=ctx)
+        json = instance.get_json_from_azure(ctx=ctx)
+        self.assertIsNotNone(json['properties']['availabilitySet'])
+        self.assertEqual(str(json['properties']['availabilitySet']['id']).lower(),
+            str(ctx.instance.runtime_properties[constants.AVAILABILITY_ID_KEY]).lower()
+        )
+
+        ctx.logger.info("delete VM")
+        self.assertEqual(202, instance.delete(ctx=ctx))
+
+        ctx.logger.info("delete availability_set")
+        self.assertEqual(200, availability_set.delete(ctx=ctx))
+
+        ctx.logger.info("END create VM test")
+
     def test_delete_instance(self):    
-        ctx = self.mock_ctx('testdelete')
+        ctx = self.mock_ctx('testdeleteinstance')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN delete VM test")
     
@@ -233,7 +276,7 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("END delete VM test")
 
     def test_conflict_instance(self):
-        ctx = self.mock_ctx('testconflict')
+        ctx = self.mock_ctx('testconflictinstance')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN conflict VM test")
 

@@ -109,9 +109,11 @@ AVAILABILITY_ID_KEY = 'availability_set_id'
 DELETABLE_KEY = 'deletable'
 
 # RELATIONSHIPS KEYS
-STORAGE_ACCOUNT_CONNECTED_TO_RESOURCE_GROUP = \
+STORAGE_ACCOUNT_CONTAINED_IN_RESOURCE_GROUP = \
     'cloudify.azure.relationships.storage_account_contained_in_resource_group'
-NETWORK_CONNECTED_TO_RESOURCE_GROUP = \
+AVAILABILITY_SET_CONTAINED_IN_RESOURCE_GROUP = \
+    'cloudify.azure.relationships.availability_set_contained_in_resource_group'
+NETWORK_CONTAINED_IN_RESOURCE_GROUP = \
     'cloudify.azure.relationships.network_contained_in_resource_group'
 SUBNET_CONNECTED_TO_NETWORK = \
     'cloudify.azure.relationships.subnet_connected_to_network'
@@ -119,8 +121,10 @@ NIC_CONNECTED_TO_SUBNET = \
     'cloudify.azure.relationships.nic_connected_to_subnet'
 NIC_CONNECTED_TO_PUBLIC_IP = \
     'cloudify.azure.relationships.nic_connected_to_public_ip'
-INSTANCE_CONNECTED_TO_RESOURCE_GROUP = \
+INSTANCE_CONTAINED_IN_RESOURCE_GROUP = \
     'cloudify.azure.relationships.instance_contained_in_resource_group'
+INSTANCE_CONTAINED_IN_AVAILABILITY_SET = \
+    'cloudify.azure.relationships.instance_contained_in_availability_set'
 INSTANCE_CONNECTED_TO_STORAGE_ACCOUNT = \
     'cloudify.azure.relationships.instance_depends_on_storage_account'
 INSTANCE_CONNECTED_TO_NIC = \
