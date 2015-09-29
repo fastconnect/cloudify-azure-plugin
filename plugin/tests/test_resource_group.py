@@ -1,6 +1,7 @@
 ﻿import testtools
 import time
 import test_utils
+import random
 
 from plugin import (utils,
                     constants,
@@ -14,6 +15,15 @@ TIME_DELAY = 20
 
 class TestResourceGroup(testtools.TestCase):
 
+    __random_id = str(random.randrange(0, 1000, 2))
+    
+    @classmethod
+    def setUpClass(self):
+        ctx = self.mock_ctx('init')
+        ctx.logger.info("BEGIN test ressource_group number "\
+                                + self.__random_id)
+
+    @classmethod
     def mock_ctx(self, test_name):
         """ Creates a mock context for the instance
             tests
@@ -25,13 +35,15 @@ class TestResourceGroup(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: test_name,
+                constants.RESOURCE_GROUP_KEY: test_name +\
+                                                self.__random_id,
             },
-            constants.RESOURCE_GROUP_KEY: test_name,
+            constants.RESOURCE_GROUP_KEY: test_name +\
+                                            self.__random_id,
             constants.DELETABLE_KEY: True
         }
 
-        return MockCloudifyContext(node_id = 'test',
+        return MockCloudifyContext(node_id = 'test' + self.__random_id,
                                    properties = test_properties)
 
     def setUp(self):
@@ -52,14 +64,15 @@ class TestResourceGroup(testtools.TestCase):
         ctx.logger.debug("status_code = " + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "resource_group",constants.SUCCEEDED, 600)  
+        utils.wait_status(ctx, "resource_group",constants.SUCCEEDED, timeout=600)  
 
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("delete resource_group")
         self.assertEqual(202, resource_group.delete(ctx=ctx))
+        
         try:
-
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, "resource_group","deleting", 600)
+            utils.wait_status(ctx, "resource_group","waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
 
@@ -76,14 +89,15 @@ class TestResourceGroup(testtools.TestCase):
         ctx.logger.debug("status_code = " + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "resource_group",constants.SUCCEEDED, 600)      
+        utils.wait_status(ctx, "resource_group",constants.SUCCEEDED, timeout=600)      
 
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("delete resource_group")
         self.assertEqual(202, resource_group.delete(ctx=ctx))
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, "resource_group","deleting", 600)
+            utils.wait_status(ctx, "resource_group","waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
 
@@ -94,20 +108,21 @@ class TestResourceGroup(testtools.TestCase):
         ctx.logger.debug("status_code = " + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "resource_group",constants.SUCCEEDED, 600)  
+        utils.wait_status(ctx, "resource_group",constants.SUCCEEDED, timeout=600)  
 
         ctx.logger.info("not delete resource_group")
+        current_ctx.set(ctx=ctx)
         self.assertEqual(0, resource_group.delete(ctx=ctx))
-
-        ctx.logger.info("Set deletable propertie to True")
-        ctx.node.properties[constants.DELETABLE_KEY] = True
-
+        
         ctx.logger.info("delete resource_group")
+        ctx.logger.info("Set deletable propertie to True")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[constants.DELETABLE_KEY] = True
         self.assertEqual(202, resource_group.delete(ctx=ctx))
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, "resource_group","deleting", 600)
+            utils.wait_status(ctx, "resource_group","waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
 
@@ -117,13 +132,12 @@ class TestResourceGroup(testtools.TestCase):
         ctx = self.mock_ctx('conflictgroup')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN resource_group conflict test")
-
         ctx.logger.info("create resource group")
         status_code = resource_group.create(ctx=ctx)
         ctx.logger.debug("status_code = " + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "resource_group",constants.SUCCEEDED, 600)    
+        utils.wait_status(ctx, "resource_group",constants.SUCCEEDED, timeout=600)    
 
         ctx.logger.info("conflict create resource group")
         status_code = resource_group.create(ctx=ctx)
@@ -131,11 +145,12 @@ class TestResourceGroup(testtools.TestCase):
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
 
         ctx.logger.info("delete resource_group")
+        current_ctx.set(ctx=ctx)
         self.assertEqual(202, resource_group.delete(ctx=ctx))
         
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, "resource_group","deleting", 600)
+            utils.wait_status(ctx, "resource_group","waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
 

@@ -1,6 +1,7 @@
 ﻿import testtools
 import time
 import test_utils
+import random
 
 from plugin import (utils,
                     constants,
@@ -15,9 +16,13 @@ TIME_DELAY = 20
 
 class TestStorage(testtools.TestCase):
 
+    __random_id = str(random.randrange(0, 1000, 2))
+
     @classmethod
     def setUpClass(self): 
         ctx = self.mock_ctx('init')
+        ctx.logger.info("BEGIN test storage number "\
+                                + self.__random_id)
         ctx.logger.info("CREATE storage_account\'s required resources")
         current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
@@ -41,10 +46,12 @@ class TestStorage(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'storageresource_group_test'
-            },
-            constants.RESOURCE_GROUP_KEY: 'storageresource_group_test',
-            constants.STORAGE_ACCOUNT_KEY: test_name,
+                constants.RESOURCE_GROUP_KEY: 'storageresource_group_test'+\
+                                                self.__random_id
+            
+            constants.RESOURCE_GROUP_KEY: 'storageresource_group_test'+\
+                                            self.__random_id,
+            constants.STORAGE_ACCOUNT_KEY: test_name + self.__random_id,
             constants.ACCOUNT_TYPE_KEY: 'Standard_LRS', #Standard_LRS|Standard_ZRS|Standard_GRS|Standard_RAGRS|Premium_LRS
             constants.DELETABLE_KEY: True
         }
@@ -70,7 +77,7 @@ class TestStorage(testtools.TestCase):
         ctx.logger.info("status_code : " + str(status_code))
         self.assertTrue(bool((status_code == 200) | (status_code == 202)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "storage",constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "storage",constants.SUCCEEDED, timeout=600)
         ctx.logger.info("Storage Account Created")
 
         self.assertEqual(200, storage.delete(ctx=ctx))
@@ -94,27 +101,10 @@ class TestStorage(testtools.TestCase):
         ctx.logger.info("status_code : " + str(status_code))
         self.assertTrue(bool((status_code == 200) | (status_code == 202)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "storage",constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "storage",constants.SUCCEEDED, timeout=600)
 
-        self.assertEqual(200, storage.delete(ctx=ctx))
-
-        ctx.logger.info("Checking Storage Account deleted")
-        current_ctx.set(ctx=ctx)
-        self.assertRaises(utils.WindowsAzureError,
-            storage.get_provisioning_state,
-            ctx=ctx
-        )
-        ctx.logger.info("Storage Account Deleted")
-
+        ctx.logger.info("create storage with deletable propertie set to False")
         ctx.node.properties[constants.DELETABLE_KEY] = False
-
-        status_code = storage.create(ctx=ctx)
-        ctx.logger.info("status_code : " + str(status_code))
-        self.assertTrue(bool((status_code == 200) | (status_code == 202)))
-        ctx.logger.info("create storage with deletable propertie set to false")
-        
-        current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "storage", constants.SUCCEEDED, 900)
         
         ctx.logger.info("not delete storage")
         self.assertEqual(0, storage.delete(ctx=ctx))
@@ -145,7 +135,7 @@ class TestStorage(testtools.TestCase):
         ctx.logger.info("status_code : " + str(status_code))
         self.assertTrue(bool((status_code == 200) | (status_code == 202)))
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "storage", constants.SUCCEEDED, 600)
+        utils.wait_status(ctx, "storage", constants.SUCCEEDED, timeout=600)
         ctx.logger.info("Storage Account Created")
 
         ctx.logger.info("Conflict Creating Storage Account")

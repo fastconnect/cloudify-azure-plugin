@@ -2,6 +2,7 @@
 import time
 import test_utils
 import test_mockcontext
+import random
 
 from plugin import (utils,
                     constants,
@@ -16,10 +17,13 @@ TIME_DELAY = 20
 
 class TestSubnet(testtools.TestCase):
 
+    __random_id = str(random.randrange(0, 1000, 2))
+
     @classmethod
     def setUpClass(self): 
         ctx = self.mock_ctx('init')
-        ctx.logger.info("CREATE subnet\'s required resources")
+        ctx.logger.info("BEGIN test subnet number "\
+                                + self.__random_id)
         
         ctx.logger.info("CREATE resource_group")        
         current_ctx.set(ctx=ctx)
@@ -35,12 +39,6 @@ class TestSubnet(testtools.TestCase):
     def tearDownClass(self):
         ctx = self.mock_ctx('del')
         ctx.logger.info("DELETE subnet\'s required resources")
-
-        ctx.logger.info("DELETE network")
-        current_ctx.set(ctx=ctx)
-        ctx.node.properties[
-            constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
-        network.create(ctx=ctx)
         
         ctx.logger.info("DELETE resource_group")
         current_ctx.set(ctx=ctx)
@@ -57,17 +55,18 @@ class TestSubnet(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'subnetresource_group_test'
+                constants.RESOURCE_GROUP_KEY: 'subnetresource_group_test' +\
+                                                self.__random_id
             },
-            constants.RESOURCE_GROUP_KEY: 'subnetresource_group_test',
-            constants.SUBNET_KEY: test_name,
+            constants.RESOURCE_GROUP_KEY: 'subnetresource_group_test' + self.__random_id,
+            constants.SUBNET_KEY: test_name + self.__random_id,
             constants.SUBNET_ADDRESS_KEY: cdir,
-            constants.VIRTUAL_NETWORK_KEY: 'subnetnetwork_test',
+            constants.VIRTUAL_NETWORK_KEY: 'subnetnetwork_test'+self.__random_id,
             constants.DELETABLE_KEY: True
         }
 
         test_runtime = {
-            constants.VIRTUAL_NETWORK_KEY: 'subnetnetwork_test'
+            constants.VIRTUAL_NETWORK_KEY: 'subnetnetwork_test' + self.__random_id
         }
 
         test_relationships = [ 
@@ -76,8 +75,11 @@ class TestSubnet(testtools.TestCase):
                                 'relationship_type':\
                                     constants.SUBNET_CONNECTED_TO_NETWORK,
                                 'relationship_properties': \
-                                    {constants.VIRTUAL_NETWORK_KEY: \
-                                                    'subnetnetwork_test'}
+                                    {
+                                        constants.VIRTUAL_NETWORK_KEY: \
+                                                    'subnetnetwork_test'+\
+                                                    self.__random_id
+                                    }
                                 }
                              ]
 
@@ -104,26 +106,19 @@ class TestSubnet(testtools.TestCase):
         status_code = subnet.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "subnet",constants.SUCCEEDED, timeout=600)
 
-        status_subnet = constants.CREATING
-        while status_subnet != constants.SUCCEEDED :
-            current_ctx.set(ctx=ctx)
-            status_subnet = subnet.get_provisioning_state(ctx=ctx)
-            ctx.logger.info("Subnet status is " + status_subnet)
-            time.sleep(TIME_DELAY)
+        ctx.logger.info("Set deletable propertie to True")
+        current_ctx.set(ctx=ctx)
+        ctx.node.properties[constants.DELETABLE_KEY] = True 
+        status_code = subnet.delete(ctx=ctx)
+        ctx.logger.debug("status_code =" + str(status_code) )
+        self.assertTrue(bool((status_code == 202) or (status_code == 204)))
 
-        ctx.logger.info("Subnet Created")
-        self.assertEqual(constants.SUCCEEDED, status_subnet)
-
-
-
-
-        status_subnet = constants.DELETING
         try:
-            while status_subnet == constants.DELETING :
-                current_ctx.set(ctx=ctx)           
-                status_subnet = subnet.get_provisioning_state(ctx=ctx)
-                time.sleep(TIME_DELAY)
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "subnet", "waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
 
@@ -132,67 +127,33 @@ class TestSubnet(testtools.TestCase):
     def test_delete_subnet(self):
         ctx = self.mock_ctx('testdeletesubnet', cdir='10.0.3.0/24')
         ctx.logger.info("BEGIN test_delete_subnet")
+
         current_ctx.set(ctx=ctx)
         status_code = subnet.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-
-        status_subnet = constants.CREATING
-        while status_subnet != constants.SUCCEEDED :
-            current_ctx.set(ctx=ctx)
-            status_subnet = subnet.get_provisioning_state(ctx=ctx)
-            ctx.logger.info("Subnet status is " + status_subnet)
-            time.sleep(TIME_DELAY)
-
-        ctx.logger.info("Subnet Created")
-        self.assertEqual(constants.SUCCEEDED, status_subnet)
-
-        status_code = subnet.delete(ctx=ctx)
-        ctx.logger.debug("status_code =" + str(status_code) )
-        self.assertTrue(bool((status_code == 202) or (status_code == 204)))
-
-        ctx.logger.info("Checking Subnet deleted")
         current_ctx.set(ctx=ctx)
-        self.assertRaises(utils.WindowsAzureError,
-            subnet.get_provisioning_state,
-            ctx=ctx
-        )
+        utils.wait_status(ctx, "subnet",constants.SUCCEEDED, timeout=600)
 
-        ctx.logger.info("create subnet with deletable propertie set to false")
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("create subnet with deletable propertie set to False")
         ctx.node.properties[constants.DELETABLE_KEY] = False
-        current_ctx.set(ctx=ctx)
-        status_code = subnet.create(ctx=ctx)
-        ctx.logger.debug("status_code = " + str(status_code) )
-        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-
-        status_subnet = constants.CREATING
-        while status_subnet != constants.SUCCEEDED :
-            current_ctx.set(ctx=ctx)
-            status_subnet = subnet.get_provisioning_state(ctx=ctx)
-            ctx.logger.info("subnet status is " + status_subnet)
-            time.sleep(TIME_DELAY)
-          
         ctx.logger.info("not delete subnet")
         self.assertEqual(0, subnet.delete(ctx=ctx))
 
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("Set deletable propertie to True")
         ctx.node.properties[constants.DELETABLE_KEY] = True
-
-        ctx.logger.info("delete subnet")
         status_code = subnet.delete(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 202) or (status_code == 204)))
 
-        status_subnet = constants.DELETING
         try:
-            while status_subnet == constants.DELETING :
-                current_ctx.set(ctx=ctx)
-                status_subnet = subnet.get_provisioning_state(ctx=ctx)
-                ctx.logger.info("subnet status is " + status_subnet)
-                time.sleep(TIME_DELAY)
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "subnet", "waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
-
+          
         ctx.logger.info("END test_delete_subnet")
 
     def test_conflict_subnet(self):
@@ -203,62 +164,36 @@ class TestSubnet(testtools.TestCase):
         status_code = subnet.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-
-        status_subnet = constants.CREATING
-        while status_subnet != constants.SUCCEEDED :
-            current_ctx.set(ctx=ctx)
-            status_subnet = subnet.get_provisioning_state(ctx=ctx)
-            ctx.logger.info("Subnet status is " + status_subnet)
-            time.sleep(TIME_DELAY)
-
-        ctx.logger.info("Subnet Created")
-        self.assertEqual(constants.SUCCEEDED, status_subnet)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "subnet",constants.SUCCEEDED, timeout=600)
 
         ctx.logger.info("Conflict Creating Subnet")
+        current_ctx.set(ctx=ctx)
         self.assertNotEqual(201, subnet.create(ctx=ctx))
         ctx.logger.info("Conflict detected")
 
+        current_ctx.set(ctx=ctx)
         status_code = subnet.delete(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 202) or (status_code == 204)))
-
-        status_subnet = constants.DELETING
+    
         try:
-            while status_subnet == constants.DELETING :
-                current_ctx.set(ctx=ctx)
-                status_subnet = subnet.get_provisioning_state(ctx=ctx)
-                ctx.logger.info("Virtual subnet status is " + status_subnet)
-                time.sleep(TIME_DELAY)
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "subnet", "waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
-
-        ctx.logger.info("Checking Subnet deleted")
-        current_ctx.set(ctx=ctx)
-        self.assertRaises(utils.WindowsAzureError,
-            subnet.get_provisioning_state,
-            ctx=ctx
-        )
         ctx.logger.info("Subnet Deleted")
-
+        
+        current_ctx.set(ctx=ctx)
         status_code = subnet.delete(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 202) or (status_code == 204)))
-
-        status_subnet = constants.DELETING
+     
         try:
-            while status_subnet == constants.DELETING :
-                current_ctx.set(ctx=ctx)
-                status_subnet = subnet.get_provisioning_state(ctx=ctx)
-                ctx.logger.info("Virtual subnet status is " + status_subnet)
-                time.sleep(TIME_DELAY)
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "subnet", "waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
 
-        ctx.logger.info("check is Virtual subnet is release")
-        current_ctx.set(ctx=ctx)
-        self.assertRaises(utils.WindowsAzureError,
-            subnet.get_provisioning_state,
-            ctx=ctx
-        )
         ctx.logger.info("Virtual subnet Deleted")
         ctx.logger.info("END test_conflict_subnet")
