@@ -3,17 +3,17 @@ publisher_name: ''
 offer: ''
 sku: ''
 compute_name: ''
-storage_account_name: ''
 compute_user: ''
 compute_password: ''
 public_key: |
 
-resource_group_name: ''
-virtual_network_name: ''
-subnet_name: ''
+network_interface_name: ''
+public_ip_name: ''
+storage_account_name: ''
 account_type: ''
-storage_account_deletable: False
+# storage_account_deletable: False
 
+# compute_disks: ''
 # To add disks to the machine, make a list of disk with these properties:
 # name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)
 # Example:

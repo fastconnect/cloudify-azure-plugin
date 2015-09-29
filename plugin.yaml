@@ -85,6 +85,9 @@ node_types:
         default: ''
       azure_config:
         default: {}
+      deletable:
+        type: boolean
+        default: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -209,6 +212,9 @@ relationships:
       cloudify.interfaces.relationship_lifecycle:
         preconfigure:
           implementation: azure.plugin.nic.add_public_ip
+
+  cloudify.azure.relationships.public_ip_contained_in_resource_group:
+    derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.instance_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
