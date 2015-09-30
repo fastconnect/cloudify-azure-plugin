@@ -29,8 +29,7 @@ class TestNIC(testtools.TestCase):
     @classmethod
     def setUpClass(self): 
         ctx = self.mock_ctx('init')
-                ctx.logger.info("BEGIN test NIC number "\
-                                + self.__random_id)
+        ctx.logger.info("BEGIN test NIC number " + self.__random_id)
         ctx.logger.info("CREATE NIC\'s required resources")
 
         ctx.logger.info("CREATE ressource_group")
@@ -68,21 +67,21 @@ class TestNIC(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test' +\
-                                                self.__random_id,
-                constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test' +\
-                                                self.__random_id,
-                constants.SUBNET_KEY: 'nic_subnet_test' +\
-                                        self.__random_id
+                constants.RESOURCE_GROUP_KEY:\
+                    'nic_resource_group_test' + self.__random_id,
+                constants.VIRTUAL_NETWORK_KEY:\
+                    'nic_virtual_network_test' + self.__random_id,
+                constants.SUBNET_KEY:\
+                    'nic_subnet_test' + self.__random_id
             },
-            constants.RESOURCE_GROUP_KEY: 'nic_resource_group_test' +\
-                                            self.__random_id,
-            constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test' +\
-                                            self.__random_id,
-            constants.SUBNET_KEY: 'nic_subnet_test' +\
-                                    self.__random_id,
-            constants.NETWORK_INTERFACE_KEY: test_name +\
-                                            self.__random_id,
+            constants.RESOURCE_GROUP_KEY:\
+                'nic_resource_group_test' + self.__random_id,
+            constants.VIRTUAL_NETWORK_KEY:\
+                'nic_virtual_network_test' + self.__random_id,
+            constants.SUBNET_KEY:\
+                'nic_subnet_test' + self.__random_id,
+            constants.NETWORK_INTERFACE_KEY:\
+                test_name + self.__random_id,
             constants.DELETABLE_KEY: True
 
         }
@@ -95,16 +94,18 @@ class TestNIC(testtools.TestCase):
             {
                 'node_id': 'test',
                 'relationship_type': constants.SUBNET_CONNECTED_TO_NETWORK,
-                'relationship_properties': \
-                {constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test'}
+                'relationship_properties':\
+                    {constants.VIRTUAL_NETWORK_KEY:\
+                         'nic_virtual_network_test' + self.__random_id}
             },
             {
                 'node_id': 'test',
                 'relationship_type': constants.NIC_CONNECTED_TO_SUBNET,
-                'relationship_properties':\
+                'relationship_properties':
                     {
                         constants.SUBNET_KEY: 'nic_subnet_test',
-                        constants.VIRTUAL_NETWORK_KEY: 'nic_virtual_network_test'
+                        constants.VIRTUAL_NETWORK_KEY:\
+                            'nic_virtual_network_test' + self.__random_id
                     }
             },
             # {

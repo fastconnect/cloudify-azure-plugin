@@ -21,8 +21,7 @@ class TestStorage(testtools.TestCase):
     @classmethod
     def setUpClass(self): 
         ctx = self.mock_ctx('init')
-        ctx.logger.info("BEGIN test storage number "\
-                                + self.__random_id)
+        ctx.logger.info("BEGIN test storage number " + self.__random_id)
         ctx.logger.info("CREATE storage_account\'s required resources")
         current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
@@ -46,11 +45,11 @@ class TestStorage(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'storageresource_group_test'+\
-                                                self.__random_id
-            
-            constants.RESOURCE_GROUP_KEY: 'storageresource_group_test'+\
-                                            self.__random_id,
+                constants.RESOURCE_GROUP_KEY:\
+                    'storageresource_group_test' + self.__random_id,
+            },
+            constants.RESOURCE_GROUP_KEY:\
+                'storageresource_group_test' + self.__random_id,
             constants.STORAGE_ACCOUNT_KEY: test_name + self.__random_id,
             constants.ACCOUNT_TYPE_KEY: 'Standard_LRS', #Standard_LRS|Standard_ZRS|Standard_GRS|Standard_RAGRS|Premium_LRS
             constants.DELETABLE_KEY: True
