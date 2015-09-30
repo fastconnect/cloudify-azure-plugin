@@ -22,6 +22,8 @@ inputs:
     type: string
   compute_name:
     type: string
+  availability_set_name:
+    type: string
   network_interface_name:
     type: string
   public_ip_name:
@@ -42,6 +44,11 @@ inputs:
     default: {}
 
 node_templates:
+  compute_availability_set:
+    type: cloudify.azure.nodes.AvailabilitySet
+    properties:
+      availability_set_name: {get_input: availability_set_name}
+
   compute_instance:
     type: cloudify.azure.nodes.Instance
     properties:
@@ -59,6 +66,8 @@ node_templates:
       compute_password: {get_input: compute_password}
       public_key: { get_input: public_key }
     relationships:
+      - target: compute_availability_set
+        type: cloudify.azure.relationships.instance_contained_in_availability_set
       - target: compute_nic
         type: cloudify.azure.relationships.instance_connected_to_nic
 

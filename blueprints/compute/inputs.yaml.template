@@ -7,6 +7,7 @@ compute_user: ''
 compute_password: ''
 public_key: |
 
+availability_set_name: ''
 network_interface_name: ''
 public_ip_name: ''
 storage_account_name: ''
