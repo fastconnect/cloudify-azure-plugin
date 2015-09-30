@@ -1,6 +1,7 @@
 import testtools
 import time
 import test_utils
+import random
 
 from plugin import (utils,
                     constants,
@@ -15,13 +16,17 @@ TIME_DELAY = 20
 
 class TestAvailabilitySet(testtools.TestCase):
 
+    __random_id = str(random.randrange(0, 1000, 2))
+
     @classmethod
     def setUpClass(self):
         ctx = self.mock_ctx('init')
+        ctx.logger.info("BEGIN test availability_set number "\
+                        + self.__random_id)
         ctx.logger.info("CREATE availability set required resources")
         current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
-
+4
 
     @classmethod
     def tearDownClass(self):
@@ -39,10 +44,12 @@ class TestAvailabilitySet(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'avail_set_res_group_test',
+                constants.RESOURCE_GROUP_KEY: 'avail_set_res_group_test'+\
+                                                self.__random_id,
             },
-            constants.RESOURCE_GROUP_KEY: 'avail_set_res_group_test',
-            constants.AVAILABILITY_SET_KEY: test_name,
+            constants.RESOURCE_GROUP_KEY: 'avail_set_res_group_test'+\
+                                            self.__random_id,
+            constants.AVAILABILITY_SET_KEY: test_name + self.__random_id,
             constants.DELETABLE_KEY: True
         }
         #should not be empty
