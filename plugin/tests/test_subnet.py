@@ -22,9 +22,8 @@ class TestSubnet(testtools.TestCase):
     @classmethod
     def setUpClass(self): 
         ctx = self.mock_ctx('init')
-        ctx.logger.info("BEGIN test subnet number "\
-                                + self.__random_id)
-        
+        ctx.logger.info("BEGIN test subnet number " + self.__random_id)
+
         ctx.logger.info("CREATE resource_group")        
         current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
@@ -55,8 +54,8 @@ class TestSubnet(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'subnetresource_group_test' +\
-                                                self.__random_id
+                constants.RESOURCE_GROUP_KEY:\
+                    'subnetresource_group_test' + self.__random_id
             },
             constants.RESOURCE_GROUP_KEY: 'subnetresource_group_test' + self.__random_id,
             constants.SUBNET_KEY: test_name + self.__random_id,
@@ -70,18 +69,14 @@ class TestSubnet(testtools.TestCase):
         }
 
         test_relationships = [ 
-                                {
-                                'node_id': 'test',
-                                'relationship_type':\
-                                    constants.SUBNET_CONNECTED_TO_NETWORK,
-                                'relationship_properties': \
-                                    {
-                                        constants.VIRTUAL_NETWORK_KEY: \
-                                                    'subnetnetwork_test'+\
-                                                    self.__random_id
-                                    }
-                                }
-                             ]
+            {
+                'node_id': 'test',
+                'relationship_type': constants.SUBNET_CONNECTED_TO_NETWORK,
+                'relationship_properties': {
+                    constants.VIRTUAL_NETWORK_KEY: 'subnetnetwork_test' + self.__random_id
+                }
+            }
+        ]
 
         return test_mockcontext.MockCloudifyContextRelationships(
                                 node_id='test',

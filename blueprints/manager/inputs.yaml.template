@@ -13,6 +13,7 @@ public_key: |
 
 private_key: ''
 resource_group_name: ''
+availability_set_name: ''
 virtual_network_name: ''
 virtual_network_address_prefix: ''
 subnet_name: ''

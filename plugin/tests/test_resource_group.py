@@ -20,8 +20,7 @@ class TestResourceGroup(testtools.TestCase):
     @classmethod
     def setUpClass(self):
         ctx = self.mock_ctx('init')
-        ctx.logger.info("BEGIN test ressource_group number "\
-                                + self.__random_id)
+        ctx.logger.info("BEGIN test ressource_group number " + self.__random_id)
 
     @classmethod
     def mock_ctx(self, test_name):
@@ -35,11 +34,9 @@ class TestResourceGroup(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: test_name +\
-                                                self.__random_id,
+                constants.RESOURCE_GROUP_KEY: test_name + self.__random_id,
             },
-            constants.RESOURCE_GROUP_KEY: test_name +\
-                                            self.__random_id,
+            constants.RESOURCE_GROUP_KEY: test_name + self.__random_id,
             constants.DELETABLE_KEY: True
         }
 

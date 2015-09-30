@@ -21,8 +21,7 @@ class TestPublicIP(testtools.TestCase):
     @classmethod
     def setUpClass(self):
         ctx = self.mock_ctx('init')
-        ctx.logger.info("BEGIN test public_ip number "\
-                                + self.__random_id)
+        ctx.logger.info("BEGIN test public_ip number " + self.__random_id)
         ctx.logger.info("CREATE public_ip\'s required resources")
         current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
@@ -47,11 +46,11 @@ class TestPublicIP(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test'+\
-                                                self.__random_id
+                constants.RESOURCE_GROUP_KEY:\
+                    'publicipresource_group_test' + self.__random_id
             },
-            constants.RESOURCE_GROUP_KEY: 'publicipresource_group_test'+\
-                                            self.__random_id,
+            constants.RESOURCE_GROUP_KEY:\
+                'publicipresource_group_test' + self.__random_id,
             constants.PUBLIC_IP_KEY: test_name + self.__random_id,
             constants.DELETABLE_KEY: True
         }
@@ -91,8 +90,8 @@ class TestPublicIP(testtools.TestCase):
         self.assertEqual(202, public_ip.delete(ctx=ctx))
 
         try:
-                current_ctx.set(ctx=ctx)
-                utils.wait_status(ctx, "public_ip","waiting for exception", timeout=600)
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "public_ip","waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
 

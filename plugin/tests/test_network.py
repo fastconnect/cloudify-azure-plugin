@@ -20,8 +20,7 @@ class TestNetwork(testtools.TestCase):
     @classmethod
     def setUpClass(self): 
         ctx = self.mock_ctx('init')
-        ctx.logger.info("BEGIN test network number "\
-                                + self.__random_id)
+        ctx.logger.info("BEGIN test network number " + self.__random_id)
         ctx.logger.info("CREATE network\'s required resources")
         current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
@@ -47,11 +46,11 @@ class TestNetwork(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'networkresource_group_test'+\
-                                            self.__random_id
+                constants.RESOURCE_GROUP_KEY:\
+                    'networkresource_group_test' + self.__random_id
             },
-            constants.RESOURCE_GROUP_KEY: 'networkresource_group_test'+\
-                                            self.__random_id,
+            constants.RESOURCE_GROUP_KEY:\
+                'networkresource_group_test' + self.__random_id,
             constants.VIRTUAL_NETWORK_KEY: test_name + self.__random_id,
             constants.VIRTUAL_NETWORK_ADDRESS_KEY: '10.0.0.0/16',
             constants.DELETABLE_KEY: True

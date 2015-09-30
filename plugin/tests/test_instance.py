@@ -33,8 +33,7 @@ class TestInstance(testtools.TestCase):
     @classmethod
     def setUpClass(self):     
         ctx = self.mock_ctx('init')
-        ctx.logger.info("BEGIN test instance number "\
-                                + self.__random_id)
+        ctx.logger.info("BEGIN test instance number " + self.__random_id)
         
         current_ctx.set(ctx=ctx)
         ctx.logger.info("CREATE resource_group")
@@ -75,12 +74,12 @@ class TestInstance(testtools.TestCase):
 
         ctx.logger.info("CREATE NIC")
         current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] =\
-            "instance_nic_test" + self.__random_id
-        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] =\
-            "instance_public_ip_test" + self.__random_id
-        ctx.instance.runtime_properties[constants.SUBNET_KEY] =\
-            "instancesubnet_test" + self.__random_id
+        # ctx.node.properties[constants.NETWORK_INTERFACE_KEY] =\
+        #     "instance_nic_test" + self.__random_id
+        # ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] =\
+        #     "instance_public_ip_test" + self.__random_id
+        # ctx.instance.runtime_properties[constants.SUBNET_KEY] =\
+        #     "instancesubnet_test" + self.__random_id
         nic.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
@@ -98,10 +97,10 @@ class TestInstance(testtools.TestCase):
             tests
         """
         if id != None:
-            nic_name = 'instance_nic_test_{}'.format(id)
+            nic_name = 'instance_nic_test_{}_{}'.format(self.__random_id, id)
             # public_ip_name = 'instance_public_ip_test_{}'.format(id)
         else:
-            nic_name = 'instance_nic_test'
+            nic_name = 'instance_nic_test_{}'.format(self.__random_id)
             # public_ip_name = 'instance_public_ip_test'
 
         test_properties = {
@@ -110,12 +109,12 @@ class TestInstance(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test'+\
-                                                self.__random_id,
-                constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test' +\
-                                                self.__random_id,
-                constants.SUBNET_KEY: 'instancesubnet_test' +\
-                                        self.__random_id,
+                constants.RESOURCE_GROUP_KEY:\
+                    'instanceresource_group_test' + self.__random_id,
+                constants.VIRTUAL_NETWORK_KEY:\
+                    'instancevirtualnetwork_test' + self.__random_id,
+                constants.SUBNET_KEY:\
+                    'instancesubnet_test' + self.__random_id,
             },
             constants.PUBLISHER_KEY: 'Canonical',
             constants.OFFER_KEY: 'UbuntuServer',
@@ -129,16 +128,16 @@ class TestInstance(testtools.TestCase):
             constants.PRIVATE_KEY_KEY: test_utils.PRIVATE_KEY,
             constants.STORAGE_ACCOUNT_KEY: 'instancestoacount' + self.__random_id,
             constants.CREATE_OPTION_KEY:'FromImage',
-            constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test' +\
-                                        self.__random_id,
-            constants.AVAILABILITY_SET_KEY: 'instanceavailability_set_test' +\
-                                        self.__random_id,
-            constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test' +\
-                                        self.__random_id,
-            constants.SUBNET_KEY: 'instancesubnet_test' +\
-                                    self.__random_id,
+            constants.RESOURCE_GROUP_KEY:\
+                'instanceresource_group_test' + self.__random_id,
+            constants.AVAILABILITY_SET_KEY:\
+                'instanceavailability_set_test' + self.__random_id,
+            constants.VIRTUAL_NETWORK_KEY:\
+                'instancevirtualnetwork_test' + self.__random_id,
+            constants.SUBNET_KEY:\
+                'instancesubnet_test' + self.__random_id,
             'resources_prefix': 'instanceprefix',
-            constants.NETWORK_INTERFACE_KEY: nic_name + self.__random_id,
+            constants.NETWORK_INTERFACE_KEY: nic_name,
             constants.DELETABLE_KEY: True
         }
 
@@ -150,17 +149,15 @@ class TestInstance(testtools.TestCase):
             {
                 'node_id': 'test',
                 'relationship_type': constants.SUBNET_CONNECTED_TO_NETWORK,
-                'relationship_properties': \
-                {
+                'relationship_properties': {
                     constants.VIRTUAL_NETWORK_KEY:\
-                        'instancevirtualnetwork_test' +self.__random_id
+                        'instancevirtualnetwork_test' + self.__random_id
                 }
             },
             {
                 'node_id': 'test',
                 'relationship_type': constants.NIC_CONNECTED_TO_SUBNET,
-                'relationship_properties':\
-                    {
+                'relationship_properties': {
                         constants.SUBNET_KEY:\
                             'instancesubnet_test' + self.__random_id,
                         constants.VIRTUAL_NETWORK_KEY:\
@@ -170,9 +167,8 @@ class TestInstance(testtools.TestCase):
             {
                 'node_id': 'test',
                 'relationship_type': constants.INSTANCE_CONNECTED_TO_NIC,
-                'relationship_properties':\
-                    {
-                        constants.NETWORK_INTERFACE_KEY: nic_name + self.__random_id
+                'relationship_properties': {
+                        constants.NETWORK_INTERFACE_KEY: nic_name
                     }
             }
         ]
@@ -230,6 +226,7 @@ class TestInstance(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
 
+        ctx.logger.info("test instance is in availability_set")
         current_ctx.set(ctx=ctx)
         json = instance.get_json_from_azure(ctx=ctx)
         self.assertIsNotNone(json['properties']['availabilitySet'])
