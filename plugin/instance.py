@@ -302,7 +302,7 @@ def is_available(**_):
 
     response = connection.AzureConnectionClient().azure_get(
         ctx,
-        ("subscriptions/{}/resourcegroups/{}/" +
+        ("subscriptions/{}/resourceGroups/{}/" +
          "providers/Microsoft.Compute/virtualmachines" +
          "?api-version={}").format(
             subscription_id,

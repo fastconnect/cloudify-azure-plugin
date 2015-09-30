@@ -5,6 +5,7 @@ import test_mockcontext
 import inspect
 import threading
 import Queue
+import random
 
 
 from plugin import (utils,
@@ -27,9 +28,13 @@ TIME_DELAY = 20
 
 class TestInstance(testtools.TestCase):
 
+    __random_id = str(random.randrange(0, 1000, 2))
+ 
     @classmethod
     def setUpClass(self):     
         ctx = self.mock_ctx('init')
+        ctx.logger.info("BEGIN test instance number "\
+                                + self.__random_id)
         
         current_ctx.set(ctx=ctx)
         ctx.logger.info("CREATE resource_group")
@@ -54,7 +59,8 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("CREATE subnet")
         current_ctx.set(ctx=ctx)
         ctx.node.properties[constants.SUBNET_ADDRESS_KEY] = "10.0.1.0/24"
-        ctx.instance.runtime_properties[constants.VIRTUAL_NETWORK_KEY] = "instancevirtualnetwork_test"
+        ctx.instance.runtime_properties[constants.VIRTUAL_NETWORK_KEY] =\
+            "instancevirtualnetwork_test" + self.__random_id
 
         subnet.create(ctx=ctx) 
         current_ctx.set(ctx=ctx)
@@ -69,9 +75,12 @@ class TestInstance(testtools.TestCase):
 
         ctx.logger.info("CREATE NIC")
         current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] = "instance_nic_test"
-        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
-        ctx.instance.runtime_properties[constants.SUBNET_KEY] = "instancesubnet_test"
+        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] =\
+            "instance_nic_test" + self.__random_id
+        ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] =\
+            "instance_public_ip_test" + self.__random_id
+        ctx.instance.runtime_properties[constants.SUBNET_KEY] =\
+            "instancesubnet_test" + self.__random_id
         nic.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
@@ -79,43 +88,6 @@ class TestInstance(testtools.TestCase):
     @classmethod
     def tearDownClass(self):
         ctx = self.mock_ctx('del')
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE nic")
-        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] = "instance_nic_test"
-        nic.delete(ctx=ctx)
-
-        try:
-            current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, "nic","wait exception", 600)    
-        except utils.WindowsAzureError:
-            pass
-
-        # current_ctx.set(ctx=ctx)
-        # ctx.logger.info("DELETE public_ip")
-        # ctx.node.properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
-        # public_ip.delete(ctx=ctx)
-        #
-        # try:
-        #     current_ctx.set(ctx=ctx)
-        #     utils.wait_status(ctx, "public_ip","wait exception", 600)
-        # except utils.WindowsAzureError:
-        #     pass
-
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE subnet")
-        ctx.instance.runtime_properties[constants.VIRTUAL_NETWORK_KEY] = "instancevirtualnetwork_test"
-        subnet.delete(ctx=ctx)
-
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE network")
-        ctx.instance.runtime_properties[constants.VIRTUAL_NETWORK_KEY] = "instancevirtualnetwork_test"
-        print ctx.instance
-        network.delete(ctx=ctx)
-
-        current_ctx.set(ctx=ctx)
-        ctx.logger.info("DELETE storage account")
-        storage.delete(ctx=ctx)
-
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE resource_group")
         resource_group.delete(ctx=ctx)
@@ -138,33 +110,39 @@ class TestInstance(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test',
-                constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test',
-                constants.SUBNET_KEY: 'instancesubnet_test',
+                constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test'+\
+                                                self.__random_id,
+                constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test' +\
+                                                self.__random_id,
+                constants.SUBNET_KEY: 'instancesubnet_test' +\
+                                        self.__random_id,
             },
             constants.PUBLISHER_KEY: 'Canonical',
             constants.OFFER_KEY: 'UbuntuServer',
             constants.SKU_KEY: '12.04.5-LTS',
             constants.SKU_VERSION_KEY: 'latest',
             constants.FLAVOR_KEY: 'Standard_A1',
-            constants.COMPUTE_KEY: test_name,
+            constants.COMPUTE_KEY: test_name + self.__random_id,
             constants.COMPUTE_USER_KEY: test_utils.COMPUTE_USER,
             constants.COMPUTE_PASSWORD_KEY: test_utils.COMPUTE_PASSWORD,
             constants.PUBLIC_KEY_KEY: test_utils.PUBLIC_KEY,
             constants.PRIVATE_KEY_KEY: test_utils.PRIVATE_KEY,
-            constants.STORAGE_ACCOUNT_KEY: 'instancestraccounttest',
+            constants.STORAGE_ACCOUNT_KEY: 'instancestoacount' + self.__random_id,
             constants.CREATE_OPTION_KEY:'FromImage',
-            constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test',
-            constants.AVAILABILITY_SET_KEY: 'instanceavailability_set_test',
-            constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test',
-            constants.SUBNET_KEY: 'instancesubnet_test',
+            constants.RESOURCE_GROUP_KEY: 'instanceresource_group_test' +\
+                                        self.__random_id,
+            constants.AVAILABILITY_SET_KEY: 'instanceavailability_set_test' +\
+                                        self.__random_id,
+            constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test' +\
+                                        self.__random_id,
+            constants.SUBNET_KEY: 'instancesubnet_test' +\
+                                    self.__random_id,
             'resources_prefix': 'instanceprefix',
-            constants.NETWORK_INTERFACE_KEY: nic_name,
+            constants.NETWORK_INTERFACE_KEY: nic_name + self.__random_id,
             constants.DELETABLE_KEY: True
         }
 
         test_runtime = {
-            # constants.PUBLIC_IP_KEY: public_ip_name
             'not': 'empty'
         }
 
@@ -173,22 +151,29 @@ class TestInstance(testtools.TestCase):
                 'node_id': 'test',
                 'relationship_type': constants.SUBNET_CONNECTED_TO_NETWORK,
                 'relationship_properties': \
-                {constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test'}
+                {
+                    constants.VIRTUAL_NETWORK_KEY:\
+                        'instancevirtualnetwork_test' +self.__random_id
+                }
             },
             {
                 'node_id': 'test',
                 'relationship_type': constants.NIC_CONNECTED_TO_SUBNET,
                 'relationship_properties':\
                     {
-                        constants.SUBNET_KEY: 'instancesubnet_test',
-                        constants.VIRTUAL_NETWORK_KEY: 'instancevirtualnetwork_test'
+                        constants.SUBNET_KEY:\
+                            'instancesubnet_test' + self.__random_id,
+                        constants.VIRTUAL_NETWORK_KEY:\
+                            'instancevirtualnetwork_test' + self.__random_id
                      }
             },
             {
                 'node_id': 'test',
                 'relationship_type': constants.INSTANCE_CONNECTED_TO_NIC,
                 'relationship_properties':\
-                    {constants.NETWORK_INTERFACE_KEY: nic_name}
+                    {
+                        constants.NETWORK_INTERFACE_KEY: nic_name + self.__random_id
+                    }
             }
         ]
 
