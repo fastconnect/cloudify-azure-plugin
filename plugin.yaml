@@ -189,8 +189,6 @@ node_types:
         type: string
       compute_name:
         type: string
-      storage_account_name:
-        type: string
       compute_user:
         type: string
       compute_password:

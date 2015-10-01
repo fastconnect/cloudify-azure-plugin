@@ -26,8 +26,6 @@ def create(**_):
     utils.validate_node_property(constants.SKU_KEY, ctx.node.properties)
     utils.validate_node_property(constants.SKU_VERSION_KEY,
                                  ctx.node.properties)
-    utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, 
-                                 ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_USER_KEY, 
                                  ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_PASSWORD_KEY, 
@@ -50,8 +48,17 @@ def create(**_):
     offer = ctx.node.properties[constants.OFFER_KEY]
     sku = ctx.node.properties[constants.SKU_KEY]
     distro_version = ctx.node.properties[constants.SKU_VERSION_KEY]
-    storage_account = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     create_option = 'FromImage'
+
+    try:
+        storage_account = utils.get_target_property(ctx,
+            constants.INSTANCE_CONNECTED_TO_STORAGE_ACCOUNT,
+            constants.STORAGE_ACCOUNT_KEY
+        )
+        ctx.logger.debug("get storage account {} from relationship".format(storage_account))
+    except:
+        storage_account = azure_config[constants.STORAGE_ACCOUNT_KEY]
+        ctx.logger.debug("get storage account {} from azure_config".format(storage_account))
     
     # check availability name
     if not is_available(ctx=ctx):
@@ -68,8 +75,6 @@ def create(**_):
                                             vm_name,
                                             os_disk_name
                                             )
-
-    utils.wait_status(ctx, 'storage')
 
     nic_id = nic.get_id(ctx)
 

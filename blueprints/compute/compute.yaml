@@ -49,6 +49,11 @@ node_templates:
     properties:
       availability_set_name: {get_input: availability_set_name}
 
+  compute_storage_account:
+    type: cloudify.azure.nodes.StorageAccount
+    properties:
+      storage_account_name: {get_input: storage_account_name}
+
   compute_instance:
     type: cloudify.azure.nodes.Instance
     properties:
@@ -61,11 +66,12 @@ node_templates:
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: compute_name}
-      storage_account_name: {get_input: storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: { get_input: public_key }
     relationships:
+      - target: compute_storage_account
+        type: cloudify.azure.relationships.instance_depends_on_storage_account
       - target: compute_availability_set
         type: cloudify.azure.relationships.instance_contained_in_availability_set
       - target: compute_nic
