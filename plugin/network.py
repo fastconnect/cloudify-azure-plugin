@@ -92,6 +92,8 @@ def delete(**_):
         ctx.logger.info('Not deleting virtual network {}.'.format(virtual_network_name))
         return 0
 
+
+@operation
 def get_provisioning_state(**_):
     utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
 

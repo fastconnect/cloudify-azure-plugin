@@ -9,7 +9,6 @@ from plugin import (utils,
                     network
                     )
 
-from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 TIME_DELAY = 20
 
@@ -22,7 +21,6 @@ class TestNetwork(testtools.TestCase):
         ctx = self.mock_ctx('init')
         ctx.logger.info("BEGIN test network number " + self.__random_id)
         ctx.logger.info("CREATE network\'s required resources")
-        current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
 
 
@@ -30,7 +28,6 @@ class TestNetwork(testtools.TestCase):
     def tearDownClass(self):
         ctx = self.mock_ctx('init')
         ctx.logger.info("DELETE network\'s required resources")
-        current_ctx.set(ctx=ctx)
         resource_group.delete(ctx=ctx)
     
 
@@ -71,18 +68,15 @@ class TestNetwork(testtools.TestCase):
 
     def test_create_network(self):
         ctx = self.mock_ctx('testcreatenetwork')
-        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN test_create")
 
         status_code = network.create(ctx=ctx)
         ctx.logger.debug("status_code = " + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-        current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "network",constants.SUCCEEDED, timeout=600) 
 
         self.assertEqual(202, network.delete(ctx=ctx))
         ctx.logger.info("Checking Virtual Network deleted")
-        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             utils.wait_status,
             ctx,
@@ -94,7 +88,6 @@ class TestNetwork(testtools.TestCase):
 
     def test_delete_network(self):
         ctx = self.mock_ctx('testdeletenetwork')
-        current_ctx.set(ctx=ctx)
 
         ctx.logger.info("BEGIN test_delete")
         ctx.logger.info("create network with deletable propertie set to false")
@@ -103,7 +96,6 @@ class TestNetwork(testtools.TestCase):
         ctx.logger.debug("status_code = " + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
         
-        current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "network",constants.SUCCEEDED, timeout=600)
 
         ctx.logger.info("not delete network")
@@ -116,7 +108,6 @@ class TestNetwork(testtools.TestCase):
         self.assertEqual(202, network.delete(ctx=ctx))
 
         try:
-            current_ctx.set(ctx=ctx)
             utils.wait_status(ctx, "network", "waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
@@ -126,33 +117,26 @@ class TestNetwork(testtools.TestCase):
 
     def test_conflict_network(self):
         ctx = self.mock_ctx('testconflictnetwork')
-        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN test_conflict_network")
 
         ctx.logger.info("CREATE network")
-        current_ctx.set(ctx=ctx)
         self.assertEqual(201, network.create(ctx=ctx))
         
-        current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "network", constants.SUCCEEDED, timeout=600)
 
         ctx.logger.info("Conflict Creating Virtual Network")
-        current_ctx.set(ctx=ctx)
         self.assertNotEqual(201, network.create(ctx=ctx))
         ctx.logger.info("Conflict detected")
 
-        current_ctx.set(ctx=ctx)
         self.assertEqual(202, network.delete(ctx=ctx))
         ctx.logger.info("Checking Virtual Network deleted")
 
         try:
-            current_ctx.set(ctx=ctx)
             utils.wait_status(ctx, "network", "waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
 
         ctx.logger.info("check is Virtual Network is release")
-        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             network.get_provisioning_state,
             ctx=ctx

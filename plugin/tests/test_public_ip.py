@@ -9,7 +9,6 @@ from plugin import (utils,
                     public_ip
                     )
 
-from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 
 TIME_DELAY = 20
@@ -23,7 +22,6 @@ class TestPublicIP(testtools.TestCase):
         ctx = self.mock_ctx('init')
         ctx.logger.info("BEGIN test public_ip number " + self.__random_id)
         ctx.logger.info("CREATE public_ip\'s required resources")
-        current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
 
 
@@ -31,7 +29,6 @@ class TestPublicIP(testtools.TestCase):
     def tearDownClass(self):
         ctx = self.mock_ctx('del')
         ctx.logger.info("DELETE public_ip\'s required resources")
-        current_ctx.set(ctx=ctx)
         resource_group.delete(ctx=ctx)
 
     
@@ -76,21 +73,18 @@ class TestPublicIP(testtools.TestCase):
 
     def test_create_public_ip(self):
         ctx = self.mock_ctx('testcreateip')
-        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create public_ip test")
 
         ctx.logger.info("create public_ip")
         status_code = public_ip.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-        current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, timeout=600)    
 
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
 
         try:
-            current_ctx.set(ctx=ctx)
             utils.wait_status(ctx, "public_ip","waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
@@ -100,7 +94,6 @@ class TestPublicIP(testtools.TestCase):
 
     def test_delete_public_ip(self):
         ctx = self.mock_ctx('testdeleteip')
-        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN public_ip delete test")
 
         ctx.logger.info("create public ip with deletable propertie set to False")
@@ -109,7 +102,6 @@ class TestPublicIP(testtools.TestCase):
         status_code = public_ip.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-        current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, timeout=600)
 
         ctx.logger.info("not delete public ip")
@@ -122,7 +114,6 @@ class TestPublicIP(testtools.TestCase):
         self.assertEqual(202, public_ip.delete(ctx=ctx))
 
         try:
-            current_ctx.set(ctx=ctx)
             utils.wait_status(ctx, "public_ip","waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass
@@ -132,14 +123,13 @@ class TestPublicIP(testtools.TestCase):
 
     def test_conflict_public_ip(self):
         ctx = self.mock_ctx('testconflictip')
-        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN conflict public_ip test")
 
         ctx.logger.info("create public_ip")
         status_code = public_ip.create(ctx=ctx)
         ctx.logger.debug("status_code =" + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
-        current_ctx.set(ctx=ctx)
+
         utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, timeout=600)
 
         status_code = public_ip.create(ctx=ctx)
@@ -149,7 +139,6 @@ class TestPublicIP(testtools.TestCase):
         ctx.logger.info("delete public_ip")
         self.assertEqual(202, public_ip.delete(ctx=ctx))
         try:
-            current_ctx.set(ctx=ctx)
             utils.wait_status(ctx, "public_ip","waiting for exception", timeout=600)
         except utils.WindowsAzureError:
             pass

@@ -83,6 +83,7 @@ def _get_vm_ip(ctx, public=False):
     return (response.json())['properties']['ipAddress']
 
 
+@operation
 def get_provisioning_state(**_):
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.node.properties)
 
