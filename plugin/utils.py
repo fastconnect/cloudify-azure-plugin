@@ -27,6 +27,7 @@ except:
     import constants
 
 from cloudify import ctx
+from cloudify.decorators import operation
 from cloudify.exceptions import NonRecoverableError
 
 
@@ -123,10 +124,9 @@ def wait_status(ctx, resource,
                     )
     status = 'empty'
     ttw=0
-
     while ((status != expected_status) and (status != constants.FAILED) and 
            (ttw <= timeout)):
-        status = getattr(module, 'get_provisioning_state')()
+        status = getattr(module, 'get_provisioning_state')(ctx=ctx)
         ctx.logger.info('{} is {}.'.format(resource, status))
         ttw += constants.TIME_DELAY
         sleep(constants.TIME_DELAY)
