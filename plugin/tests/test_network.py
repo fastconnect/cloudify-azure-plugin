@@ -11,6 +11,7 @@ from plugin import (utils,
 
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
+from cloudify.exceptions import NonRecoverableError
 TIME_DELAY = 20
 
 class TestNetwork(testtools.TestCase):
@@ -159,3 +160,40 @@ class TestNetwork(testtools.TestCase):
         )
         ctx.logger.info("Virtual Network Deleted")
         ctx.logger.info("END test_conflict_network")
+
+    def test_conflict_network_address(self):
+        ctx = self.mock_ctx('testconflictnetworkaddress')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN test_conflict_network_address")
+
+        ctx.logger.info("CREATE network")
+        current_ctx.set(ctx=ctx)
+        self.assertEqual(201, network.create(ctx=ctx))
+
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "network", constants.SUCCEEDED, timeout=600)
+
+        ctx.logger.info("Conflict Creating Virtual Network")
+        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = '10.9.0.0/16'
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(NonRecoverableError, network.create, ctx=ctx)
+        ctx.logger.info("Conflict detected")
+
+        current_ctx.set(ctx=ctx)
+        self.assertEqual(202, network.delete(ctx=ctx))
+        ctx.logger.info("Checking Virtual Network deleted")
+
+        try:
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "network", "waiting for exception", timeout=600)
+        except utils.WindowsAzureError:
+            pass
+
+        ctx.logger.info("check is Virtual Network is release")
+        current_ctx.set(ctx=ctx)
+        self.assertRaises(utils.WindowsAzureError,
+            network.get_provisioning_state,
+            ctx=ctx
+        )
+        ctx.logger.info("Virtual Network Deleted")
+        ctx.logger.info("END test_conflict_network_address")

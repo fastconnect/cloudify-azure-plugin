@@ -150,17 +150,17 @@ node_templates:
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: compute_name}
-      storage_account_name: {get_input: storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: {get_input: public_key}
       azure_config: { get_property: [azure_configuration, azure_config] }
       install_agent: false
     relationships:
-#      - target: manager_availability_set
-#        type: cloudify.azure.relationships.instance_contained_in_availability_set
+
       - target: manager_storage_account
         type: cloudify.azure.relationships.instance_depends_on_storage_account
+#      - target: manager_availability_set
+#        type: cloudify.azure.relationships.instance_contained_in_availability_set
       - target: manager_nic
         type: cloudify.azure.relationships.instance_connected_to_nic
 

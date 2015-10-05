@@ -111,6 +111,8 @@ class TestInstance(testtools.TestCase):
                 constants.LOCATION_KEY: 'westeurope',
                 constants.RESOURCE_GROUP_KEY:\
                     'instanceresource_group_test' + self.__random_id,
+                constants.STORAGE_ACCOUNT_KEY:\
+                    'instancestoacount' + self.__random_id,
                 constants.VIRTUAL_NETWORK_KEY:\
                     'instancevirtualnetwork_test' + self.__random_id,
                 constants.SUBNET_KEY:\
@@ -194,6 +196,30 @@ class TestInstance(testtools.TestCase):
         ctx.logger.info("create VM") 
 
         instance.create(ctx=ctx) 
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("delete VM")
+        self.assertEqual(202, instance.delete(ctx=ctx))
+
+        ctx.logger.info("END create VM test")
+
+    def test_storage_relationship_instance(self):
+        ctx = self.mock_ctx('teststorelainstance')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN storage relationship VM test: {}".format(ctx.instance.id))
+
+        ctx.instance.relationships.append(test_mockcontext.MockRelationshipContext(node_id='test',
+            runtime_properties={
+                constants.STORAGE_ACCOUNT_KEY:\
+                     ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
+            },
+            type=constants.INSTANCE_CONNECTED_TO_STORAGE_ACCOUNT)
+        )
+
+        ctx.logger.info("create VM")
+        instance.create(ctx=ctx)
+
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
 
