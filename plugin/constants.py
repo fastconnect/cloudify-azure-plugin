@@ -130,4 +130,5 @@ INSTANCE_CONNECTED_TO_STORAGE_ACCOUNT = \
 INSTANCE_CONNECTED_TO_NIC = \
     'cloudify.azure.relationships.instance_connected_to_nic'
 DISK_ATTACH_TO_INSTANCE = 'cloudify.azure.relationships.disk_attach_to_instance'
+DISK_CONTAINED_IN_STORAGE_ACCOUNT = 'cloudify.azure.relationships.disk_contained_in_storage_account'
 

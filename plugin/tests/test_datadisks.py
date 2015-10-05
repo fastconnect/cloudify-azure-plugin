@@ -134,7 +134,8 @@ class TestDatadisks(testtools.TestCase):
             constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test'+\
                                             self.__random_id,
             constants.NETWORK_INTERFACE_KEY: 'disknic_test'+\
-                                            self.__random_id
+                                            self.__random_id,
+            constants.COMPUTE_KEY: test_name + self.__random_id
         }
 
         test_relationships = [
@@ -176,7 +177,19 @@ class TestDatadisks(testtools.TestCase):
                     constants.PUBLIC_IP_KEY: \
                         'nic_public_ip_test' + self.__random_id
                 }
-}
+            },
+            {
+                'node_id': 'test',
+                'relationship_type':\
+                    constants.DISK_ATTACH_TO_INSTANCE,
+                'relationship_properties': \
+                {
+                    constants.COMPUTE_KEY: \
+                        test_name + self.__random_id,
+                    constants.STORAGE_ACCOUNT_KEY:\
+                        'diskstoaccounttest' + self.__random_id,
+                }
+            }
         ]
 
         return test_mockcontext.MockCloudifyContextRelationships(node_id='test',

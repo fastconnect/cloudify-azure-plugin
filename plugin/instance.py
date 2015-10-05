@@ -52,7 +52,12 @@ def create(**_):
     distro_version = ctx.node.properties[constants.SKU_VERSION_KEY]
     storage_account = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     create_option = 'FromImage'
-    
+
+    # Place the vm name and storage account in runtime_properties 
+    # for relationships DISK_ATTACH_TO_INSTANCE
+    ctx.instance.runtime_properties[constants.COMPUTE_KEY] = vm_name
+    ctx.instance.runtime_properties[constants.STORAGE_ACCOUNT_KEY]  = storage_account
+
     # check availability name
     if not is_available(ctx=ctx):
         ctx.logger.info('VM creation not possible, {} already exist'
@@ -229,15 +234,12 @@ def stop(**_):
 
 
 def get_provisioning_state(**_):
-    utils.validate_node_property(constants.COMPUTE_KEY, 
-                                 ctx.node.properties)
-
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    vm_name = ctx.node.properties[constants.COMPUTE_KEY]
+    vm_name = ctx.instance.runtime_properties[constants.COMPUTE_KEY]
 
     response = connection.AzureConnectionClient().azure_get(
         ctx,
@@ -321,14 +323,12 @@ def is_available(**_):
     return True
 
 def get_json_from_azure(**_):
-    utils.validate_node_property(constants.COMPUTE_KEY, 
-                                 ctx.node.properties)
-
+    
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
-    vm_name = ctx.node.properties[constants.COMPUTE_KEY]
+    vm_name = ctx.instance.runtime_properties[constants.COMPUTE_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     response = connection.AzureConnectionClient().azure_get(
