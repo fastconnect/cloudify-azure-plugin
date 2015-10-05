@@ -50,10 +50,7 @@ def create(**_):
     distro_version = ctx.node.properties[constants.SKU_VERSION_KEY]
     create_option = 'FromImage'
 
-    # Place the vm name and storage account in runtime_properties 
-    # for relationships DISK_ATTACH_TO_INSTANCE
     ctx.instance.runtime_properties[constants.COMPUTE_KEY] = vm_name
-    ctx.instance.runtime_properties[constants.STORAGE_ACCOUNT_KEY]  = storage_account
 
     try:
         storage_account = utils.get_target_property(ctx,
@@ -65,6 +62,9 @@ def create(**_):
         storage_account = azure_config[constants.STORAGE_ACCOUNT_KEY]
         ctx.logger.debug("get storage account {} from azure_config".format(storage_account))
     
+    
+    ctx.instance.runtime_properties[constants.STORAGE_ACCOUNT_KEY]  = storage_account
+
     # check availability name
     if not is_available(ctx=ctx):
         ctx.logger.info('VM creation not possible, {} already exist'

@@ -101,6 +101,8 @@ class TestDatadisks(testtools.TestCase):
                                                 self.__random_id,
                 constants.SUBNET_KEY: 'disksubnet_test' +\
                                         self.__random_id,
+                constants.STORAGE_ACCOUNT_KEY: 'diskstoaccounttest'+\
+                                            self.__random_id
             },
             constants.PUBLISHER_KEY: 'Canonical',
             constants.OFFER_KEY: 'UbuntuServer',
