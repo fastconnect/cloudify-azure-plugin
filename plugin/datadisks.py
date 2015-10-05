@@ -10,25 +10,42 @@ from cloudify.exceptions import NonRecoverableError
 
 @operation
 def create(**_):
-    utils.validate_node_property(constants.DISKS_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, 
-                                 ctx.node.properties)
-    
+    utils.validate_node_property(constants.DISKS_KEY, ctx.node.properties)    
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
-    vm_name = ctx.node.properties[constants.COMPUTE_KEY]
-    storage_account = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
+    vm_name = utils.get_target_property(
+                                        ctx, 
+                                        constants.DISK_ATTACH_TO_INSTANCE,
+                                        constants.COMPUTE_KEY
+                                        )
+
     disks = ctx.node.properties[constants.DISKS_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    ctx.logger.info('Create datadisk')
+    
+    try:
+        storage_account = utils.get_target_property(
+                                        ctx, 
+                                        constants.DISK_CONTAINED_IN_STORAGE_ACCOUNT,
+                                        constants.STORAGE_ACCOUNT_KEY
+                                        )
+        ctx.logger.info("Use storage account {} in DISK_CONTAINED_IN_STORAGE_ACCOUNT relationship".format(storage_account))
+    except NonRecoverableError:
+        storage_account = utils.get_target_property(
+                                        ctx, 
+                                        constants.DISK_ATTACH_TO_INSTANCE,
+                                        constants.STORAGE_ACCOUNT_KEY
+                                        )
+        ctx.logger.info("Use storage account {} in DISK_ATTACH_TO_INSTANCE relationship".format(storage_account))
+
+    # Place the vm name in runtime_properties 
+    # for relationships DISK_ATTACH_TO_INSTANCE
+    ctx.instance.runtime_properties[constants.COMPUTE_KEY] = vm_name
 
     try:
         for disk in disks:
             json_VM = instance.get_json_from_azure()
-            ctx.logger.debug(json_VM)
 
             if 'dataDisks' in json_VM['properties']['storageProfile']:
                 lun = len(
@@ -39,7 +56,7 @@ def create(**_):
                 json_VM['properties']['storageProfile']['dataDisks'] = []
 
             uri = "http://{}.blob.core.windows.net/{}-vhds/{}.vhd".format(
-                        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY],
+                        storage_account,
                         vm_name,
                         disk['name']
                         )
@@ -61,7 +78,6 @@ def create(**_):
                                                                 json_disk
                                                                 )
 
-            ctx.logger.debug(json_VM)
 
             ctx.logger.info(('Attaching disk {} on lun {} ' + 
                              'and machine {}.').format(disk['name'],

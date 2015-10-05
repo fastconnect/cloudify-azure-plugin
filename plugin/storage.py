@@ -35,6 +35,9 @@ def create(**_):
             ctx.logger.info(str(availability['message']))
             return 400
 
+    # Place the storage name in runtime_properties for relationships
+    ctx.instance.runtime_properties[constants.STORAGE_ACCOUNT_KEY] = storage_account_name
+
     json ={
         "location": str(location),
         "properties": {
@@ -57,6 +60,9 @@ def create(**_):
         ),
         json=json
     )
+
+    utils.wait_status(ctx, 'storage')
+
     return response.status_code
 
 

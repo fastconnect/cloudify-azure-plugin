@@ -47,8 +47,8 @@ inputs:
     type: string
   resource_group_name:
     type: string
-  availability_set_name:
-    type: string
+#  availability_set_name:
+#    type: string
   virtual_network_name:
     type: string
   virtual_network_address_prefix:
@@ -63,7 +63,6 @@ inputs:
     type: string
   manager_disks:
     default: {}
-
 node_templates:
   manager_resource_group:
     type: cloudify.azure.nodes.ResourceGroup
@@ -71,14 +70,14 @@ node_templates:
       resource_group_name: {get_input: resource_group_name}
       azure_config: { get_property: [azure_configuration, azure_config] }
 
-  manager_availability_set:
-    type: cloudify.azure.nodes.AvailabilitySet
-    properties:
-      availability_set_name: {get_input: availability_set_name}
-      azure_config: { get_property: [azure_configuration, azure_config] }
-    relationships:
-      - target: manager_resource_group
-        type: cloudify.azure.relationships.availability_set_contained_in_resource_group
+#  manager_availability_set:
+#    type: cloudify.azure.nodes.AvailabilitySet
+#    properties:
+#      availability_set_name: {get_input: availability_set_name}
+#      azure_config: { get_property: [azure_configuration, azure_config] }
+#    relationships:
+#      - target: manager_resource_group
+#        type: cloudify.azure.relationships.availability_set_contained_in_resource_group
 
   manager_storage_account:
     type: cloudify.azure.nodes.StorageAccount
@@ -151,25 +150,23 @@ node_templates:
       version: { get_input: version }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: compute_name}
-      storage_account_name: {get_input: storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: {get_input: public_key}
       azure_config: { get_property: [azure_configuration, azure_config] }
       install_agent: false
     relationships:
-      - target: manager_availability_set
-        type: cloudify.azure.relationships.instance_contained_in_availability_set
+
       - target: manager_storage_account
         type: cloudify.azure.relationships.instance_depends_on_storage_account
+#      - target: manager_availability_set
+#        type: cloudify.azure.relationships.instance_contained_in_availability_set
       - target: manager_nic
         type: cloudify.azure.relationships.instance_connected_to_nic
 
   manager_disk:
     type: cloudify.azure.nodes.Datadisks
     properties:
-      storage_account_name: {get_input: storage_account_name}
-      compute_name: {get_input: compute_name}
       disks: { get_input: manager_disks }
       azure_config: { get_property: [azure_configuration, azure_config] }
     relationships:

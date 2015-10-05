@@ -1,6 +1,7 @@
 ﻿import test_utils
 import testtools
 import test_mockcontext
+import random
 
 from plugin import (utils,
                     constants,
@@ -20,9 +21,13 @@ from cloudify.exceptions import NonRecoverableError
 
 class TestDatadisks(testtools.TestCase):
 
+    __random_id = str(random.randrange(0, 1000, 2))
+    
     @classmethod
     def setUpClass(self): 
-        ctx = self.mock_ctx('init','')    
+        ctx = self.mock_ctx('init','')
+        ctx.logger.info("BEGIN test datadisk number "\
+                                + self.__random_id)   
         current_ctx.set(ctx=ctx)
         ctx.logger.info("CREATE ressource_group")
         resource_group.create(ctx=ctx)
@@ -45,8 +50,10 @@ class TestDatadisks(testtools.TestCase):
 
         ctx.logger.info("CREATE subnet")
         current_ctx.set(ctx=ctx)
+
         ctx.node.properties[constants.SUBNET_ADDRESS_KEY] = "10.0.1.0/24"
-        ctx.instance.runtime_properties[constants.VIRTUAL_NETWORK_KEY] = "diskvirtualnetwork_test"
+        ctx.instance.runtime_properties[constants.VIRTUAL_NETWORK_KEY] =\
+            "diskvirtualnetwork_test" + self.__random_id
 
         subnet.create(ctx=ctx) 
         current_ctx.set(ctx=ctx)
@@ -88,33 +95,49 @@ class TestDatadisks(testtools.TestCase):
                 constants.USERNAME_KEY: test_utils.AZURE_USERNAME,
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
-                constants.RESOURCE_GROUP_KEY: 'diskresource_group_test'
+                constants.RESOURCE_GROUP_KEY: 'diskresource_group_test'+\
+                                                self.__random_id,
+                constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test' +\
+                                                self.__random_id,
+                constants.SUBNET_KEY: 'disksubnet_test' +\
+                                        self.__random_id,
+                constants.STORAGE_ACCOUNT_KEY: 'diskstoaccounttest'+\
+                                            self.__random_id
             },
             constants.PUBLISHER_KEY: 'Canonical',
             constants.OFFER_KEY: 'UbuntuServer',
             constants.SKU_KEY: '12.04.5-LTS',
             constants.SKU_VERSION_KEY: 'latest',
             constants.FLAVOR_KEY: 'Standard_A1',
-            constants.COMPUTE_KEY: test_name,
+            constants.COMPUTE_KEY: test_name + self.__random_id,
             constants.COMPUTE_USER_KEY: test_utils.COMPUTE_USER,
             constants.COMPUTE_PASSWORD_KEY: test_utils.COMPUTE_PASSWORD,
             constants.PUBLIC_KEY_KEY: test_utils.PUBLIC_KEY,
             constants.PRIVATE_KEY_KEY: test_utils.PRIVATE_KEY,
-            constants.STORAGE_ACCOUNT_KEY: 'diskstorageaccounttest',
+            constants.STORAGE_ACCOUNT_KEY: 'diskstoaccounttest'+\
+                                            self.__random_id,
             constants.CREATE_OPTION_KEY:'FromImage',
-            constants.RESOURCE_GROUP_KEY: 'diskresource_group_test',
-            constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test',
-            constants.SUBNET_KEY: 'disksubnet_test',
-            constants.NETWORK_INTERFACE_KEY: 'disknic_test',
+            constants.RESOURCE_GROUP_KEY: 'diskresource_group_test'+\
+                                            self.__random_id,
+            constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test'+\
+                                            self.__random_id,
+            constants.SUBNET_KEY: 'disksubnet_test'+\
+                                    self.__random_id,
+            constants.NETWORK_INTERFACE_KEY: 'disknic_test'+\
+                                                self.__random_id,
             constants.DISKS_KEY: disk,
             'resources_prefix': 'diskprefix',
             constants.DELETABLE_KEY: True
 
         }
         test_runtime = {
-            constants.PUBLIC_IP_KEY: 'diskpublic_ip_test',
-            constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test',
-            constants.NETWORK_INTERFACE_KEY: 'disknic_test'
+            constants.PUBLIC_IP_KEY: 'diskpublic_ip_test'+\
+                                    self.__random_id,
+            constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test'+\
+                                            self.__random_id,
+            constants.NETWORK_INTERFACE_KEY: 'disknic_test'+\
+                                            self.__random_id,
+            constants.COMPUTE_KEY: test_name + self.__random_id
         }
 
         test_relationships = [
@@ -122,15 +145,20 @@ class TestDatadisks(testtools.TestCase):
                 'node_id': 'test',
                 'relationship_type': constants.SUBNET_CONNECTED_TO_NETWORK,
                 'relationship_properties': \
-                {constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test'}
+                {
+                    constants.VIRTUAL_NETWORK_KEY:\
+                 'diskvirtualnetwork_test' + self.__random_id
+                }
             },
             {
                 'node_id': 'test',
                 'relationship_type': constants.NIC_CONNECTED_TO_SUBNET,
                 'relationship_properties':\
                     {
-                        constants.SUBNET_KEY: 'disksubnet_test',
-                        constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test'
+                        constants.SUBNET_KEY:\
+                            'disksubnet_test' + self.__random_id,
+                        constants.VIRTUAL_NETWORK_KEY:\
+                         'diskvirtualnetwork_test' + self.__random_id
                      }
             },
             {
@@ -138,7 +166,8 @@ class TestDatadisks(testtools.TestCase):
                 'relationship_type': constants.INSTANCE_CONNECTED_TO_NIC,
                 'relationship_properties':\
                     {
-                        constants.NETWORK_INTERFACE_KEY: 'disknic_test'
+                        constants.NETWORK_INTERFACE_KEY:\
+                            'disknic_test' + self.__random_id
                     }
             },
             {
@@ -148,9 +177,21 @@ class TestDatadisks(testtools.TestCase):
                 'relationship_properties': \
                 {
                     constants.PUBLIC_IP_KEY: \
-                        'nic_public_ip_test'
+                        'nic_public_ip_test' + self.__random_id
                 }
-}
+            },
+            {
+                'node_id': 'test',
+                'relationship_type':\
+                    constants.DISK_ATTACH_TO_INSTANCE,
+                'relationship_properties': \
+                {
+                    constants.COMPUTE_KEY: \
+                        test_name + self.__random_id,
+                    constants.STORAGE_ACCOUNT_KEY:\
+                        'diskstoaccounttest' + self.__random_id,
+                }
+            }
         ]
 
         return test_mockcontext.MockCloudifyContextRelationships(node_id='test',
@@ -172,9 +213,8 @@ class TestDatadisks(testtools.TestCase):
         ctx.logger.info("BEGIN create VM test: {}".format(test_name)) 
 
         instance.create(ctx=ctx)
-        
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, 'instance', constants.CREATING, timeout=900)
+        utils.wait_status(ctx, 'instance', constants.SUCCEEDED, timeout=900)
 
         current_ctx.set(ctx=ctx)
         datadisks.create(ctx=ctx)
@@ -196,7 +236,8 @@ class TestDatadisks(testtools.TestCase):
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN delete VM test: {}".format(test_name)) 
-        
+        instance.delete(ctx=ctx)
+
         try:
             current_ctx.set(ctx=ctx)
             utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
