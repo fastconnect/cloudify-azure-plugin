@@ -9,6 +9,7 @@ from plugin import (utils,
                     storage,
                     )
 
+from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 
 TIME_DELAY = 20
@@ -22,12 +23,14 @@ class TestStorage(testtools.TestCase):
         ctx = self.mock_ctx('init')
         ctx.logger.info("BEGIN test storage number " + self.__random_id)
         ctx.logger.info("CREATE storage_account\'s required resources")
+        current_ctx.set(ctx=ctx)
         resource_group.create(ctx=ctx)
 
     @classmethod
     def tearDownClass(self):
         ctx = self.mock_ctx('del')
         ctx.logger.info("DELETE storage_account\'s required resources")
+        current_ctx.set(ctx=ctx)
         resource_group.delete(ctx=ctx)
 
     @classmethod
@@ -48,9 +51,7 @@ class TestStorage(testtools.TestCase):
             constants.RESOURCE_GROUP_KEY:\
                 'storageresource_group_test' + self.__random_id,
             constants.STORAGE_ACCOUNT_KEY: test_name + self.__random_id,
-            # Storage type: 
-            # Standard_LRS|Standard_ZRS|Standard_GRS|Standard_RAGRS|Premium_LRS
-            constants.ACCOUNT_TYPE_KEY: 'Standard_LRS', 
+            constants.ACCOUNT_TYPE_KEY: 'Standard_LRS', #Standard_LRS|Standard_ZRS|Standard_GRS|Standard_RAGRS|Premium_LRS
             constants.DELETABLE_KEY: True
         }
 
@@ -68,17 +69,19 @@ class TestStorage(testtools.TestCase):
 
     def test_create_storage(self):
         ctx = self.mock_ctx('testcreatestorage')
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN test create storage")
     
         status_code = storage.create(ctx=ctx)
         ctx.logger.info("status_code : " + str(status_code))
         self.assertTrue(bool((status_code == 200) | (status_code == 202)))
-
+        current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "storage",constants.SUCCEEDED, timeout=600)
         ctx.logger.info("Storage Account Created")
 
         self.assertEqual(200, storage.delete(ctx=ctx))
         ctx.logger.info("Checking Storage Account deleted")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             storage.get_provisioning_state,
             ctx=ctx
@@ -90,12 +93,13 @@ class TestStorage(testtools.TestCase):
 
     def test_delete_storage(self):
         ctx = self.mock_ctx('testdeletestorage')
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN test delete storage")
 
         status_code = storage.create(ctx=ctx)
         ctx.logger.info("status_code : " + str(status_code))
         self.assertTrue(bool((status_code == 200) | (status_code == 202)))
-
+        current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "storage",constants.SUCCEEDED, timeout=600)
 
         ctx.logger.info("create storage with deletable propertie set to False")
@@ -111,7 +115,7 @@ class TestStorage(testtools.TestCase):
         self.assertEqual(200, storage.delete(ctx=ctx))
 
         ctx.logger.info("Checking Storage Account deleted")
-
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             storage.get_provisioning_state,
             ctx=ctx
@@ -123,12 +127,13 @@ class TestStorage(testtools.TestCase):
 
     def test_conflict_storage(self):
         ctx = self.mock_ctx('testconflictstorage')
+        current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN test conflict storage")
 
         status_code = storage.create(ctx=ctx)
         ctx.logger.info("status_code : " + str(status_code))
         self.assertTrue(bool((status_code == 200) | (status_code == 202)))
-
+        current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "storage", constants.SUCCEEDED, timeout=600)
         ctx.logger.info("Storage Account Created")
 
@@ -138,6 +143,7 @@ class TestStorage(testtools.TestCase):
         self.assertEqual(200, storage.delete(ctx=ctx))
 
         ctx.logger.info("Check is Storage Account is release")
+        current_ctx.set(ctx=ctx)
         self.assertRaises(utils.WindowsAzureError,
             storage.get_provisioning_state,
             ctx=ctx
