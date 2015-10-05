@@ -102,7 +102,6 @@ def delete(**_):
         return 0
     
 
-@operation
 def get_provisioning_state(**_):
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
 

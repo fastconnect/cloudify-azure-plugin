@@ -8,7 +8,7 @@ from cloudify import ctx
 from cloudify.decorators import operation
 from cloudify.exceptions import NonRecoverableError
 
-@operation
+
 def get_provisioning_state(**_):
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.node.properties)
 

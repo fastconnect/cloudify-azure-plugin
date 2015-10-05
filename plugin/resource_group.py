@@ -7,7 +7,7 @@ from plugin import (utils,
 from cloudify import ctx
 from cloudify.decorators import operation
 
-@operation
+
 def get_provisioning_state(**_):
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
     azure_config = utils.get_azure_config(ctx)
