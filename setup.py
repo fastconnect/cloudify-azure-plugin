@@ -23,7 +23,7 @@ setup(
     # Do not use underscores in the plugin name.
     name='cloudify-azure-plugin',
 
-    version='0.1',
+    version='0.0.2',
     author='fastconnect',
     author_email='ENTER-AUTHOR-EMAIL-HERE',
     description='The plugin designed to execute Cloudify 3 on Azure',
