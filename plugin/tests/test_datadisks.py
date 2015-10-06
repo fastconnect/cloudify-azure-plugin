@@ -15,6 +15,7 @@ from plugin import (utils,
                     instance
                     )
 
+from test_mockcontext import MockRelationshipContext
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 from cloudify.exceptions import NonRecoverableError
@@ -162,16 +163,6 @@ class TestDatadisks(testtools.TestCase):
                         constants.NETWORK_INTERFACE_KEY:\
                             'disknic_test' + self.__random_id
                     }
-            },
-            {
-                'node_id': 'test',
-                'relationship_type':\
-                    constants.DISK_CONTAINED_IN_STORAGE_ACCOUNT,
-                'relationship_properties': \
-                {
-                    constants.STORAGE_ACCOUNT_KEY: \
-                        'storageaccountdisk' + self.__random_id
-                }
             },
             {
                 'node_id': 'test',
@@ -469,6 +460,16 @@ class TestDatadisks(testtools.TestCase):
 
         instance.create(ctx=ctx)
         
+        ctx.instance.relationships.append(
+                    MockRelationshipContext(
+                                'test',
+                                {constants.STORAGE_ACCOUNT_KEY: \
+                                       'storageaccountdisk' + self.__random_id
+                                }, 
+                                constants.DISK_CONTAINED_IN_STORAGE_ACCOUNT
+                    )
+        )
+                                            
         current_ctx.set(ctx=ctx)
         datadisks.create(ctx=ctx)
 
@@ -477,8 +478,16 @@ class TestDatadisks(testtools.TestCase):
 
         jsonInstance = instance.get_json_from_azure(ctx=ctx)
 
-        self.assertIn("storageaccountdisk" + self.__random_id,
-                      jsonInstance['properties']['storageProfile']['dataDisks'][0]['vhd']['uri'])
+        self.assertIn('storageaccountdisk' + self.__random_id,
+                      jsonInstance['properties'
+                                   ]['storageProfile'
+                                     ]['dataDisks'][0]['vhd']['uri']
+                      )
+
+        ctx.logger.info('Disks are located in {}.'.format(
+                                    'storageaccountdisk' + self.__random_id,
+                                    )
+                        )
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN delete VM test: {}".format(test_name))
