@@ -1,5 +1,4 @@
 ﻿# -*- coding: utf-8 -*-
-import random
 import re
 import inspect
 # Local import
@@ -7,7 +6,6 @@ from plugin import (utils,
                     constants,
                     connection,
                     nic,
-                    public_ip
                     )
 
 # Cloudify imports
@@ -19,6 +17,10 @@ TIME_DELAY = 5
 
 @operation
 def create(**_):
+    """Create an instance.
+
+    :param ctx: The Cloudify ctx context.
+    """
     utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
     utils.validate_node_property(constants.FLAVOR_KEY, ctx.node.properties)
     utils.validate_node_property(constants.PUBLISHER_KEY, ctx.node.properties)
@@ -195,6 +197,12 @@ def create(**_):
 
 @operation
 def delete(**_):
+    """Delete an instance.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
@@ -225,15 +233,31 @@ def delete(**_):
 
 @operation
 def start(**_):
+    """Start an instance.
+    (Doing nothing)
+
+    :param ctx: The Cloudify ctx context.
+    """
     ctx.logger.info("VM starts.")
 
 
 @operation
 def stop(**_):
+    """Stop an instance.
+    (Doing nothing)
+
+    :param ctx: The Cloudify ctx context.
+    """
     ctx.logger.info("VM stops.")
 
 
 def get_provisioning_state(**_):
+    """Get the provisioning state of an instance.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The provisioning state of an instance.
+    :rtype: string
+    """
     utils.validate_node_property(constants.COMPUTE_KEY, 
                                  ctx.node.properties)
 
@@ -261,6 +285,13 @@ def get_provisioning_state(**_):
 
 
 def get_nic_virtual_machine_id(**_):
+    """DEPRECATED
+    Get the id of the network interface card of an instance.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The id of the network interface card.
+    :rtype: string
+    """
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, 
                                  ctx.instance.runtime_properties)
     
@@ -295,6 +326,12 @@ def get_nic_virtual_machine_id(**_):
 
 
 def is_available(**_):
+    """Check the availability of an instance name.
+
+    :param ctx: The Cloudify ctx context.
+    :return: A the availability.
+    :rtype: bool
+    """
     utils.validate_node_property(constants.COMPUTE_KEY, 
                                  ctx.node.properties)
 
@@ -326,6 +363,12 @@ def is_available(**_):
     return True
 
 def get_json_from_azure(**_):
+    """Get the json of an instance.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The json of an instance.
+    :rtype: dictionary
+    """
     utils.validate_node_property(constants.COMPUTE_KEY, 
                                  ctx.node.properties)
 

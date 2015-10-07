@@ -10,6 +10,12 @@ from cloudify.exceptions import NonRecoverableError
 
 
 def get_provisioning_state(**_):
+    """Get the provisioning state of a public ip.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The provisioning state of a public ip.
+    :rtype: string
+    """
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
@@ -37,6 +43,12 @@ def get_provisioning_state(**_):
 
 @operation
 def delete(**_):
+    """Delete a public ip.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.node.properties)
     utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
@@ -70,6 +82,12 @@ def delete(**_):
 
 @operation
 def create(**_):
+    """Create a public ip.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.PUBLIC_IP_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
@@ -110,6 +128,12 @@ def create(**_):
 
 
 def get_id(**_):
+    """Get the id of a public ip (relationship function for a network interface card).
+
+    :param ctx: The Cloudify ctx context.
+    :return: The id of a public ip.
+    :rtype: string
+    """
     # get the public_id for the nic relationship
     azure_config = utils.get_azure_config(ctx)
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]

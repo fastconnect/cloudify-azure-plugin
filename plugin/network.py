@@ -11,6 +11,12 @@ from cloudify.exceptions import NonRecoverableError
 
 @operation
 def create(**_):
+    """Create a virtual network.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
     utils.validate_node_property(constants.VIRTUAL_NETWORK_ADDRESS_KEY, ctx.node.properties)
 
@@ -76,6 +82,12 @@ def create(**_):
 
 @operation
 def delete(**_):
+    """Delete a virtual network.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
     utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
@@ -112,6 +124,12 @@ def delete(**_):
         return 0
 
 def get_provisioning_state(**_):
+    """Get the provisioning state of a virtual network.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The provisioning state of a virtual network.
+    :rtype: string
+    """
     utils.validate_node_property(constants.VIRTUAL_NETWORK_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
@@ -141,6 +159,12 @@ def get_provisioning_state(**_):
     return status_storage
 
 def get_list_networks(**_):
+    """Get the list of all virtual networks in the resource group.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The list of all virtual networks.
+    :rtype: table
+    """
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]

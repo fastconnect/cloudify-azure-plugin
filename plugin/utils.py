@@ -1,19 +1,4 @@
 ﻿# -*- coding: utf-8 -*-
-########
-# Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#        http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-#    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    * See the License for the specific language governing permissions and
-#    * limitations under the License.
-
 # Built-in Imports
 import os
 import importlib
@@ -33,9 +18,10 @@ from cloudify.exceptions import NonRecoverableError
 def validate_node_property(key, ctx_node_properties):
     """Checks if the node property exists in the blueprint.
 
+    :param key: The key to find.
+    :param ctx_node_properties: The dictionary to search
     :raises NonRecoverableError: if key not in the node's properties
     """
-
     if key not in ctx_node_properties:
         raise NonRecoverableError(
             '{0} is a required input. Unable to create.'.format(key))
@@ -43,8 +29,9 @@ def validate_node_property(key, ctx_node_properties):
 
 def log_available_resources(list_of_resources):
     """This logs a list of available resources.
-    """
 
+    :param list_of_resources:
+    """
     message = 'Available resources: \n'
 
     for resource in list_of_resources:
@@ -60,14 +47,12 @@ def unassign_runtime_property_from_resource(property_name, ctx_instance):
     :param ctx_instance: The CTX Node-Instance Context.
     :param ctx:  The Cloudify ctx context.
     """
-
     value = ctx_instance.runtime_properties.pop(property_name)
     ctx.logger.debug(
         'Unassigned {0} runtime property: {1}'.format(property_name, value))
 
 
 def get_instance_or_source_node_properties():
-
         if ctx.type == constants.RELATIONSHIP_INSTANCE:
             return ctx.source.node.properties
         elif ctx.type == constants.NODE_INSTANCE:
@@ -83,6 +68,13 @@ def get_instance_or_source_node_properties():
 
 
 def get_target_property(ctx, relationship_name, property_name):
+    """Get a runtime_property from the target of a relationship.
+
+    :param ctx:  The Cloudify ctx context.
+    :param relationship_name: The relationship's name.
+    :param property_name: The runtime_property's key to get.
+    :return: the runtime_property's value.
+    """
     # FIX: this function will only return the first property found for
     # the first corresponding relationship found. Maybe return an array
     # of properties if more than one relationship correspond.
@@ -139,7 +131,12 @@ def wait_status(ctx, resource,
 
 
 def get_azure_config(ctx):
-    
+    """Get the azure_config dictionary.
+
+    :param ctx:  The Cloudify ctx context.
+    :return: the azure_config dictionary.
+    :rtype: dictionary
+    """
     if ctx.type == 'node-instance':
         if ctx.node.properties[constants.AZURE_CONFIG_KEY]:
             return ctx.node.properties[constants.AZURE_CONFIG_KEY]

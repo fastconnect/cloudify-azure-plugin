@@ -10,6 +10,12 @@ from cloudify.decorators import operation
 
 @operation
 def create(**_):
+    """Create a storage account.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
     utils.validate_node_property(constants.ACCOUNT_TYPE_KEY, ctx.node.properties)
 
@@ -68,6 +74,12 @@ def create(**_):
 
 @operation
 def delete(**_):
+    """Delete a storage account.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
     utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
@@ -104,6 +116,12 @@ def delete(**_):
 
 
 def get_provisioning_state(**_):
+    """Get the provisioning state of a storage account.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The provisioning state of a storage account.
+    :rtype: string
+    """
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
@@ -134,6 +152,12 @@ def get_provisioning_state(**_):
 
 
 def availability_account_name(**_):
+    """Check the availability of a storage account name.
+
+    :param ctx: The Cloudify ctx context.
+    :return: A dictionary with name availability and the reason.
+    :rtype: dictionary
+    """
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)

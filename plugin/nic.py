@@ -11,9 +11,12 @@ from cloudify.exceptions import NonRecoverableError
 from cloudify.decorators import operation
 
 def _get_vm_ip(ctx, public=False):
-    ''' 
-        Get the public IP from a machine or a network interface. 
-    '''
+    """Get the ip of a network interface card id (relationship function for an instance).
+
+    :param ctx: The Cloudify ctx context.
+    :return: The ip of a network interface card.
+    :rtype: string
+    """
     utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
 
     azure_connection = connection.AzureConnectionClient()
@@ -84,6 +87,12 @@ def _get_vm_ip(ctx, public=False):
 
 
 def get_provisioning_state(**_):
+    """Get the provisioning state of a network interface card.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The provisioning state of a network interface card.
+    :rtype: string
+    """
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
@@ -112,6 +121,12 @@ def get_provisioning_state(**_):
 
 @operation
 def create(**_):
+    """Create a network interface card.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.node.properties)
     
     azure_config = utils.get_azure_config(ctx)
@@ -165,6 +180,12 @@ def create(**_):
 
 @operation
 def add_public_ip(**_):
+    """Add a public ip to a network interface card.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
@@ -219,6 +240,12 @@ def add_public_ip(**_):
     
 @operation
 def delete(**_):
+    """Delete a network interface card.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.NETWORK_INTERFACE_KEY, ctx.node.properties)
     utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
 
@@ -253,7 +280,12 @@ def delete(**_):
 
 
 def get_id(ctx):
-    # get the nic id for the instance relationship
+    """Get the id of a network interface card (relationship function for an instance).
+
+    :param ctx: The Cloudify ctx context.
+    :return: The id of a network interface card.
+    :rtype: string
+    """
     azure_config = utils.get_azure_config(ctx)
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]

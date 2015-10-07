@@ -8,6 +8,12 @@ from cloudify import ctx
 from cloudify.decorators import operation
 
 def get_provisioning_state(**_):
+    """Get the provisioning state of a resource group.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The provisioning state of a resource group.
+    :rtype: string
+    """
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
     azure_config = utils.get_azure_config(ctx)
 
@@ -31,6 +37,12 @@ def get_provisioning_state(**_):
 
 @operation
 def delete(**_):
+    """Delete a resource group.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
     utils.validate_node_property(constants.DELETABLE_KEY, ctx.node.properties)
     azure_config = utils.get_azure_config(ctx)
@@ -61,6 +73,12 @@ def delete(**_):
 
 @operation
 def create(**_):
+    """Create a resource group.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.RESOURCE_GROUP_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)

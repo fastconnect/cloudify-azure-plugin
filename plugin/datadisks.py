@@ -1,4 +1,5 @@
-﻿from plugin import (utils,
+﻿# -*- coding: utf-8 -*-
+from plugin import (utils,
                     constants,
                     instance,
                     connection
@@ -10,6 +11,10 @@ from cloudify.exceptions import NonRecoverableError
 
 @operation
 def create(**_):
+    """Create a data disk.
+
+    :param ctx: The Cloudify ctx context.
+    """
     utils.validate_node_property(constants.DISKS_KEY, ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
     utils.validate_node_property(constants.STORAGE_ACCOUNT_KEY, 

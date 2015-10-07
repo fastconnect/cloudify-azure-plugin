@@ -11,6 +11,12 @@ from cloudify.decorators import operation
 
 @operation
 def create(**_):
+    """Create a subnet.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.SUBNET_KEY, ctx.node.properties)
     utils.validate_node_property(constants.SUBNET_ADDRESS_KEY, 
                                  ctx.node.properties)
@@ -62,6 +68,12 @@ def create(**_):
 
 @operation
 def delete(**_):
+    """Delete a subnet.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The status code of the REST request.
+    :rtype: int
+    """
     utils.validate_node_property(constants.SUBNET_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
@@ -103,6 +115,12 @@ def delete(**_):
 
 
 def get_provisioning_state(**_):
+    """Get the provisioning state of a subnet.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The provisioning state of a subnet.
+    :rtype: string
+    """
     utils.validate_node_property(constants.SUBNET_KEY, ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
@@ -140,7 +158,12 @@ def get_provisioning_state(**_):
 
 
 def get_id(**_):
-    # get the subnet id for the nic relationship
+    """Get the id of a subnet (relationship function for a network interface card).
+
+    :param ctx: The Cloudify ctx context.
+    :return: The id of a subnet.
+    :rtype: string
+    """
     azure_config = utils.get_azure_config(ctx)
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]

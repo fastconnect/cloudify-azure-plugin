@@ -19,9 +19,16 @@ class AzureConnectionClient():
         self._get_token()
 
     def azure_get(self, ctx, path, header={}):
+        """Make a GET REST request to Azure
+
+        :param ctx: The Cloudify ctx context.
+        :param path: URI path of the request.
+        :param header: header of the request.
+        :return: The response of the request with his json and status code.
+        """
         path = '{}/{}'.format(constants.AZURE_API_URL, path)
-       #ctx.logger.debug(path)
-        header.update({'Content-Type':'application/json', 
+        #ctx.logger.debug(path)
+        header.update({'Content-Type':'application/json',
                         'Authorization':'Bearer {}'.format(
                                       AzureConnectionClient.token
                                       )
@@ -30,50 +37,70 @@ class AzureConnectionClient():
         return self._azure_response(requests.get(path,headers=header))
 
     def azure_post(self, ctx, path, json, header={}):
+        """Make a POST REST request to Azure
+
+        :param ctx: The Cloudify ctx context.
+        :param path: URI path of the request.
+        :param json: json of the request.
+        :param header: header of the request.
+        :return: The response of the request with his json and status code.
+        """
         path = '{}/{}'.format(constants.AZURE_API_URL, path)
         #ctx.logger.debug(path)
-        header.update({'Content-Type':'application/json', 
+        header.update({'Content-Type':'application/json',
                     'Authorization':'Bearer {}'.format(
                                       AzureConnectionClient.token
                                       )
                     })
         return self._azure_response(requests.post(path,headers=header,json=json))
 
-
     def azure_put(self, ctx, path, json={}, header={}):
+        """Make a PUT REST request to Azure
+
+        :param ctx: The Cloudify ctx context.
+        :param path: URI path of the request.
+        :param json: json of the request.
+        :param header: header of the request.
+        :return: The response of the request with his json and status code.
+        """
         path = '{}/{}'.format(constants.AZURE_API_URL, path)
         #ctx.logger.debug(path)
-        header.update({'Content-Type':'application/json', 
+        header.update({'Content-Type':'application/json',
                        'Authorization':'Bearer {}'.format(
                                       AzureConnectionClient.token
                                       )
                        })
         return self._azure_response(requests.put(path,headers=header,json=json))
 
-
     def azure_delete(self, ctx, path, header={}):
-         path = '{}/{}'.format(constants.AZURE_API_URL, path)
-         #ctx.logger.debug(path)
-         header.update({'Content-Type':'application/json', 
-                       'Authorization':'Bearer {}'.format(
-                                      AzureConnectionClient.token
-                                      )
-                       })
-         return self._azure_response(requests.delete(path,headers=header))
+        """Make a DELETE REST request to Azure
 
+        :param ctx: The Cloudify ctx context.
+        :param path: URI path of the request.
+        :param header: header of the request.
+        :return: The response of the request with his json and status code.
+        """
+        path = '{}/{}'.format(constants.AZURE_API_URL, path)
+        #ctx.logger.debug(path)
+        header.update({'Content-Type':'application/json',
+                   'Authorization':'Bearer {}'.format(
+                                  AzureConnectionClient.token
+                                  )
+                   })
+        return self._azure_response(requests.delete(path,headers=header))
 
     def _get_token(self):
-        if ((AzureConnectionClient.token is None) or 
+        if ((AzureConnectionClient.token is None) or
             (time.gmtime() > AzureConnectionClient.expires_on)) :
 
             azure_config = get_azure_config(ctx)
 
             payload = {
-                'grant_type': 'password',
-                'client_id': constants.APPLICATION_ID,
-                'username': azure_config[constants.USERNAME_KEY],
-                'password': azure_config[constants.PASSWORD_KEY],
-                'resource': constants.RESOURCE_CONNECTION_URL,
+            'grant_type': 'password',
+            'client_id': constants.APPLICATION_ID,
+            'username': azure_config[constants.USERNAME_KEY],
+            'password': azure_config[constants.PASSWORD_KEY],
+            'resource': constants.RESOURCE_CONNECTION_URL,
             }
             #ctx.logger.info('Getting token from Azure...')
             response = requests.post(constants.TOKEN_URL, data=payload)
@@ -82,8 +109,7 @@ class AzureConnectionClient():
             AzureConnectionClient.token = json['access_token']
             AzureConnectionClient.expires_on = time.gmtime(float(json['expires_on']))
         #else:
-         #   ctx.logger.debug('Token\'s been already taken. Reusing it.')
-
+        #   ctx.logger.debug('Token\'s been already taken. Reusing it.')
 
     def _azure_response(self, response):
         #ctx.logger.debug('Request : {}'.format(response.headers))
