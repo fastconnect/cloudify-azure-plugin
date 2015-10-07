@@ -7,6 +7,7 @@ from plugin import (utils,
 from cloudify import ctx
 from cloudify.decorators import operation
 
+
 def get_provisioning_state(**_):
     """Get the provisioning state of a resource group.
 

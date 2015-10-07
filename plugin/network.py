@@ -123,6 +123,7 @@ def delete(**_):
         ctx.logger.info('Not deleting virtual network {}.'.format(virtual_network_name))
         return 0
 
+
 def get_provisioning_state(**_):
     """Get the provisioning state of a virtual network.
 

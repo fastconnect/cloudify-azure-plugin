@@ -114,7 +114,6 @@ def delete(**_):
         return 0
     
 
-
 def get_provisioning_state(**_):
     """Get the provisioning state of a storage account.
 

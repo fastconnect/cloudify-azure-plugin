@@ -1,11 +1,11 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import re
 import inspect
 # Local import
 from plugin import (utils,
                     constants,
                     connection,
-                    nic,
+                    nic
                     )
 
 # Cloudify imports
@@ -52,6 +52,8 @@ def create(**_):
     distro_version = ctx.node.properties[constants.SKU_VERSION_KEY]
     create_option = 'FromImage'
 
+    ctx.instance.runtime_properties[constants.COMPUTE_KEY] = vm_name
+
     try:
         storage_account = utils.get_target_property(ctx,
             constants.INSTANCE_CONNECTED_TO_STORAGE_ACCOUNT,
@@ -62,6 +64,9 @@ def create(**_):
         storage_account = azure_config[constants.STORAGE_ACCOUNT_KEY]
         ctx.logger.debug("get storage account {} from azure_config".format(storage_account))
     
+    
+    ctx.instance.runtime_properties[constants.STORAGE_ACCOUNT_KEY]  = storage_account
+
     # check availability name
     if not is_available(ctx=ctx):
         ctx.logger.info('VM creation not possible, {} already exist'
@@ -258,15 +263,13 @@ def get_provisioning_state(**_):
     :return: The provisioning state of an instance.
     :rtype: string
     """
-    utils.validate_node_property(constants.COMPUTE_KEY, 
-                                 ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
     api_version = constants.AZURE_API_VERSION_06
-    vm_name = ctx.node.properties[constants.COMPUTE_KEY]
+    vm_name = ctx.instance.runtime_properties[constants.COMPUTE_KEY]
 
     response = connection.AzureConnectionClient().azure_get(
         ctx,
@@ -369,14 +372,12 @@ def get_json_from_azure(**_):
     :return: The json of an instance.
     :rtype: dictionary
     """
-    utils.validate_node_property(constants.COMPUTE_KEY, 
-                                 ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
-    vm_name = ctx.node.properties[constants.COMPUTE_KEY]
+    vm_name = ctx.instance.runtime_properties[constants.COMPUTE_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     response = connection.AzureConnectionClient().azure_get(

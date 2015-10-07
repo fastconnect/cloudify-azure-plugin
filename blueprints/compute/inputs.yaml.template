@@ -19,5 +19,5 @@ account_type: ''
 # name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)
 # Example:
 # disks:
-#   - { name: 'datadisk-1', size: 100, attache: False, caching: 'None' }
-#   - { name: 'datadisk-2', size: 500, attache: False, caching: 'ReadWrite' }
+#   - { name: 'datadisk-1', size: 100, attach: False, caching: 'None' }
+#   - { name: 'datadisk-2', size: 500, attach: False, caching: 'ReadWrite' }

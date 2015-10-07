@@ -15,6 +15,7 @@ from plugin import (utils,
                     instance
                     )
 
+from test_mockcontext import MockRelationshipContext
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 from cloudify.exceptions import NonRecoverableError
@@ -59,13 +60,6 @@ class TestDatadisks(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "subnet",constants.SUCCEEDED, timeout=600)
       
-        # TODO waiting for ctx relashionship fix
-        #ctx.logger.info("CREATE public_ip")
-        #current_ctx.set(ctx=ctx)
-        #public_ip.create(ctx=ctx)
-        #current_ctx.set(ctx=ctx)
-        #utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, timeout=600)
-
         ctx.logger.info("CREATE NIC")
         current_ctx.set(ctx=ctx)
        
@@ -101,6 +95,8 @@ class TestDatadisks(testtools.TestCase):
                                                 self.__random_id,
                 constants.SUBNET_KEY: 'disksubnet_test' +\
                                         self.__random_id,
+                constants.STORAGE_ACCOUNT_KEY: 'diskstoaccounttest'+\
+                                            self.__random_id
             },
             constants.PUBLISHER_KEY: 'Canonical',
             constants.OFFER_KEY: 'UbuntuServer',
@@ -134,7 +130,8 @@ class TestDatadisks(testtools.TestCase):
             constants.VIRTUAL_NETWORK_KEY: 'diskvirtualnetwork_test'+\
                                             self.__random_id,
             constants.NETWORK_INTERFACE_KEY: 'disknic_test'+\
-                                            self.__random_id
+                                            self.__random_id,
+            constants.COMPUTE_KEY: test_name + self.__random_id
         }
 
         test_relationships = [
@@ -170,13 +167,15 @@ class TestDatadisks(testtools.TestCase):
             {
                 'node_id': 'test',
                 'relationship_type':\
-                    constants.NIC_CONNECTED_TO_PUBLIC_IP,
+                    constants.DISK_ATTACH_TO_INSTANCE,
                 'relationship_properties': \
                 {
-                    constants.PUBLIC_IP_KEY: \
-                        'nic_public_ip_test' + self.__random_id
+                    constants.COMPUTE_KEY: \
+                        test_name + self.__random_id,
+                    constants.STORAGE_ACCOUNT_KEY:\
+                        'diskstoaccounttest' + self.__random_id,
                 }
-}
+            }
         ]
 
         return test_mockcontext.MockCloudifyContextRelationships(node_id='test',
@@ -438,3 +437,71 @@ class TestDatadisks(testtools.TestCase):
         except utils.WindowsAzureError:
             pass
 
+    def test_datadisk_in_storage_account(self):
+        disk = [{'name': 'attach_disk',
+                  'size': 100,
+                  'attach': False,
+                  'caching': 'None'
+                }]
+
+        test_name = 'test-datadisk-in-storage-account'
+        ctx = self.mock_ctx(test_name, disk)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("CREATE storage account")
+        ctx.node.properties[constants.ACCOUNT_TYPE_KEY] = "Standard_LRS"
+        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = "storageaccountdisk" + self.__random_id
+        storage.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "storage",constants.SUCCEEDED, timeout=600)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create VM test: {}".format(test_name))
+
+        instance.create(ctx=ctx)
+        
+        ctx.instance.relationships.append(
+                    MockRelationshipContext(
+                                'test',
+                                {constants.STORAGE_ACCOUNT_KEY: \
+                                       'storageaccountdisk' + self.__random_id
+                                }, 
+                                constants.DISK_CONTAINED_IN_STORAGE_ACCOUNT
+                    )
+        )
+                                            
+        current_ctx.set(ctx=ctx)
+        datadisks.create(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, 'instance',timeout=900)
+
+        jsonInstance = instance.get_json_from_azure(ctx=ctx)
+
+        self.assertIn('storageaccountdisk' + self.__random_id,
+                      jsonInstance['properties'
+                                   ]['storageProfile'
+                                     ]['dataDisks'][0]['vhd']['uri']
+                      )
+
+        ctx.logger.info('Disks are located in {}.'.format(
+                                    'storageaccountdisk' + self.__random_id,
+                                    )
+                        )
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN delete VM test: {}".format(test_name))
+        instance.delete(ctx=ctx)
+
+        try:
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+        except utils.WindowsAzureError:
+            pass
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("DELETE storage account")
+        ctx.node.properties[constants.ACCOUNT_TYPE_KEY] = "Standard_LRS"
+        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = "storageaccountdisk" + self.__random_id
+        storage.delete(ctx=ctx)
+        

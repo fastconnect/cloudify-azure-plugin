@@ -21,9 +21,10 @@ inputs:
     default: 'Standard_A1'
     type: string
   compute_name:
+    default: ''
     type: string
-  availability_set_name:
-    type: string
+ # availability_set_name:
+ #   type: string
   network_interface_name:
     type: string
   public_ip_name:
@@ -42,12 +43,14 @@ inputs:
     type: string
   compute_disks:
     default: {}
-
+  custom_storage_account_name:
+    default : ''
+    type: string
 node_templates:
-  compute_availability_set:
-    type: cloudify.azure.nodes.AvailabilitySet
-    properties:
-      availability_set_name: {get_input: availability_set_name}
+#  compute_availability_set:
+#    type: cloudify.azure.nodes.AvailabilitySet
+#    properties:
+#      availability_set_name: {get_input: availability_set_name}
 
   compute_storage_account:
     type: cloudify.azure.nodes.StorageAccount
@@ -70,10 +73,11 @@ node_templates:
       compute_password: {get_input: compute_password}
       public_key: { get_input: public_key }
     relationships:
+
       - target: compute_storage_account
         type: cloudify.azure.relationships.instance_depends_on_storage_account
-      - target: compute_availability_set
-        type: cloudify.azure.relationships.instance_contained_in_availability_set
+#      - target: compute_availability_set
+#        type: cloudify.azure.relationships.instance_contained_in_availability_set
       - target: compute_nic
         type: cloudify.azure.relationships.instance_connected_to_nic
 
@@ -93,10 +97,15 @@ node_templates:
   compute_disk:
     type: cloudify.azure.nodes.Datadisks
     properties:
-      storage_account_name: {get_input: storage_account_name}
-      compute_name: {get_input: compute_name}
-      disks: { get_input: compute_disks }
+      disks:  {get_input: compute_disks }
+
     relationships:
       - target: compute_instance
         type: cloudify.azure.relationships.disk_attach_to_instance
+      - target: compute_storage_account
+        type: cloudify.relationships.contained_in
 
+  compute_storage_account:
+     type: cloudify.azure.nodes.StorageAccount
+     properties:
+      storage_account_name:  {get_input: custom_storage_account_name}

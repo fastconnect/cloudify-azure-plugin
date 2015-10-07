@@ -1,6 +1,6 @@
 ﻿##################################################################################
 # Cloudify Azure built in types and plugins definitions.
-# Version: 0.0.1-SNAPSHOT
+# Version: 0.0.2-SNAPSHOT
 ##################################################################################
 
 plugins:
@@ -155,12 +155,6 @@ node_types:
   cloudify.azure.nodes.Datadisks:
     derived_from: cloudify.nodes.Root
     properties:
-      compute_name:
-        type: string
-        default: ''
-      storage_account_name:
-        type: string
-        default: ''
       disks:
         default: {}
         description: >
@@ -246,6 +240,9 @@ relationships:
 
   cloudify.azure.relationships.instance_connected_to_nic:
     derived_from: cloudify.relationships.connected_to
-  
+
   cloudify.azure.relationships.disk_attach_to_instance:
     derived_from: cloudify.relationships.connected_to
+
+  cloudify.azure.relationships.disk_contained_in_storage_account:
+    derived_from: cloudify.relationships.contained_in

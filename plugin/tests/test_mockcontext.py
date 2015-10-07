@@ -1,5 +1,7 @@
-from cloudify.mocks import (MockCloudifyContext,
+﻿from cloudify.mocks import (MockCloudifyContext,
                             MockNodeInstanceContext,
+                            MockNodeContext,
+                            MockContext
                            )
 
 
@@ -27,6 +29,14 @@ class MockNodeInstanceContextRelationships(MockNodeInstanceContext):
     def instance(self):
         return self._instance
     
+
+class MockRelationshipSubjectContext(object):
+
+    def __init__(self, context=None, properties=None, runtime_properties=None):
+        self.context = MockContext()
+        self.node = MockNodeContext(id=None, properties=properties)
+        self.instance = MockNodeInstanceContext(id=None, runtime_properties=runtime_properties)
+
 
 class MockRelationshipContext(object):
 
@@ -63,21 +73,21 @@ class MockCloudifyContextRelationships(MockCloudifyContext):
                  bootstrap_context=None,
                  relationships=None):
         super(MockCloudifyContextRelationships, self).__init__(
-                            node_id,
-                            node_name,
-                            blueprint_id,
-                            deployment_id,
-                            execution_id,
-                            properties,
-                            capabilities,
-                            related,
-                            source,
-                            target,
-                            operation,
-                            resources,
-                            provider_context,
-                            bootstrap_context,
-                            runtime_properties)
+                            node_id=node_id,
+                            node_name=node_name,
+                            blueprint_id=blueprint_id,
+                            deployment_id=deployment_id,
+                            execution_id=execution_id,
+                            properties=properties,
+                            capabilities=capabilities,
+                            related=related,
+                            source=source,
+                            target=target,
+                            operation=operation,
+                            resources=resources,
+                            provider_context=provider_context,
+                            bootstrap_context=bootstrap_context,
+                            runtime_properties=runtime_properties)
         self._instance = MockNodeInstanceContextRelationships(
                                                 node_id,
                                                 runtime_properties, 
