@@ -184,7 +184,6 @@ def create(**_):
                                  )
                              )
 
-        
         # Get agent's private ip 
         ip = nic._get_vm_ip(ctx)
 
