@@ -9,14 +9,12 @@ Welcome to test_doc's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    pages/user_guide
    pages/dev_guide
    pages/plugin
-   plugin/module.rst
-   plugin/plugin.rst
-   plugin/plugin.tests.rst
+   code/code_documentation
 
 
 
