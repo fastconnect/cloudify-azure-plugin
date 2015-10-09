@@ -1,4 +1,5 @@
-﻿from cloudify.mocks import (MockCloudifyContext,
+# -*- coding: utf-8 -*-
+from cloudify.mocks import (MockCloudifyContext,
                             MockNodeInstanceContext,
                             MockNodeContext,
                             MockContext

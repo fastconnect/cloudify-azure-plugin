@@ -1,4 +1,5 @@
-﻿import test_utils
+# -*- coding: utf-8 -*-
+import test_utils
 import testtools
 import test_mockcontext
 import random
