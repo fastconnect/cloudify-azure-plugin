@@ -8,4 +8,4 @@ As a you user, you do not really need this.
 .. toctree::
    :maxdepth: 2
 
-   modules.rst
+   modules

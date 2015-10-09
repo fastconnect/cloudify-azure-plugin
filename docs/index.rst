@@ -12,8 +12,8 @@ Contents:
    :maxdepth: 2
 
    pages/user_guide
-   pages/dev_guide
-   pages/plugin
+   pages/plugin_types
+   pages/miscellanous
    code/code_documentation
 
 
