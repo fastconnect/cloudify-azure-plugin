@@ -20,7 +20,6 @@ import shlex
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../'))
-print(sys.path)
 
 # -- General configuration ------------------------------------------------
 
@@ -34,6 +33,13 @@ extensions = [
     'sphinx.ext.autodoc',
 ]
 
+# Mock non installed packages
+autodoc_mock_imports = [
+    'requests',
+    'test_utils',
+    'cloudify',
+    'testtools'
+]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
