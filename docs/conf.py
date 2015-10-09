@@ -19,7 +19,7 @@ import shlex
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../plugin'))
+sys.path.insert(0, os.path.abspath('../'))
 print(sys.path)
 
 # -- General configuration ------------------------------------------------
@@ -49,9 +49,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'test_doc'
-copyright = u'2015, test'
-author = u'test'
+project = u'cloudify azure plugin'
+copyright = u'2015, Atos - Fastconnect'
+author = u'Fastconnect'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -203,7 +203,7 @@ html_theme = 'sphinx_rtd_theme'
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'test_docdoc'
+htmlhelp_basename = 'cloudify-azure-plugin-doc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -225,7 +225,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'test_doc.tex', u'test\\_doc Documentation',
+  (master_doc, 'cloudify-azure-plugin.tex', u'cloudify-azure-plugin Documentation',
    u'test', 'manual'),
 ]
 
@@ -255,7 +255,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'test_doc', u'test_doc Documentation',
+    (master_doc, 'cloudify-azure-plugin', u'cloudify-azure-plugin Documentation',
      [author], 1)
 ]
 
@@ -269,8 +269,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'test_doc', u'test_doc Documentation',
-   author, 'test_doc', 'One line description of project.',
+  (master_doc, 'cloudify-azure-plugin', u'cloudify-azure-plugin Documentation',
+   author, 'cloudify-azure-plugin', 'One line description of project.',
    'Miscellaneous'),
 ]
 
