@@ -33,6 +33,9 @@ extensions = [
     'sphinx.ext.autodoc',
 ]
 
+# Mock imports of tests_utils
+autodoc_mock_imports = ['test_utils']
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
