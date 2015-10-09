@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import testtools
 import time
 import test_utils

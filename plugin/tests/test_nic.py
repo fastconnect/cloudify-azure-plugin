@@ -1,4 +1,5 @@
-﻿import testtools
+﻿# -*- coding: utf-8 -*-
+import testtools
 import time
 import test_utils
 import test_mockcontext

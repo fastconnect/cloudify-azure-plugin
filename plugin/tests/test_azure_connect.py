@@ -1,4 +1,5 @@
-﻿import testtools
+﻿# -*- coding: utf-8 -*-
+import testtools
 import requests
 import test_utils
 import time
