@@ -110,17 +110,33 @@ def create(**_):
     n_priority = 1
     for rule in rules:
         priority = n_priority*100
+
+        protocol = str(rule[constants.PROTOCOL_KEY])\
+            if constants.PROTOCOL_KEY in rule else "*"
+        sourcePort = str(rule[constants.SOURCE_PORT_KEY])\
+            if constants.SOURCE_PORT_KEY in rule else "*"
+        destinationPort = str(rule[constants.DEST_PORT_KEY])\
+            if constants.DEST_PORT_KEY in rule else "*"
+        sourceAddress = str(rule[constants.SOURCE_ADDRESS_KEY])\
+            if constants.SOURCE_ADDRESS_KEY in rule else "*"
+        destinationAddress = str(rule[constants.DEST_ADDRESS_KEY])\
+            if constants.DEST_ADDRESS_KEY in rule else "*"
+        access = str(rule[constants.ACCESS_KEY])\
+            if constants.ACCESS_KEY in rule else "Allow"
+        direction = str(rule[constants.DIRECTION_KEY])\
+            if constants.DIRECTION_KEY in rule else "Inbound"
+
         json_rule = {
             "name": str(rule[constants.RULE_KEY]),
             "properties":{
-                "protocol": str(rule[constants.PROTOCOL_KEY]),
-                "sourcePortRange": str(rule[constants.SOURCE_PORT_KEY]),
-                "destinationPortRange": str(rule[constants.DEST_PORT_KEY]),
-                "sourceAddressPrefix": str(rule[constants.SOURCE_ADDRESS_KEY]),
-                "destinationAddressPrefix": str(rule[constants.DEST_ADDRESS_KEY]),
-                "access": str(rule[constants.ACCESS_KEY]),
+                "protocol": protocol,
+                "sourcePortRange": sourcePort,
+                "destinationPortRange": destinationPort,
+                "sourceAddressPrefix": sourceAddress,
+                "destinationAddressPrefix": destinationAddress,
+                "access": access,
                 "priority": priority,
-                "direction": str(rule[constants.DIRECTION_KEY])
+                "direction": direction
             }
         }
 

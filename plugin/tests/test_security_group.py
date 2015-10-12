@@ -52,23 +52,16 @@ class TestSecurityGroup(testtools.TestCase):
             constants.DELETABLE_KEY: True,
             constants.RULES_KEY: [
                 {
-                    constants.RULE_KEY: 'secu_group_rule_1_' + self.__random_id,
-                    constants.PROTOCOL_KEY: '*',
-                    constants.SOURCE_PORT_KEY: '*',
-                    constants.DEST_PORT_KEY: '*',
-                    constants.SOURCE_ADDRESS_KEY: '*',
-                    constants.DEST_ADDRESS_KEY: '*',
-                    constants.ACCESS_KEY: 'Allow',
-                    constants.DIRECTION_KEY: 'Inbound'
+                    constants.RULE_KEY: 'secu_group_rule_1_' + self.__random_id
                 },
                 {
                     constants.RULE_KEY: 'secu_group_rule_2_' + self.__random_id,
-                    constants.PROTOCOL_KEY: '*',
-                    constants.SOURCE_PORT_KEY: '*',
-                    constants.DEST_PORT_KEY: '*',
-                    constants.SOURCE_ADDRESS_KEY: '*',
-                    constants.DEST_ADDRESS_KEY: '*',
-                    constants.ACCESS_KEY: 'Deny',
+                    constants.PROTOCOL_KEY: 'Udp',
+                    constants.SOURCE_PORT_KEY: '20-3000',
+                    constants.DEST_PORT_KEY: '21',
+                    constants.SOURCE_ADDRESS_KEY: '69.69.69.69',
+                    constants.DEST_ADDRESS_KEY: '10.0.0.0/8',
+                    constants.ACCESS_KEY: 'Allow',
                     constants.DIRECTION_KEY: 'Outbound'
                 },
             ]
