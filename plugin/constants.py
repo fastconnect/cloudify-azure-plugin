@@ -86,6 +86,17 @@ VIRTUAL_NETWORK_ADDRESS_KEY = 'virtual_network_address_prefix'
 SUBNET_KEY = 'subnet_name'
 SUBNET_ADDRESS_KEY = 'subnet_address_prefix'
 
+SECURITY_GROUP_KEY = 'security_group_name'
+RULES_KEY = 'rules'
+RULE_KEY = 'name'
+PROTOCOL_KEY = 'protocol'
+SOURCE_PORT_KEY = 'sourcePortRange'
+DEST_PORT_KEY = 'destinationPortRange'
+SOURCE_ADDRESS_KEY = 'sourceAddressPrefix'
+DEST_ADDRESS_KEY = 'destinationAddressPrefix'
+ACCESS_KEY = 'access'
+DIRECTION_KEY = 'direction'
+
 NETWORK_INTERFACE_KEY = 'network_interface_name'
 
 PUBLIC_IP_KEY = 'public_ip_name'
