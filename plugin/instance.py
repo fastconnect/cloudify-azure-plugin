@@ -49,7 +49,7 @@ def create(**_):
     sku = ctx.node.properties[constants.SKU_KEY]
     distro_version = ctx.node.properties[constants.SKU_VERSION_KEY]
     create_option = 'FromImage'
-    os_profile = _set_os_profile(ctx)
+    os_profile = _create_os_profile(ctx)
 
     ctx.instance.runtime_properties[constants.COMPUTE_KEY] = vm_name
 
@@ -378,7 +378,15 @@ def get_json_from_azure(**_):
     return response.json()
 
 
-def _set_os_profile(ctx):
+def _create_os_profile(ctx):
+    """Create a dictionary to represent the os profile.
+    The function determines if the requested machine is Windows or Unix
+    based on the supplied properties in the context
+
+    :param ctx: The Cloudify ctx context.
+    :return: The OS profile structure for the JSON of the machine.
+    :rtype: dictionary.
+    """
     admin_username = ctx.node.properties[constants.COMPUTE_USER_KEY]
     admin_password = ctx.node.properties[constants.COMPUTE_PASSWORD_KEY]
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
