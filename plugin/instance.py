@@ -32,8 +32,6 @@ def create(**_):
                                  ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_PASSWORD_KEY, 
                                  ctx.node.properties)
-    utils.validate_node_property(constants.PUBLIC_KEY_KEY, 
-                                 ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
 
@@ -51,6 +49,7 @@ def create(**_):
     sku = ctx.node.properties[constants.SKU_KEY]
     distro_version = ctx.node.properties[constants.SKU_VERSION_KEY]
     create_option = 'FromImage'
+    os_profile = _set_os_profile(ctx)
 
     ctx.instance.runtime_properties[constants.COMPUTE_KEY] = vm_name
 
@@ -99,22 +98,7 @@ def create(**_):
             'hardwareProfile': {
                 'vmSize': str(vm_size)
             },
-            'osProfile': {
-                'computerName': str(vm_name),
-                'adminUsername': str(admin_username),
-                'adminPassword': str(admin_password),
-                'linuxConfiguration': {
-                    'disablePasswordAuthentication': 'true',
-                    'ssh': {
-                        'publicKeys': [{
-                            'path': '/home/{}/.ssh/authorized_keys'.format(
-                                admin_username
-                            ),
-                            'keyData': str(public_key)
-                        }]
-                    }
-                }
-            },
+            'osProfile': os_profile,
             'storageProfile': {
                 'imageReference': {
                     'publisher': str(publisher),
@@ -392,3 +376,38 @@ def get_json_from_azure(**_):
                     )
 
     return response.json()
+
+
+def _set_os_profile(ctx):
+    admin_username = ctx.node.properties[constants.COMPUTE_USER_KEY]
+    admin_password = ctx.node.properties[constants.COMPUTE_PASSWORD_KEY]
+    vm_name = ctx.node.properties[constants.COMPUTE_KEY]
+
+    os_profile =  {'computerName': str(vm_name),
+                  'adminUsername': str(admin_username),
+                  'adminPassword': str(admin_password)
+                  }
+
+    if constants.WINDOWS_AUTOMATIC_UPDATES_KEY in ctx.node.properties:
+        # The machine is a Windows machine
+        updates = ctx.node.properties[constants.WINDOWS_AUTOMATIC_UPDATES_KEY]
+        os_profile['windowsConfiguration'] = {
+                        'provisionVMAgent': 'true',
+                        'enableAutomaticUpdates': str(updates)
+                        }
+    else:
+        # The machine is a linux machine, the public key is required
+        utils.validate_node_property(constants.PUBLIC_KEY_KEY, ctx.node.properties)
+        os_profile['linuxConfiguration'] = {
+                      'disablePasswordAuthentication': 'true',
+                      'ssh': {
+                          'publicKeys': [{
+                              'path': '/home/{}/.ssh/authorized_keys'.format(
+                                  admin_username
+                              ),
+                              'keyData': str(public_key)
+                          }]
+                      }
+                  }
+
+    return os_profile
