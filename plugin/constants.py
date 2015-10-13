@@ -87,6 +87,7 @@ SUBNET_KEY = 'subnet_name'
 SUBNET_ADDRESS_KEY = 'subnet_address_prefix'
 
 SECURITY_GROUP_KEY = 'security_group_name'
+SECURITY_GROUP_ID_KEY = 'security_group_id'
 RULES_KEY = 'rules'
 RULE_KEY = 'name'
 PROTOCOL_KEY = 'protocol'
@@ -124,10 +125,14 @@ STORAGE_ACCOUNT_CONTAINED_IN_RESOURCE_GROUP = \
     'cloudify.azure.relationships.storage_account_contained_in_resource_group'
 AVAILABILITY_SET_CONTAINED_IN_RESOURCE_GROUP = \
     'cloudify.azure.relationships.availability_set_contained_in_resource_group'
+SECURITY_GROUP_CONTAINED_IN_RESOURCE_GROUP = \
+    'cloudify.azure.relationships.security_group_contained_in_resource_group'
 NETWORK_CONTAINED_IN_RESOURCE_GROUP = \
     'cloudify.azure.relationships.network_contained_in_resource_group'
 SUBNET_CONNECTED_TO_NETWORK = \
     'cloudify.azure.relationships.subnet_connected_to_network'
+SUBNET_CONNECTED_TO_SECURITY_GROUP = \
+    'cloudify.azure.relationships.subnet_connected_to_security_group'
 NIC_CONNECTED_TO_SUBNET = \
     'cloudify.azure.relationships.nic_connected_to_subnet'
 NIC_CONNECTED_TO_PUBLIC_IP = \

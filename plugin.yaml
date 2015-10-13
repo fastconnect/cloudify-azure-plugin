@@ -232,10 +232,16 @@ relationships:
   cloudify.azure.relationships.availability_set_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
+  cloudify.azure.relationships.security_group_contained_in_resource_group:
+    derived_from: cloudify.relationships.contained_in
+
   cloudify.azure.relationships.network_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.subnet_connected_to_network:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.azure.relationships.subnet_connected_to_security_group:
     derived_from: cloudify.relationships.connected_to
 
   cloudify.azure.relationships.nic_connected_to_subnet:

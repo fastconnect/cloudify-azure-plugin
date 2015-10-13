@@ -7,6 +7,8 @@ import random
 from plugin import (utils,
                     constants,
                     resource_group,
+                    network,
+                    subnet,
                     security_group
                     )
 
@@ -52,10 +54,10 @@ class TestSecurityGroup(testtools.TestCase):
             constants.DELETABLE_KEY: True,
             constants.RULES_KEY: [
                 {
-                    constants.RULE_KEY: 'secu_group_rule_1_' + self.__random_id
+                    constants.RULE_KEY: 'secu_group_rule_1_test' + self.__random_id
                 },
                 {
-                    constants.RULE_KEY: 'secu_group_rule_2_' + self.__random_id,
+                    constants.RULE_KEY: 'secu_group_rule_2_test' + self.__random_id,
                     constants.PROTOCOL_KEY: 'Udp',
                     constants.SOURCE_PORT_KEY: '20-3000',
                     constants.DEST_PORT_KEY: '21',

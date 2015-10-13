@@ -156,4 +156,9 @@ def create(**_):
         ),
         json=json_secu
     )
+
+    # Place the availability_set id in runtime_properties for relationships
+    ctx.instance.runtime_properties[constants.SECURITY_GROUP_ID_KEY] = \
+        response.json()['id']
+
     return response.status_code
