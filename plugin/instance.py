@@ -228,7 +228,7 @@ def delete(**_):
 
     # wait vm deletion
     try:
-        utils.wait_status(ctx, 'instance')
+        utils.wait_status(ctx, 'instance', 'waiting for exception')
     except utils.WindowsAzureError:
         pass
 

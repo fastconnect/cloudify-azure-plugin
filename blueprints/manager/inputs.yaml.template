@@ -14,12 +14,34 @@ public_key: |
 private_key: ''
 resource_group_name: ''
 availability_set_name: ''
+security_group_name: ''
 virtual_network_name: ''
 virtual_network_address_prefix: ''
 subnet_name: ''
 subnet_address_prefix: ''
 network_interface_name: ''
 public_ip_name: ''
+
+# To add security rules to the security group, make a list of rule with these properties:
+# name, protocol (*, Tcp or Udp; Default: *),
+# sourcePortRange & destinationPortRange (port or range between 0 and 65535 or *; Default: *)
+# sourceAddressPrefix & destinationAddressPrefix (CIDR or source IP range or *, tags such as ‘VirtualNetwork’,
+# ‘AzureLoadBalancer’ and ‘Internet’ can also be used; Default: *)
+# access (Allow or Deny; Default: Allow), and direction (Inbound or Outbound; Default: Inbound)
+# Example for the manager:
+# security_group_rules:
+#   - {name: 'http', destinationPortRange: '80', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'https', destinationPortRange: '443', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'ssh', destinationPortRange: '22', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'rabbit', destinationPortRange: '5672', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'fileserver', destinationPortRange: '53229', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'rest', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '8100', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'ui', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '9100', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'nginx', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '8101', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'elastics', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '9200', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'influx', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '8086', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'logstach', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '9999', destinationAddressPrefix: {get_input: subnet_address_prefix} }
+#   - {name: 'denyother', access: 'Deny'}
 
 # To add disks to the machine, make a list of disk with these properties:
 # name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)

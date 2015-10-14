@@ -80,6 +80,7 @@ node_types:
       rules:
         description: >
           A list of rules for the security group. The required input is 'name'.
+          http://getcloudify.org/guide/3.2/overview-components.html
         default: {}
       azure_config:
         default: {}
