@@ -30,18 +30,26 @@ public_ip_name: ''
 # access (Allow or Deny; Default: Allow), and direction (Inbound or Outbound; Default: Inbound)
 # Example for the manager:
 # security_group_rules:
-#   - {name: 'http', destinationPortRange: '80', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'https', destinationPortRange: '443', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'ssh', destinationPortRange: '22', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'rabbit', destinationPortRange: '5672', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'fileserver', destinationPortRange: '53229', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'rest', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '8100', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'ui', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '9100', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'nginx', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '8101', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'elastics', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '9200', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'influx', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '8086', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'logstach', sourceAddressPrefix: {get_input: virtual_network_address_prefix}, destinationPortRange: '9999', destinationAddressPrefix: {get_input: subnet_address_prefix} }
-#   - {name: 'denyother', access: 'Deny'}
+#   http:
+#     destinationPortRange: '80'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   https:
+#     destinationPortRange: '443'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   ssh:
+#     destinationPortRange: '22'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   rabbit:
+#     destinationPortRange: '5672'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   fileserver:
+#     destinationPortRange: '53229'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   internal_in:
+#     sourceAddressPrefix: {get_input: virtual_network_address_prefix}
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   deny_other_in:
+#     access: 'Deny'
 
 # To add disks to the machine, make a list of disk with these properties:
 # name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)
