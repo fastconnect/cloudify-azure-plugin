@@ -52,12 +52,14 @@ class TestSecurityGroup(testtools.TestCase):
                 'secu_group_res_group_test' + self.__random_id,
             constants.SECURITY_GROUP_KEY: test_name + self.__random_id,
             constants.DELETABLE_KEY: True,
-            constants.RULES_KEY: [
-                {
-                    constants.RULE_KEY: 'secu_group_rule_1_test' + self.__random_id
+            constants.RULES_KEY: {
+                'secu_rule_in_1_test' + self.__random_id: {
+                    constants.PROTOCOL_KEY: 'Tcp',
                 },
-                {
-                    constants.RULE_KEY: 'secu_group_rule_2_test' + self.__random_id,
+                'secu_rule_in_2_test' + self.__random_id: {
+                    constants.ACCESS_KEY: 'Deny',
+                },
+                'secu_rule_out_1_test' + self.__random_id:{
                     constants.PROTOCOL_KEY: 'Udp',
                     constants.SOURCE_PORT_KEY: '20-3000',
                     constants.DEST_PORT_KEY: '21',
@@ -66,7 +68,7 @@ class TestSecurityGroup(testtools.TestCase):
                     constants.ACCESS_KEY: 'Allow',
                     constants.DIRECTION_KEY: 'Outbound'
                 },
-            ]
+            }
         }
         #should not be empty
         test_runtime = {

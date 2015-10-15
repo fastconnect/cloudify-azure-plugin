@@ -107,27 +107,27 @@ def create(**_):
         }
     }
 
-    n_priority = 1
-    for rule in rules:
-        priority = n_priority*100
-
-        protocol = str(rule[constants.PROTOCOL_KEY])\
-            if constants.PROTOCOL_KEY in rule else "*"
-        sourcePort = str(rule[constants.SOURCE_PORT_KEY])\
-            if constants.SOURCE_PORT_KEY in rule else "*"
-        destinationPort = str(rule[constants.DEST_PORT_KEY])\
-            if constants.DEST_PORT_KEY in rule else "*"
-        sourceAddress = str(rule[constants.SOURCE_ADDRESS_KEY])\
-            if constants.SOURCE_ADDRESS_KEY in rule else "*"
-        destinationAddress = str(rule[constants.DEST_ADDRESS_KEY])\
-            if constants.DEST_ADDRESS_KEY in rule else "*"
-        access = str(rule[constants.ACCESS_KEY])\
-            if constants.ACCESS_KEY in rule else "Allow"
-        direction = str(rule[constants.DIRECTION_KEY])\
-            if constants.DIRECTION_KEY in rule else "Inbound"
+    in_priority = 100
+    out_priority = 100
+    for rule_name, rule_dict in rules.iteritems():
+        protocol = str(rule_dict[constants.PROTOCOL_KEY])\
+            if constants.PROTOCOL_KEY in rule_dict else "*"
+        sourcePort = str(rule_dict[constants.SOURCE_PORT_KEY])\
+            if constants.SOURCE_PORT_KEY in rule_dict else "*"
+        destinationPort = str(rule_dict[constants.DEST_PORT_KEY])\
+            if constants.DEST_PORT_KEY in rule_dict else "*"
+        sourceAddress = str(rule_dict[constants.SOURCE_ADDRESS_KEY])\
+            if constants.SOURCE_ADDRESS_KEY in rule_dict else "*"
+        destinationAddress = str(rule_dict[constants.DEST_ADDRESS_KEY])\
+            if constants.DEST_ADDRESS_KEY in rule_dict else "*"
+        access = str(rule_dict[constants.ACCESS_KEY])\
+            if constants.ACCESS_KEY in rule_dict else "Allow"
+        direction = str(rule_dict[constants.DIRECTION_KEY])\
+            if constants.DIRECTION_KEY in rule_dict else "Inbound"
+        priority = in_priority if direction == "Inbound" else out_priority
 
         json_rule = {
-            "name": str(rule[constants.RULE_KEY]),
+            "name": str(rule_name),
             "properties":{
                 "protocol": protocol,
                 "sourcePortRange": sourcePort,
@@ -139,10 +139,13 @@ def create(**_):
                 "direction": direction
             }
         }
-
         json_secu['properties']['securityRules'].append(json_rule)
-        n_priority+=1
+        if direction == "Inbound":
+            in_priority += 100
+        else:
+            out_priority += 100
 
+    ctx.logger.debug('JSON: {}'.format(json_secu))
     response = connection.AzureConnectionClient().azure_put(ctx,
         ("subscriptions/{}" +
          "/resourceGroups/{}" +
