@@ -53,9 +53,7 @@ class TestSecurityGroup(testtools.TestCase):
             constants.SECURITY_GROUP_KEY: test_name + self.__random_id,
             constants.DELETABLE_KEY: True,
             constants.RULES_KEY: {
-                'secu_rule_in_1_test' + self.__random_id: {
-                    constants.PROTOCOL_KEY: 'Tcp',
-                },
+                'secu_rule_in_1_test' + self.__random_id: {},
                 'secu_rule_in_2_test' + self.__random_id: {
                     constants.ACCESS_KEY: 'Deny',
                 },

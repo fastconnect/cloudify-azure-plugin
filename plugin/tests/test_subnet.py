@@ -64,11 +64,9 @@ class TestSubnet(testtools.TestCase):
             constants.SUBNET_ADDRESS_KEY: cdir,
             constants.VIRTUAL_NETWORK_KEY: 'subnetnetwork_test'+self.__random_id,
             constants.SECURITY_GROUP_KEY: 'subnetsecugroup_test' + self.__random_id,
-            constants.RULES_KEY: [
-                {
-                    constants.RULE_KEY: 'subnet_rule_test' + self.__random_id
-                }
-            ],
+            constants.RULES_KEY: {
+                'subnet_rule_test' + self.__random_id: {}
+            },
             constants.DELETABLE_KEY: True
         }
 
