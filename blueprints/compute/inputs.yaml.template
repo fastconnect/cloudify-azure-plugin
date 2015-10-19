@@ -5,7 +5,6 @@ sku: ''
 compute_name: ''
 compute_user: ''
 compute_password: ''
-public_key: |
 
 availability_set_name: ''
 network_interface_name: ''
@@ -13,6 +12,12 @@ public_ip_name: ''
 storage_account_name: ''
 account_type: ''
 # storage_account_deletable: False
+
+# If you want a Windows machine, you can activate (true) or deactivate (false) automatic updates
+# windows_automatic_updates: false
+
+# If you want a Linux machine, you have to give a ssh key, put the CONTENT of the key here
+# public_key: |
 
 # compute_disks: ''
 # To add disks to the machine, make a list of disk with these properties:
