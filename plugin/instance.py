@@ -401,11 +401,15 @@ def _create_os_profile(ctx):
         updates = ctx.node.properties[constants.WINDOWS_AUTOMATIC_UPDATES_KEY]
         os_profile['windowsConfiguration'] = {
                         'provisionVMAgent': 'true',
-                        'enableAutomaticUpdates': str(updates)
+                        'enableAutomaticUpdates': str(updates),
+                        'winRM': {
+                            'listeners': [{'protocol': 'http'}]
+                            }
                         }
     else:
         # The machine is a linux machine, the public key is required
         utils.validate_node_property(constants.PUBLIC_KEY_KEY, ctx.node.properties)
+        public_key = ctx.node.properties[constants.PUBLIC_KEY_KEY]
         os_profile['linuxConfiguration'] = {
                       'disablePasswordAuthentication': 'true',
                       'ssh': {
