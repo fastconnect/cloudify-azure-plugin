@@ -188,7 +188,7 @@ class TestDatadisks(testtools.TestCase):
     def test_create_datadisk(self):
         disk = [{'name': 'disk_1',
                  'size': 100,
-                 'attach': False,
+                 'deletable': False,
                  'caching': 'None'
                }]
 
@@ -232,11 +232,11 @@ class TestDatadisks(testtools.TestCase):
     def test_create_dataDisks(self):
         disks = [{'name': 'disks_1',
                   'size': 100,
-                  'attach': False,
+                  'deletable': False,
                   'caching': 'None'
                 },{'name': 'disks_2',
                    'size': 200,
-                   'attach': False,
+                   'deletable': False,
                    'caching': 'ReadWrite'
                 }]
 
@@ -282,15 +282,15 @@ class TestDatadisks(testtools.TestCase):
     def test_create_too_much_datadisks(self):
         disks = [{'name': 'much_disks_1',
                   'size': 100,
-                  'attach': False,
+                  'deletable': False,
                   'caching': 'None'
                 },{'name': 'much_disks_2',
                    'size': 200,
-                   'attach': False,
+                   'deletable': False,
                    'caching': 'ReadWrite'
                 },{'name': 'much_disks_3',
                    'size': 200,
-                   'attach': False,
+                   'deletable': False,
                    'caching': 'ReadOnly'
                 }]
 
@@ -337,10 +337,10 @@ class TestDatadisks(testtools.TestCase):
             pass
 
     def test_fail_create_datadisk(self):
-        #attach true trigger the test fail
+        # Disks are limited to a maximum of 1TB
         disk = [{'name': 'disk_fail_1',
-                 'size': 100,
-                 'attach': True,
+                 'size': 5000,
+                 'deletable': True,
                  'caching': 'None'
                }]
 
@@ -374,7 +374,7 @@ class TestDatadisks(testtools.TestCase):
     def test_attach_datadisk(self):
         disk = [{'name': 'attach_disk',
                   'size': 100,
-                  'attach': False,
+                  'deletable': False,
                   'caching': 'None'
                 }]
 
@@ -400,8 +400,6 @@ class TestDatadisks(testtools.TestCase):
             utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
-
-        disk[0]['attach'] = True
 
         test_name = 'test-attach-datadisk'
         ctx = self.mock_ctx(test_name, disk)
@@ -441,7 +439,7 @@ class TestDatadisks(testtools.TestCase):
     def test_datadisk_in_storage_account(self):
         disk = [{'name': 'attach_disk',
                   'size': 100,
-                  'attach': False,
+                  'deletable': False,
                   'caching': 'None'
                 }]
 
@@ -506,3 +504,56 @@ class TestDatadisks(testtools.TestCase):
         ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = "storageaccountdisk" + self.__random_id
         storage.delete(ctx=ctx)
         
+
+    def test_delete_datadisk(self):
+        disk = [{'name': 'delete_disk',
+                  'size': 100,
+                  constants.DELETABLE_KEY: True,
+                  'caching': 'None'
+                },{'name': 'delete_disk_2',
+                  'size': 100,
+                  constants.DELETABLE_KEY: False,
+                  'caching': 'None'
+                }]
+
+        test_name = 'test-delete-datadisk'
+        ctx = self.mock_ctx(test_name, disk)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create VM test: {}".format(test_name))
+        instance.create(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        datadisks.create(ctx=ctx)
+        
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, 'instance',timeout=900)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN delete VM test: {}".format(test_name))
+        instance.delete(ctx=ctx)
+
+        try:
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+        except utils.WindowsAzureError:
+            pass
+
+        ctx.logger.info("BEGIN delete datadisk test: {}".format(disk[0]['name']))
+        current_ctx.set(ctx=ctx)
+        datadisks.delete(ctx=ctx)
+        
+        list  = datadisks._get_datadisks_from_storage(ctx)
+        self.assertFalse(datadisks._is_datadisk_exists(
+                                        list,
+                                        disk[0]['name']
+                                        )
+                        )
+        ctx.logger.info("Disk {} has been deleted.".format(disk[0]['name']))
+
+        self.assertTrue(datadisks._is_datadisk_exists(
+                                        list, 
+                                        disk[1]['name']
+                                        )
+                        )
+        ctx.logger.info("Datadisk {} still exists.".format(disk[1]['name']))
