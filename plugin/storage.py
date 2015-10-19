@@ -184,3 +184,48 @@ def availability_account_name(**_):
     )
 
     return response.json()
+
+
+def get_storage_keys(ctx):
+    """Get storage account keys.
+
+    :param ctx: The Cloudify ctx context.
+    :return: A list of keys attached to the storage account. Keys are encoded in base64
+    :rtype: list
+    """
+
+    azure_config = utils.get_azure_config(ctx)
+
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+    location = azure_config[constants.LOCATION_KEY]
+    if constants.STORAGE_ACCOUNT_KEY in ctx.node.properties:
+        storage_account_name = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
+    else:
+        storage_account_name = ctx.instance.runtim_properties[constants.STORAGE_ACCOUNT_KEY]
+
+    account_type = ctx.node.properties[constants.ACCOUNT_TYPE_KEY]
+    api_version = constants.AZURE_API_VERSION_05_preview
+
+    connect = connection.AzureConnectionClient()
+
+    ctx.logger.info("Getting storage account keys")
+    response = connect.azure_post(ctx,
+                                  ("subscriptions/{}" +
+                                   "/resourceGroups/{}" +
+                                   "/providers/Microsoft.Storage" +
+                                   "/storageAccounts/{}" +
+                                   "/listKeys" +
+                                   "?api-version={}").format(
+                                        subscription_id,
+                                        resource_group_name,
+                                        storage_account_name,
+                                        api_version
+                                    ),
+                                  json={}
+                                  )
+
+    keys = response.json()
+    ctx.logger.debug("Key: {}".format(keys))
+
+    return [keys['key1'], keys['key2']]

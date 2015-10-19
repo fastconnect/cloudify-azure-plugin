@@ -80,6 +80,11 @@ class TestStorage(testtools.TestCase):
         utils.wait_status(ctx, "storage",constants.SUCCEEDED, timeout=600)
         ctx.logger.info("Storage Account Created")
 
+        keys = storage.get_storage_keys(ctx)
+        self.assertIsNotNone(keys)
+        self.assertEqual(len(keys), 2)
+        ctx.logger.info("Key 1: {}, key 2: {}".format(keys[0], keys[1]))
+
         self.assertEqual(200, storage.delete(ctx=ctx))
         ctx.logger.info("Checking Storage Account deleted")
         current_ctx.set(ctx=ctx)
