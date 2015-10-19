@@ -204,7 +204,6 @@ def get_storage_keys(ctx):
     else:
         storage_account_name = ctx.instance.runtim_properties[constants.STORAGE_ACCOUNT_KEY]
 
-    account_type = ctx.node.properties[constants.ACCOUNT_TYPE_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
 
     connect = connection.AzureConnectionClient()
@@ -226,6 +225,5 @@ def get_storage_keys(ctx):
                                   )
 
     keys = response.json()
-    ctx.logger.debug("Key: {}".format(keys))
 
     return [keys['key1'], keys['key2']]
