@@ -9,7 +9,8 @@ from plugin import (utils,
                     constants,
                     resource_group,
                     subnet,
-                    network
+                    network,
+                    security_group
                     )
 
 from cloudify.state import current_ctx
@@ -62,6 +63,10 @@ class TestSubnet(testtools.TestCase):
             constants.SUBNET_KEY: test_name + self.__random_id,
             constants.SUBNET_ADDRESS_KEY: cdir,
             constants.VIRTUAL_NETWORK_KEY: 'subnetnetwork_test'+self.__random_id,
+            constants.SECURITY_GROUP_KEY: 'subnetsecugroup_test' + self.__random_id,
+            constants.RULES_KEY: {
+                'subnet_rule_test' + self.__random_id: {}
+            },
             constants.DELETABLE_KEY: True
         }
 
@@ -100,16 +105,15 @@ class TestSubnet(testtools.TestCase):
 
         current_ctx.set(ctx=ctx)
         status_code = subnet.create(ctx=ctx)
-        ctx.logger.debug("status_code =" + str(status_code) )
+        ctx.logger.debug("status_code = " + str(status_code) )
         self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "subnet",constants.SUCCEEDED, timeout=600)
 
-        ctx.logger.info("Set deletable propertie to True")
         current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.DELETABLE_KEY] = True 
         status_code = subnet.delete(ctx=ctx)
-        ctx.logger.debug("status_code =" + str(status_code) )
+        ctx.logger.debug("status_code = " + str(status_code) )
         self.assertTrue(bool((status_code == 202) or (status_code == 204)))
 
         try:
@@ -119,6 +123,55 @@ class TestSubnet(testtools.TestCase):
             pass
 
         ctx.logger.info("END test_create_subnet")
+
+    def test_connect_security_group_subnet(self):
+        ctx = self.mock_ctx('testaddsecugroupsubnet', cdir='10.0.5.0/24')
+        ctx.logger.info("BEGIN test_connect_security_group_subnet")
+
+        ctx.logger.info("create security_group")
+        self.assertEqual(201, security_group.create(ctx=ctx))
+        ctx.logger.debug("security_group_id = {}".format(
+            ctx.instance.runtime_properties[constants.SECURITY_GROUP_ID_KEY]))
+
+        ctx.instance.relationships.append(test_mockcontext.MockRelationshipContext(node_id='test',
+            runtime_properties={
+                constants.SECURITY_GROUP_ID_KEY:\
+                     ctx.instance.runtime_properties[constants.SECURITY_GROUP_ID_KEY]
+            },
+            type=constants.SUBNET_CONNECTED_TO_SECURITY_GROUP)
+        )
+
+        current_ctx.set(ctx=ctx)
+        status_code = subnet.create(ctx=ctx)
+        ctx.logger.debug("status_code = " + str(status_code) )
+        self.assertTrue(bool((status_code == 200) or (status_code == 201)))
+
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "subnet",constants.SUCCEEDED, timeout=600)
+
+        ctx.logger.info("test subnet is connected to a security_group")
+        current_ctx.set(ctx=ctx)
+        json = subnet.get_json_from_azure(ctx=ctx)
+        self.assertIsNotNone(json['properties']['networkSecurityGroup'])
+        self.assertEqual(str(json['properties']['networkSecurityGroup']['id']).lower(),
+            str(ctx.instance.runtime_properties[constants.SECURITY_GROUP_ID_KEY]).lower()
+        )
+
+        current_ctx.set(ctx=ctx)
+        status_code = subnet.delete(ctx=ctx)
+        ctx.logger.debug("status_code = " + str(status_code) )
+        self.assertTrue(bool((status_code == 202) or (status_code == 204)))
+
+        try:
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, "subnet", "waiting for exception", timeout=600)
+        except utils.WindowsAzureError:
+            pass
+
+        ctx.logger.info("delete security_group")
+        self.assertEqual(202, security_group.delete(ctx=ctx))
+
+        ctx.logger.info("END test_connect_security_group_subnet")
 
     def test_delete_subnet(self):
         ctx = self.mock_ctx('testdeletesubnet', cdir='10.0.3.0/24')

@@ -46,10 +46,21 @@ def create(**_):
        }
     }
 
-    ctx.logger.info('Creating Subnet')
-    connect = connection.AzureConnectionClient()
+    try:
+        ctx.logger.debug("Search for an security_group")
+        security_group_id = utils.get_target_property(ctx,
+            constants.SUBNET_CONNECTED_TO_SECURITY_GROUP,
+            constants.SECURITY_GROUP_ID_KEY
+        )
+        ctx.logger.debug("security_group found: {}".format(security_group_id))
+        json['properties']['networkSecurityGroup']={'id': str(security_group_id)}
+    except:
+        ctx.logger.debug('Subnet not connected to a security group')
+        pass
 
-    response = connect.azure_put(ctx,
+    ctx.logger.debug('JSON: {}'.format(json))
+
+    response = connection.AzureConnectionClient().azure_put(ctx,
         ("subscriptions/{}/resourceGroups/{}/" +
             "providers/microsoft.network" +
             "/virtualNetworks/{}" +
@@ -198,3 +209,39 @@ def get_id(**_):
         )
     )
     return response.json()['id']
+
+def get_json_from_azure(**_):
+    """Get the json of a subnet.
+
+    :param ctx: The Cloudify ctx context.
+    :return: The json of a subnet.
+    :rtype: dictionary
+    """
+    azure_config = utils.get_azure_config(ctx)
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+
+    api_version = constants.AZURE_API_VERSION_05_preview
+    virtual_network_name = utils.get_target_property(ctx,
+        constants.SUBNET_CONNECTED_TO_NETWORK,
+        constants.VIRTUAL_NETWORK_KEY
+    )
+    subnet_name = ctx.node.properties[constants.SUBNET_KEY]
+
+    response = connection.AzureConnectionClient().azure_get(
+        ctx,
+        ('subscriptions/{}' +
+         '/resourceGroups/{}' +
+         '/providers/microsoft.network' +
+         '/virtualNetworks/{}' +
+         '/subnets/{}' +
+         '?api-version={}').format(
+            subscription_id,
+            resource_group_name,
+            virtual_network_name,
+            subnet_name,
+            api_version
+        )
+    )
+
+    return response.json()

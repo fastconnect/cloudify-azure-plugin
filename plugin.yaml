@@ -71,6 +71,29 @@ node_types:
         delete:
           implementation: azure.plugin.storage.delete
 
+  cloudify.azure.nodes.SecurityGroup:
+    derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      security_group_name:
+        type: string
+        default: ''
+      rules:
+        description: >
+          A list of rules for the security group. The required input is 'name'.
+          http://getcloudify.org/guide/3.2/overview-components.html
+        default: {}
+      azure_config:
+        default: {}
+      deletable:
+        type: boolean
+        default: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.security_group.create
+        delete:
+          implementation: azure.plugin.security_group.delete
+
   cloudify.azure.nodes.Network:
     derived_from: cloudify.nodes.Network
     properties:
@@ -210,10 +233,16 @@ relationships:
   cloudify.azure.relationships.availability_set_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
+  cloudify.azure.relationships.security_group_contained_in_resource_group:
+    derived_from: cloudify.relationships.contained_in
+
   cloudify.azure.relationships.network_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.subnet_connected_to_network:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.azure.relationships.subnet_connected_to_security_group:
     derived_from: cloudify.relationships.connected_to
 
   cloudify.azure.relationships.nic_connected_to_subnet:
