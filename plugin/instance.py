@@ -76,7 +76,7 @@ def create(**_):
     os_disk_name = "{}_{}.vhd".format(vm_name,
                                       storage_account
                                      )
-    os_disk_vhd = "https://{}.blob.core.windows.net/{}-vhds/{}.vhd".format(
+    os_disk_vhd = "https://{}.blob.core.windows.net/{}-vhds/{}".format(
                                             storage_account,
                                             vm_name,
                                             os_disk_name
@@ -406,6 +406,7 @@ def _create_os_profile(ctx):
     else:
         # The machine is a linux machine, the public key is required
         utils.validate_node_property(constants.PUBLIC_KEY_KEY, ctx.node.properties)
+        public_key =  ctx.node.properties[constants.PUBLIC_KEY_KEY]
         os_profile['linuxConfiguration'] = {
                       'disablePasswordAuthentication': 'true',
                       'ssh': {
