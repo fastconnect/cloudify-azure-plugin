@@ -34,7 +34,8 @@ class TestDatadisks(testtools.TestCase):
         ctx.logger.info("CREATE ressource_group")
         resource_group.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "resource_group", constants.SUCCEEDED, timeout=600)
+        utils.wait_status(ctx, "resource_group", 
+                          constants.SUCCEEDED, timeout=600)
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("CREATE storage account")
@@ -45,7 +46,8 @@ class TestDatadisks(testtools.TestCase):
 
         ctx.logger.info("CREATE network")
         current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
+        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = \
+            "10.0.0.0/16"
         network.create(ctx=ctx) 
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "network",constants.SUCCEEDED, timeout=600)
@@ -179,7 +181,8 @@ class TestDatadisks(testtools.TestCase):
             }
         ]
 
-        return test_mockcontext.MockCloudifyContextRelationships(node_id='test',
+        return test_mockcontext.MockCloudifyContextRelationships(
+            node_id='test',
             properties=test_properties,
             runtime_properties=test_runtime,
             relationships=test_relationships
@@ -209,7 +212,8 @@ class TestDatadisks(testtools.TestCase):
 
         ctx.logger.debug(json_VM)
 
-        self.assertIsNotNone(json_VM['properties']['storageProfile']['dataDisks'])
+        self.assertIsNotNone(json_VM['properties'][
+                                        'storageProfile']['dataDisks'])
         
         disks_vm = json_VM['properties']['storageProfile']['dataDisks']
 
@@ -225,7 +229,8 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -255,7 +260,8 @@ class TestDatadisks(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         json_VM = instance.get_json_from_azure(ctx=ctx)
 
-        self.assertIsNotNone(json_VM['properties']['storageProfile']['dataDisks'])
+        self.assertIsNotNone(json_VM['properties'][
+                                        'storageProfile']['dataDisks'])
 
         disks_vm = json_VM['properties']['storageProfile']['dataDisks']
 
@@ -275,7 +281,8 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance',
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -310,7 +317,8 @@ class TestDatadisks(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         json_VM = instance.get_json_from_azure(ctx=ctx)
 
-        self.assertIsNotNone(json_VM['properties']['storageProfile']['dataDisks'])
+        self.assertIsNotNone(json_VM['properties'][
+                                        'storageProfile']['dataDisks'])
 
         disks_vm = json_VM['properties']['storageProfile']['dataDisks']
 
@@ -332,7 +340,8 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -366,7 +375,8 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -397,7 +407,8 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -416,7 +427,8 @@ class TestDatadisks(testtools.TestCase):
 
         ctx.logger.debug(json_VM)
 
-        self.assertIsNotNone(json_VM['properties']['storageProfile']['dataDisks'])
+        self.assertIsNotNone(json_VM['properties'][
+                                        'storageProfile']['dataDisks'])
         
         disks_vm = json_VM['properties']['storageProfile']['dataDisks']
 
@@ -432,7 +444,8 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -449,7 +462,8 @@ class TestDatadisks(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         ctx.logger.info("CREATE storage account")
         ctx.node.properties[constants.ACCOUNT_TYPE_KEY] = "Standard_LRS"
-        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = "storageaccountdisk" + self.__random_id
+        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = \
+            "storageaccountdisk" + self.__random_id
         storage.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "storage",constants.SUCCEEDED, timeout=600)
@@ -494,14 +508,16 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE storage account")
         ctx.node.properties[constants.ACCOUNT_TYPE_KEY] = "Standard_LRS"
-        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = "storageaccountdisk" + self.__random_id
+        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = \
+            "storageaccountdisk" + self.__random_id
         storage.delete(ctx=ctx)
         
 
@@ -535,11 +551,15 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
-        ctx.logger.info("BEGIN delete datadisk test: {}".format(disk[0]['name']))
+        ctx.logger.info("BEGIN delete datadisk test: {}".format(
+                                        disk[0]['name']
+                                        )
+                        )
         current_ctx.set(ctx=ctx)
         datadisks.delete(ctx=ctx)
         
