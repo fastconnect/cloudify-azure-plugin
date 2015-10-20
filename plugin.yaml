@@ -182,7 +182,7 @@ node_types:
         default: {}
         description: >
           A list of disks to attache to the machine. The required inputs are
-          'name', 'caching' (None, ReadOnly or ReadWrite), 'attach' (True or False),
+          'name', 'caching' (None, ReadOnly or ReadWrite), 'deletable' (True or False),
           and size (in GB).
       azure_config:
         default: {}
@@ -190,6 +190,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: azure.plugin.datadisks.create
+        delete:
+            implementation: azure.plugin.datadisks.delete
 
   cloudify.azure.nodes.Instance:
     derived_from: cloudify.nodes.Compute
