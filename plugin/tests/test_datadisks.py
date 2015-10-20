@@ -364,7 +364,7 @@ class TestDatadisks(testtools.TestCase):
         utils.wait_status(ctx, 'instance',timeout=900)
 
         current_ctx.set(ctx=ctx)
-        self.assertRaises(NonRecoverableError,
+        self.assertRaises(utils.WindowsAzureError,
                           datadisks.create,
                           ctx=ctx
                           )
