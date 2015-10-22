@@ -98,6 +98,7 @@ ACCESS_KEY = 'access'
 DIRECTION_KEY = 'direction'
 
 NETWORK_INTERFACE_KEY = 'network_interface_name'
+NIC_PRIMARY_KEY = 'primary'
 
 PUBLIC_IP_KEY = 'public_ip_name'
 

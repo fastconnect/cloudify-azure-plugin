@@ -11,6 +11,7 @@ from plugin import (utils,
 # Cloudify imports
 from cloudify import ctx
 from cloudify.decorators import operation
+from cloudify.exceptions import NonRecoverableError
 
 TIME_DELAY = 5
 
@@ -38,9 +39,6 @@ def create(**_):
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     location = azure_config[constants.LOCATION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
-    admin_username = ctx.node.properties[constants.COMPUTE_USER_KEY]
-    admin_password = ctx.node.properties[constants.COMPUTE_PASSWORD_KEY]
-    public_key = ctx.node.properties[constants.PUBLIC_KEY_KEY]
     api_version = constants.AZURE_API_VERSION_06
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
     vm_size = ctx.node.properties[constants.FLAVOR_KEY]
@@ -82,7 +80,16 @@ def create(**_):
                                             os_disk_name
                                             )
 
-    nic_id = nic.get_id(ctx)
+    nics = nic.get_ids(ctx)
+    networkInterfaces_list = []
+    for _nic in nics:
+        networkInterfaces_list.append({
+            'properties': {
+                'primary': _nic['primary']
+            },
+            'id': str(_nic['id'])
+        })
+    ctx.logger.debug('networkInterfaces_list: {}'.format(networkInterfaces_list))
 
     json = {
         'id': ('/subscriptions/{}/resourceGroups/{}' +
@@ -116,11 +123,7 @@ def create(**_):
                 }
             },
             'networkProfile': {
-                'networkInterfaces':[
-                    {
-                        'id': str(nic_id)
-                    }
-                ]
+                'networkInterfaces': networkInterfaces_list
             }
         }
     }
