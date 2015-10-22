@@ -215,8 +215,9 @@ Derived From: *cloudify.nodes.Root*
 Properties:
 ^^^^^^^^^^^
 
-* **compute_name:** Indicates the name of the compute to create.
-* **storage_account_name:** the storage account name where the disks are stored.
+* **disks:** A list of disks to specify. The inputs are presented as a dictionnary. 
+You have to specify 'name', 'caching' (None, ReadOnly or ReadWrite), 'deletable' (True or False) and size (in GiB).
+Example: {name: 'my_datadisk', caching: 'None', deletable: False, size: 500}
 * **azure_config:** describes the configuration to use to use the Azure API. Outside a blueprint manager, you do not need to set this.
 
 Mapped Operations:

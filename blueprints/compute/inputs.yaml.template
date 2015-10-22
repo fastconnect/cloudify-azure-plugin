@@ -16,8 +16,8 @@ account_type: ''
 
 # compute_disks: ''
 # To add disks to the machine, make a list of disk with these properties:
-# name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)
+# name, size (in GiB), deletable (True or False) and caching (ReadWrite, ReadOnly, None)
 # Example:
 # disks:
-#   - { name: 'datadisk-1', size: 100, attach: False, caching: 'None' }
-#   - { name: 'datadisk-2', size: 500, attach: False, caching: 'ReadWrite' }
+#   - { name: 'datadisk-1', size: 100, deletable: False, caching: 'None' }
+#   - { name: 'datadisk-2', size: 500, deletable: False, caching: 'ReadWrite' }

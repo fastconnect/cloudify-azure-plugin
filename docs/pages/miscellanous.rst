@@ -9,9 +9,10 @@ Known Limitations (sprint 5)
 ****************************
 
 * Main resources (resource group, storage account, network, subnet) are fixed by the manager.
-* Datadisks may have a weird behaviour. Azure does not provide a clean way to use datadisks. Eventually, you cannot delete datadisks.
 * You may not put more than one NIC per machine.
 * Only one PIP can be attached to one NIC.
+* You cannot choose the name of the OS disk, the chosen pattern is "vmname_storageaccountname.vhd".
+* You cannot choose the name of the container within the storage account, the chosen pattern is "vmname-vhds".
 
 *******************
 Future improvements
@@ -22,4 +23,5 @@ Future improvements
 * Implement secutity groups.
 * Implement availability sets.
 * Implement keys vault (TBD).
+* Allow network creation for application
   
