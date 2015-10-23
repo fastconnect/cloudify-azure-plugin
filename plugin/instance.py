@@ -73,7 +73,16 @@ def create(**_):
                         ctx.node.properties
                                             )
 
-    nic_id = nic.get_id(ctx)
+    nics = nic.get_ids(ctx)
+    networkInterfaces_list = []
+    for _nic in nics:
+        networkInterfaces_list.append({
+            'properties': {
+                'primary': _nic['primary']
+            },
+            'id': str(_nic['id'])
+        })
+    ctx.logger.debug('networkInterfaces_list: {}'.format(networkInterfaces_list))
 
     json = {
         'id': ('/subscriptions/{}/resourceGroups/{}' +
@@ -92,11 +101,7 @@ def create(**_):
             'osProfile': os_profile,
             'storageProfile': storage_profile,
             'networkProfile': {
-                'networkInterfaces':[
-                    {
-                        'id': str(nic_id)
-                    }
-                ]
+                'networkInterfaces': networkInterfaces_list
             }
         }
     }

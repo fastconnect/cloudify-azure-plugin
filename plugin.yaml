@@ -142,6 +142,9 @@ node_types:
       network_interface_name:
         type: string
         default: ''
+      primary:
+        type: boolean
+        default: true
       azure_config:
         default: {}
       deletable:

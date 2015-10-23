@@ -190,6 +190,8 @@ class TestNIC(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)  
 
+        time.sleep(120)
+
         ctx.logger.info("delete NIC")
         self.assertEqual(202, nic.delete(ctx=ctx))
 
@@ -201,6 +203,7 @@ class TestNIC(testtools.TestCase):
             pass
         
         ctx.logger.info("END create NIC test")
+
 
     def test_add_public_ip(self):
          ctx = self.mock_ctx('testaddpublicip')

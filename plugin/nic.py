@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 from plugin import (utils,
                     constants,
                     connection,
@@ -137,14 +138,19 @@ def create(**_):
     api_version = constants.AZURE_API_VERSION_06
     network_interface_name = ctx.node.properties[constants.NETWORK_INTERFACE_KEY]
     private_ip_allocation_method = "Dynamic"
+    primary = ctx.node.properties[constants.NIC_PRIMARY_KEY]\
+            if constants.NIC_PRIMARY_KEY in ctx.node.properties else False
+    ctx.logger.debug('NIC primary is: {}'.format(primary))
     subnet_id = get_subnet_id(ctx=ctx)
 
     # Place the network name in runtime_properties for relationships
     ctx.instance.runtime_properties[constants.NETWORK_INTERFACE_KEY] = \
         network_interface_name
+    ctx.instance.runtime_properties[constants.NIC_PRIMARY_KEY] = \
+        primary
     ctx.instance.runtime_properties['subnet_id'] = subnet_id
 
-    json ={
+    nic_json ={
         "location": str(location),
         "properties": {
             "ipConfigurations": [
@@ -162,9 +168,9 @@ def create(**_):
     }
 
     ctx.logger.info('create NIC : ' + network_interface_name)
-    cntn = connection.AzureConnectionClient()
+    ctx.logger.debug('JSON: {}'.format(nic_json))
 
-    response = cntn.azure_put(ctx, 
+    response = connection.AzureConnectionClient().azure_put(ctx,
                    ("subscriptions/{}/resourcegroups/{}/" +
                     "providers/microsoft.network" +
                     "/networkInterfaces/{}" +
@@ -174,7 +180,7 @@ def create(**_):
                                             network_interface_name, 
                                             api_version
                                             ),
-                    json=json
+                    json=nic_json
                     )
     return response.status_code
 
@@ -311,3 +317,47 @@ def get_id(ctx):
         )
     )
     return response.json()['id']
+
+
+def get_ids(ctx):
+    """Get the ids of all network interface card (relationship function for an instance).
+
+    :param ctx: The Cloudify ctx context.
+    :return: The id of a network interface card.
+    :rtype: string
+    """
+    azure_config = utils.get_azure_config(ctx)
+    subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
+    resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
+
+    api_version = constants.AZURE_API_VERSION_06
+    nics = utils.get_targets_properties(
+        ctx,
+        constants.INSTANCE_CONNECTED_TO_NIC,
+        [
+            constants.NETWORK_INTERFACE_KEY,
+            constants.NIC_PRIMARY_KEY
+        ]
+    )
+
+    _list = []
+    for _nic in nics:
+        response = connection.AzureConnectionClient().azure_get(
+            ctx,
+            ('subscriptions/{}' +
+             '/resourceGroups/{}' +
+             '/providers/microsoft.network' +
+             '/networkInterfaces/{}' +
+             '?api-version={}').format(
+                subscription_id,
+                resource_group_name,
+                _nic[constants.NETWORK_INTERFACE_KEY],
+                api_version
+            )
+        )
+        _list.append({
+            'id': response.json()['id'],
+            'primary': _nic[constants.NIC_PRIMARY_KEY]
+        })
+
+    return _list

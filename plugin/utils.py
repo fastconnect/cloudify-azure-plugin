@@ -95,6 +95,40 @@ def get_target_property(ctx, relationship_name, property_name):
                                   )
 
 
+def get_targets_properties(ctx, relationship_name, properties_name):
+    """Get all runtime_property from targets of a relationship.
+
+    :param ctx:  The Cloudify ctx context.
+    :param relationship_name: The relationship's name.
+    :param property_name: The runtime_property's key to get.
+    :return: the runtime_property's value.
+    """
+    properties_list = []
+    if ctx.instance.relationships:
+        for relationship in ctx.instance.relationships:
+            if relationship.type == relationship_name:
+                properties_dict = {}
+                for property_name in properties_name:
+                    for property in relationship.target.instance.runtime_properties:
+                        if property == property_name:
+                            properties_dict[property_name]=relationship.target.instance.runtime_properties[property_name]
+                            break
+                properties_list.append(properties_dict)
+        if not properties_list:
+            raise NonRecoverableError(
+                'Relationship property {} for {} has not been found.'.format(
+                    property_name, ctx.node.name)
+            )
+        else:
+            ctx.logger.debug('properties_list: {}'.format(properties_list))
+            return properties_list
+    else:
+        raise NonRecoverableError('Missing relationship for {}.'.format(
+            ctx.node.name)
+        )
+
+
+
 def wait_status(ctx, resource,
                 expected_status=constants.SUCCEEDED, 
                 timeout=600

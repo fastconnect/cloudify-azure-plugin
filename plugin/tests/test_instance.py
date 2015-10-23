@@ -31,7 +31,7 @@ TIME_DELAY = 20
 class TestInstance(testtools.TestCase):
 
     __random_id = str(random.randrange(0, 1000, 2))
-
+ 
     @classmethod
     def setUpClass(self):     
         ctx = self.mock_ctx('init')
@@ -72,14 +72,14 @@ class TestInstance(testtools.TestCase):
         nic.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
-
+        
     @classmethod
     def tearDownClass(self):
         ctx = self.mock_ctx('del')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE resource_group")
         resource_group.delete(ctx=ctx)
-
+ 
     @classmethod 
     def mock_ctx(self, test_name, id=None):
         """ Creates a mock context for the instance
@@ -106,9 +106,9 @@ class TestInstance(testtools.TestCase):
                     'instancesubnet_test' + self.__random_id,
             },
             constants.IMAGE_KEY: {
-                constants.PUBLISHER_KEY: 'Canonical',
-                constants.OFFER_KEY: 'UbuntuServer',
-                constants.SKU_KEY: '12.04.5-LTS',
+            constants.PUBLISHER_KEY: 'Canonical',
+            constants.OFFER_KEY: 'UbuntuServer',
+            constants.SKU_KEY: '12.04.5-LTS',
                 constants.SKU_VERSION_KEY: 'latest'
             },
             constants.FLAVOR_KEY: 'Standard_A1',
@@ -159,7 +159,8 @@ class TestInstance(testtools.TestCase):
                 'node_id': 'test',
                 'relationship_type': constants.INSTANCE_CONNECTED_TO_NIC,
                 'relationship_properties': {
-                        constants.NETWORK_INTERFACE_KEY: 'customdata590'#nic_name
+                        constants.NETWORK_INTERFACE_KEY: nic_name,
+                        constants.NIC_PRIMARY_KEY: False
                     }
             }
         ]
@@ -507,7 +508,7 @@ class TestInstance(testtools.TestCase):
         ctx = self.mock_ctx('testwin')
         ctx.node.properties[constants.IMAGE_KEY
                             ][constants.PUBLISHER_KEY] = \
-                                'MicrosoftWindowsServer'
+            'MicrosoftWindowsServer'
         ctx.node.properties[constants.IMAGE_KEY
                             ][constants.OFFER_KEY] = 'WindowsServer'
         ctx.node.properties[constants.IMAGE_KEY
@@ -577,6 +578,58 @@ class TestInstance(testtools.TestCase):
                          ctx.node.properties[constants.IMAGE_KEY
                             ][constants.OS_URI_KEY]
                          )
+
+        ctx.logger.info("delete VM")
+        self.assertEqual(202, instance.delete(ctx=ctx))
+
+        ctx.logger.info("END create VM test")
+
+    def test_create_2nic_instance(self):
+        ctx = self.mock_ctx('testcreate2nicinstance')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create 2 NIC VM test: {}".format(ctx.instance.id))
+
+        subnet_name = 'instancesubnet_test_2_' + self.__random_id
+        nic_name = 'instance_nic_test_2_' + self.__random_id
+
+        ctx.logger.info("create new subnet")
+        ctx.node.properties[constants.SUBNET_KEY] = subnet_name
+        ctx.node.properties[constants.SUBNET_ADDRESS_KEY] =\
+            "10.0.2.0/24"
+        current_ctx.set(ctx=ctx)
+        subnet.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "subnet",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("create second NIC")
+        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] = nic_name
+        ctx.node.properties[constants.NIC_PRIMARY_KEY] = True
+        ctx.node.properties[constants.AZURE_CONFIG_KEY][constants.SUBNET_KEY] = subnet_name
+        for relationship in ctx.instance.relationships:
+            if relationship.type == constants.NIC_CONNECTED_TO_SUBNET:
+                relationship.target.instance.runtime_properties[constants.SUBNET_KEY] = subnet_name
+        current_ctx.set(ctx=ctx)
+        nic.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("create VM")
+        ctx.node.properties[constants.FLAVOR_KEY] = 'Standard_A3'
+        ctx.instance.relationships.append(test_mockcontext.MockRelationshipContext(node_id='test',
+            runtime_properties={
+                constants.NETWORK_INTERFACE_KEY: nic_name,
+                constants.NIC_PRIMARY_KEY: True
+            },
+            type=constants.INSTANCE_CONNECTED_TO_NIC)
+        )
+        current_ctx.set(ctx=ctx)
+        instance.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("verify the NIC's number of the instance")
+        json = instance.get_json_from_azure()
+        self.assertEqual(len(json['properties']['networkProfile']['networkInterfaces']),2)
 
         ctx.logger.info("delete VM")
         self.assertEqual(202, instance.delete(ctx=ctx))

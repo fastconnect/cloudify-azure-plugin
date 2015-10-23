@@ -166,7 +166,8 @@ class TestDatadisks(testtools.TestCase):
                 'relationship_properties':\
                     {
                         constants.NETWORK_INTERFACE_KEY:\
-                            'disknic_test' + self.__random_id
+                            'disknic_test' + self.__random_id,
+                        constants.NIC_PRIMARY_KEY: False
                     }
             },
             {
