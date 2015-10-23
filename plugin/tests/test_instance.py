@@ -24,6 +24,7 @@ from plugin import (utils,
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 from cloudify.exceptions import NonRecoverableError
+from unittest import skip
 
 TIME_DELAY = 20
 
@@ -104,10 +105,12 @@ class TestInstance(testtools.TestCase):
                 constants.SUBNET_KEY:\
                     'instancesubnet_test' + self.__random_id,
             },
+            constants.IMAGE_KEY: {
             constants.PUBLISHER_KEY: 'Canonical',
             constants.OFFER_KEY: 'UbuntuServer',
             constants.SKU_KEY: '12.04.5-LTS',
-            constants.SKU_VERSION_KEY: 'latest',
+                constants.SKU_VERSION_KEY: 'latest'
+            },
             constants.FLAVOR_KEY: 'Standard_A1',
             constants.COMPUTE_KEY: test_name + self.__random_id,
             constants.COMPUTE_USER_KEY: test_utils.COMPUTE_USER,
@@ -255,7 +258,7 @@ class TestInstance(testtools.TestCase):
 
         ctx.logger.info("END create VM test")
 
-    def test_delete_instance(self):
+    def test_delete_instance(self):    
         ctx = self.mock_ctx('testdeleteinstance')
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN delete VM test")
@@ -503,11 +506,15 @@ class TestInstance(testtools.TestCase):
    
     def test_create_windows_instance(self):
         ctx = self.mock_ctx('testwin')
-        ctx.node.properties[constants.PUBLISHER_KEY] = \
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.PUBLISHER_KEY] = \
             'MicrosoftWindowsServer'
-        ctx.node.properties[constants.OFFER_KEY] = 'WindowsServer'
-        ctx.node.properties[constants.SKU_KEY] = '2012-R2-Datacenter'
-        ctx.node.properties[constants.WINDOWS_AUTOMATIC_UPDATES_KEY] = True
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OFFER_KEY] = 'WindowsServer'
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.SKU_KEY] = '2012-R2-Datacenter'
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.WINDOWS_AUTOMATIC_UPDATES_KEY] = True
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create windows VM test")
@@ -527,6 +534,55 @@ class TestInstance(testtools.TestCase):
         self.assertEqual(202, instance.delete(ctx=ctx))
 
         ctx.logger.info("END create windows VM test")
+
+    @skip("Create test from VHD is not compliant with other instance tests.")
+    def test_create_instance_from_vhd(self):
+        '''To run this test, you need all the required resource to start a machine
+        (resource group, storage account, nic). You then have to upload a valid
+        bootable VHD on the storage account. Note the vhd's endpoint and replace 
+        MY_URI_VHD by this value.
+        Then, you can run the test.
+        Note the resource group will not be deleted by the class teardown.
+        '''
+        ctx = self.mock_ctx('testinstancevhd')
+        ctx.node.properties[constants.AZURE_CONFIG_KEY
+                            ][constants.RESOURCE_GROUP_KEY] = MY_RESOURCE_GROUP
+        ctx.node.properties[constants.AZURE_CONFIG_KEY
+                            ][constants.STORAGE_ACCOUNT_KEY] = MY_STORAGE_ACCOUNT
+        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] = MY_NIC
+        ctx.node.properties[constants.IMAGE_KEY] = {}
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OS_URI_KEY] = MY_URI_VHD
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OS_TYPE_KEY] = 'Linux'
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create VM test: {}".format(ctx.instance.id))
+        ctx.logger.info("create VM") 
+
+        instance.create(ctx=ctx) 
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
+
+        current_ctx.set(ctx=ctx)
+        jsonVM = instance.get_json_from_azure(ctx=ctx)
+
+        self.assertEqual(jsonVM['properties']['storageProfile'
+                                              ]['osDisk']['osType'],  
+                         ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OS_TYPE_KEY]
+                         )
+
+        self.assertEqual(jsonVM['properties']['storageProfile'
+                                              ]['osDisk']['image']['uri'],
+                         ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OS_URI_KEY]
+                         )
+
+        ctx.logger.info("delete VM")
+        self.assertEqual(202, instance.delete(ctx=ctx))
+
+        ctx.logger.info("END create VM test")
 
     def test_create_2nic_instance(self):
         ctx = self.mock_ctx('testcreate2nicinstance')
@@ -579,4 +635,3 @@ class TestInstance(testtools.TestCase):
         self.assertEqual(202, instance.delete(ctx=ctx))
 
         ctx.logger.info("END create VM test")
-

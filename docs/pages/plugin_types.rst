@@ -233,10 +233,7 @@ Derived From: *cloudify.nodes.Compute*
 Properties:
 ^^^^^^^^^^^
 
-* **publisher_name:** the editor of the machine to deploy (Canonical).
-* **offer:** the machine to deploy (UbuntuServer).
-* **sku:** the OS version (14.04.3-LTS).
-* **version:** the version build (default: latest).
+* **image:** specify the image to use. It can be an image from the azure marketplace, or a custom vhd. Examples: {publisher_name: 'Canonical', offer: 'UbuntuServer', sku: '14.04.3-LTS', version: 'latest'}, or {os_uri: 'https://my_storage_account.blob.core.windows.net/mycontainer/custom_image.vhd', os_type: 'Linux | Windows'}
 * **flavor_id:** the size of the machine (Standard-A1).
 * **compute_name:** the name of the machine.
 * **storage_account_name:** the name of the storage account.
