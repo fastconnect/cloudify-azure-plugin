@@ -202,7 +202,7 @@ def get_storage_keys(ctx):
     if constants.STORAGE_ACCOUNT_KEY in ctx.node.properties:
         storage_account_name = ctx.node.properties[constants.STORAGE_ACCOUNT_KEY]
     else:
-        storage_account_name = ctx.instance.runtim_properties[constants.STORAGE_ACCOUNT_KEY]
+        storage_account_name = ctx.instance.runtime_properties[constants.STORAGE_ACCOUNT_KEY]
 
     api_version = constants.AZURE_API_VERSION_05_preview
 
