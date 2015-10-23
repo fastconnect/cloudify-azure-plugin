@@ -1,7 +1,6 @@
+# The size of the machine (A1_Standard, A2_Standard...)
 flavor_id: ''
-publisher_name: ''
-offer: ''
-sku: ''
+
 compute_name: ''
 compute_user: ''
 compute_password: ''
@@ -11,6 +10,15 @@ network_interface_name: ''
 public_ip_name: ''
 storage_account_name: ''
 account_type: ''
+
+# Specify an image: use the image structure to give the image you want to instantiate.
+# You can specify an image from the Azure marketplace, or a VHD.
+# Marketplace image:
+# image: {publisher_name: 'Canonical', offer: 'UbuntuServer', sku: '14.04.3-LTS', version: 'latest'}
+# You need to put the VHD on the same storage account for custom image:
+# image: {os_uri: 'https://storage_account_name.core.windows.net/mycontainer/custom_image.vhd', 
+		  os_type: 'Linux|Windows'}
+
 # storage_account_deletable: False
 
 # If you want a Windows machine, you can activate (true) or deactivate (false) automatic updates

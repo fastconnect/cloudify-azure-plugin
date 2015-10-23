@@ -171,14 +171,8 @@ node_types:
   cloudify.azure.nodes.Instance:
     derived_from: cloudify.nodes.Compute
     properties:
-      publisher_name:
-        type: string
-      offer:
-        type: string
-      sku:
-        type: string
-      version:
-        type: string
+      image:
+        default: {}
       flavor_id:
         type: string
       compute_name:

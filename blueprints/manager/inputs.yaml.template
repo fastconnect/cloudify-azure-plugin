@@ -2,9 +2,7 @@ subscription_id: ''
 username: ''
 password: ''
 flavor_id: ''
-publisher_name: ''
-offer: ''
-sku: ''
+
 compute_name: ''
 storage_account_name: ''
 compute_user: ''
@@ -20,6 +18,14 @@ subnet_name: ''
 subnet_address_prefix: ''
 network_interface_name: ''
 public_ip_name: ''
+
+# Specify an image: use the image structure to give the image you want to instantiate.
+# You can specify an image from the Azure marketplace, or a VHD.
+# Marketplace image:
+# image: {publisher_name: 'Canonical', offer: 'UbuntuServer', sku: '14.04.3-LTS', version: 'latest'}
+# You need to put the VHD on the same storage account for custom image:
+# image: {os_uri: 'https://storage_account_name.core.windows.net/mycontainer/custom_image.vhd', 
+		  os_type: 'Linux|Windows'}
 
 # To add disks to the machine, make a list of disk with these properties:
 # name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)
