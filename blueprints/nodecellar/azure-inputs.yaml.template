@@ -17,7 +17,7 @@ nodejs_public_ip_name: ''
 # image: {publisher_name: 'Canonical', offer: 'UbuntuServer', sku: '14.04.3-LTS', version: 'latest'}
 # You need to put the VHD on the same storage account for custom image:
 # image: {os_uri: 'https://storage_account_name.core.windows.net/mycontainer/custom_image.vhd', 
-		  os_type: 'Linux|Windows'}
+#		  os_type: 'Linux|Windows'}
 
 # mongod_disks: ''
 # To add disks to the machine, make a list of disk with these properties:

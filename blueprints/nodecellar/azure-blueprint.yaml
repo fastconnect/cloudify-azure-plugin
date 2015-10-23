@@ -51,6 +51,7 @@ inputs:
     type: string
   storage_account_name:
     type: string
+    default: ''
   account_type:
     default: 'Standard_LRS'
     type: string
@@ -116,7 +117,6 @@ node_templates:
     properties:
       image: { get_input: image }
       compute_name: {get_input: mongod_compute_name}
-      storage_account_name: {get_input: mongod_storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: { get_input: public_key }
@@ -130,7 +130,6 @@ node_templates:
       image: { get_input: image }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: node_js_compute_name}
-      storage_account_name: {get_input: nodejs_storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: { get_input: public_key }
@@ -159,8 +158,6 @@ node_templates:
   mongod_disk:
     type: cloudify.azure.nodes.Datadisks
     properties:
-      storage_account_name: {get_input: storage_account_name}
-      compute_name: {get_input: mongod_compute_name}
       disks: { get_input: mongod_disks }
     relationships:
       - target: mongod_host
@@ -197,16 +194,16 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: mongod_host
-      - type: cloudify.azure.relationships.instance_connected_to_storage_account
-        target: mongod_storage_account
+      # - type: cloudify.azure.relationships.instance_connected_to_storage_account
+      #   target: mongod_storage_account
 
   nodejs:
     type: nodecellar.nodes.NodeJSServer
     relationships:
       - type: cloudify.relationships.contained_in
         target: nodejs_host
-      - type: cloudify.azure.relationships.instance_connected_to_storage_account
-        target: nodejs_storage_account
+     # - type: cloudify.azure.relationships.instance_connected_to_storage_account
+     #   target: nodejs_storage_account
 
   nodecellar:
     type: nodecellar.nodes.NodecellarApplicationModule

@@ -77,9 +77,7 @@ node_templates:
 #      cloudify_agent:
 #        default:
 #          user: { get_input: compute_user }
-#      publisher_name: { get_input: publisher_name }
-#      offer: { get_input: offer }
-#      sku: { get_input: sku }
+#      image: { get_input: image}
 #      version: { get_input: version }
 #      flavor_id: { get_input: flavor_id }
 #      compute_name: { get_input: compute_name }
