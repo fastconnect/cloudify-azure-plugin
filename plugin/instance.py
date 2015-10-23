@@ -11,6 +11,7 @@ from plugin import (utils,
 # Cloudify imports
 from cloudify import ctx
 from cloudify.decorators import operation
+from cloudify.exceptions import NonRecoverableError
 
 TIME_DELAY = 5
 
@@ -23,11 +24,6 @@ def create(**_):
     """
     utils.validate_node_property(constants.COMPUTE_KEY, ctx.node.properties)
     utils.validate_node_property(constants.FLAVOR_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.PUBLISHER_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.OFFER_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.SKU_KEY, ctx.node.properties)
-    utils.validate_node_property(constants.SKU_VERSION_KEY,
-                                 ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_USER_KEY, 
                                  ctx.node.properties)
     utils.validate_node_property(constants.COMPUTE_PASSWORD_KEY, 
@@ -38,33 +34,11 @@ def create(**_):
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     location = azure_config[constants.LOCATION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
-    admin_username = ctx.node.properties[constants.COMPUTE_USER_KEY]
-    admin_password = ctx.node.properties[constants.COMPUTE_PASSWORD_KEY]
-    public_key = ctx.node.properties[constants.PUBLIC_KEY_KEY]
     api_version = constants.AZURE_API_VERSION_06
     vm_name = ctx.node.properties[constants.COMPUTE_KEY]
     vm_size = ctx.node.properties[constants.FLAVOR_KEY]
-    publisher = ctx.node.properties[constants.PUBLISHER_KEY]
-    offer = ctx.node.properties[constants.OFFER_KEY]
-    sku = ctx.node.properties[constants.SKU_KEY]
-    distro_version = ctx.node.properties[constants.SKU_VERSION_KEY]
-    create_option = 'FromImage'
-    os_profile = _create_os_profile(ctx)
 
     ctx.instance.runtime_properties[constants.COMPUTE_KEY] = vm_name
-
-    try:
-        storage_account = utils.get_target_property(ctx,
-            constants.INSTANCE_CONNECTED_TO_STORAGE_ACCOUNT,
-            constants.STORAGE_ACCOUNT_KEY
-        )
-        ctx.logger.debug("get storage account {} from relationship".format(storage_account))
-    except:
-        storage_account = azure_config[constants.STORAGE_ACCOUNT_KEY]
-        ctx.logger.debug("get storage account {} from azure_config".format(storage_account))
-    
-    
-    ctx.instance.runtime_properties[constants.STORAGE_ACCOUNT_KEY]  = storage_account
 
     # check availability name
     if not is_available(ctx=ctx):
@@ -73,13 +47,30 @@ def create(**_):
                         )
         raise utils.WindowsAzureError(400, '{} already exist'.format(vm_name))
 
-    os_disk_name = "{}_{}.vhd".format(vm_name,
+    try:
+        storage_account = utils.get_target_property(ctx,
+            constants.INSTANCE_CONNECTED_TO_STORAGE_ACCOUNT,
+            constants.STORAGE_ACCOUNT_KEY
+        )
+        ctx.logger.debug("get storage account {} from relationship"
+                         .format(storage_account))
+    except:
+        storage_account = azure_config[constants.STORAGE_ACCOUNT_KEY]
+        ctx.logger.debug("get storage account {} from azure_config"
+                         .format(storage_account))
+    
+    ctx.instance.runtime_properties[constants.STORAGE_ACCOUNT_KEY]  = \
                                       storage_account
-                                     )
-    os_disk_vhd = "https://{}.blob.core.windows.net/{}-vhds/{}".format(
+    storage_profile = _create_storage_profile(
+                            vm_name, 
                                             storage_account,
+                            ctx.node.properties[constants.IMAGE_KEY]
+                            )
+    os_profile = _create_os_profile(
                                             vm_name,
-                                            os_disk_name
+                        ctx.node.properties[constants.COMPUTE_USER_KEY], 
+                        ctx.node.properties[constants.COMPUTE_PASSWORD_KEY],
+                        ctx.node.properties
                                             )
 
     nic_id = nic.get_id(ctx)
@@ -99,22 +90,7 @@ def create(**_):
                 'vmSize': str(vm_size)
             },
             'osProfile': os_profile,
-            'storageProfile': {
-                'imageReference': {
-                    'publisher': str(publisher),
-                    constants.OFFER_KEY: str(offer),
-                    constants.SKU_KEY: str(sku),
-                    constants.SKU_VERSION_KEY: str(distro_version)
-                },
-                'osDisk': {
-                    'vhd': {
-                        'uri': str(os_disk_vhd)
-                    },
-                    "caching": "ReadWrite",
-                    'name': str(os_disk_name),
-                    'createOption': str(create_option)
-                }
-            },
+            'storageProfile': storage_profile,
             'networkProfile': {
                 'networkInterfaces':[
                     {
@@ -131,7 +107,8 @@ def create(**_):
             constants.INSTANCE_CONTAINED_IN_AVAILABILITY_SET,
             constants.AVAILABILITY_ID_KEY
         )
-        ctx.logger.debug("availability_set found: {}".format(availability_set_id))
+        ctx.logger.debug("availability_set found: {}"
+                         .format(availability_set_id))
         json['properties']['availabilitySet']={'id': str(availability_set_id)}
     except:
         ctx.logger.debug('Instance not contained in an availability set')
@@ -378,35 +355,37 @@ def get_json_from_azure(**_):
     return response.json()
 
 
-def _create_os_profile(ctx):
+def _create_os_profile(vm_name, admin_username, admin_password, properties):
     """Create a dictionary to represent the os profile.
     The function determines if the requested machine is Windows or Unix
     based on the supplied properties in the context
 
-    :param ctx: The Cloudify ctx context.
+    :param vm_name: The name of the VM to start.
+    :param admin_username: The default username for the machine.
+    :param admin_password: The default password for the machine.
+    :param properties: The properties of the instance. It is used 
+    to determine if the instance is a linux or a windows machine
     :return: The OS profile structure for the JSON of the machine.
     :rtype: dictionary.
     """
-    admin_username = ctx.node.properties[constants.COMPUTE_USER_KEY]
-    admin_password = ctx.node.properties[constants.COMPUTE_PASSWORD_KEY]
-    vm_name = ctx.node.properties[constants.COMPUTE_KEY]
 
     os_profile =  {'computerName': str(vm_name),
                   'adminUsername': str(admin_username),
                   'adminPassword': str(admin_password)
                   }
 
-    if constants.WINDOWS_AUTOMATIC_UPDATES_KEY in ctx.node.properties:
+    if constants.WINDOWS_AUTOMATIC_UPDATES_KEY in properties:
         # The machine is a Windows machine
-        updates = ctx.node.properties[constants.WINDOWS_AUTOMATIC_UPDATES_KEY]
         os_profile['windowsConfiguration'] = {
                         'provisionVMAgent': 'true',
-                        'enableAutomaticUpdates': str(updates)
+                        'enableAutomaticUpdates': windows_update,
+                        'winRM': {
+                            'listeners': [{'protocol': 'http'}]
+                            }
                         }
-    else:
+    elif constants.PUBLIC_KEY_KEY in properties:
         # The machine is a linux machine, the public key is required
-        utils.validate_node_property(constants.PUBLIC_KEY_KEY, ctx.node.properties)
-        public_key =  ctx.node.properties[constants.PUBLIC_KEY_KEY]
+        public_key = properties[constants.PUBLIC_KEY_KEY]
         os_profile['linuxConfiguration'] = {
                       'disablePasswordAuthentication': 'true',
                       'ssh': {
@@ -418,5 +397,77 @@ def _create_os_profile(ctx):
                           }]
                       }
                   }
+    else:
+        raise NonRecoverableError("Cannot determine if the VM" +
+                                    " is a linux or windows instance.")
 
     return os_profile
+
+
+def _create_storage_profile(vm_name, storage_account, image):
+    """Create a storage profile to put in the JSON request to create a VM.
+
+    :param vm_name: The name of the VM to start.
+    :param storage_account: The name of the storage account for the OS disk.
+    :param image: A dictionnary
+    :return: The storage profile structure for the JSON of the machine.
+    :rtype: dictionary.
+    """
+    storage_profile = {}
+    create_option = 'FromImage'
+    caching = "ReadWrite"
+    os_disk_name = "{}_{}".format(vm_name,
+                                  storage_account
+                                 )
+    os_disk_vhd = "https://{}.blob.core.windows.net/{}-vhds/{}.vhd".format(
+                                            storage_account,
+                                            vm_name,
+                                            os_disk_name
+                                            )
+
+    if constants.OS_URI_KEY in image:
+        ctx.logger.info("An uri as been given: trying to create VM from this.")
+        uri_image = image[constants.OS_URI_KEY]
+        os_type = image[constants.OS_TYPE_KEY]
+        storage_profile = {
+                            "osDisk": {
+                                "osType": str(os_type),
+                                "name": str(os_disk_name),
+                                "createOption": str(create_option),
+                                "image": {
+                                    "uri": str(uri_image)
+                                },
+                                "vhd": {
+                                    "uri": str(os_disk_vhd)
+                                },
+                                "caching": str(caching)
+                           },
+                        }
+    elif constants.PUBLISHER_KEY in image:
+        ctx.logger.info("Creating VM from marketplace.")
+        publisher = image[constants.PUBLISHER_KEY]
+        offer = image[constants.OFFER_KEY]
+        sku = image[constants.SKU_KEY]
+        distro_version = image[constants.SKU_VERSION_KEY]
+
+        storage_profile = {
+                    'imageReference': {
+                        'publisher': str(publisher),
+                        constants.OFFER_KEY: str(offer),
+                        constants.SKU_KEY: str(sku),
+                        constants.SKU_VERSION_KEY: str(distro_version)
+                    },
+                    'osDisk': {
+                        'name': str(os_disk_name),
+                        'createOption': str(create_option),
+                        'vhd': {
+                            'uri': str(os_disk_vhd)
+                        },
+                        "caching": str(caching)
+                    }
+                }
+    else:
+        raise NonRecoverableError("Image structure is missing arguments.")
+
+
+    return storage_profile
