@@ -99,10 +99,12 @@ class TestDatadisks(testtools.TestCase):
                 constants.STORAGE_ACCOUNT_KEY: 'diskstoaccounttest'+\
                                             self.__random_id
             },
-            constants.PUBLISHER_KEY: 'Canonical',
-            constants.OFFER_KEY: 'UbuntuServer',
-            constants.SKU_KEY: '12.04.5-LTS',
-            constants.SKU_VERSION_KEY: 'latest',
+            constants.IMAGE_KEY: {
+                constants.PUBLISHER_KEY: 'Canonical',
+                constants.OFFER_KEY: 'UbuntuServer',
+                constants.SKU_KEY: '12.04.5-LTS',
+                constants.SKU_VERSION_KEY: 'latest'
+            },
             constants.FLAVOR_KEY: 'Standard_A1',
             constants.COMPUTE_KEY: test_name + self.__random_id,
             constants.COMPUTE_USER_KEY: test_utils.COMPUTE_USER,
