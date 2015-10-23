@@ -132,6 +132,8 @@ class TestSubnet(testtools.TestCase):
         self.assertEqual(201, security_group.create(ctx=ctx))
         ctx.logger.debug("security_group_id = {}".format(
             ctx.instance.runtime_properties[constants.SECURITY_GROUP_ID_KEY]))
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, 'security_group', constants.SUCCEEDED, timeout=900)
 
         ctx.instance.relationships.append(test_mockcontext.MockRelationshipContext(node_id='test',
             runtime_properties={
