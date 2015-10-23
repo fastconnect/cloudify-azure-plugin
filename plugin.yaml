@@ -1,6 +1,6 @@
 ﻿##################################################################################
 # Cloudify Azure built in types and plugins definitions.
-# Version: 0.0.2-SNAPSHOT
+# Version: 0.0.3-SNAPSHOT
 ##################################################################################
 
 plugins:
@@ -196,14 +196,8 @@ node_types:
   cloudify.azure.nodes.Instance:
     derived_from: cloudify.nodes.Compute
     properties:
-      publisher_name:
-        type: string
-      offer:
-        type: string
-      sku:
-        type: string
-      version:
-        type: string
+      image:
+        default: {}
       flavor_id:
         type: string
       compute_name:
@@ -226,6 +220,25 @@ node_types:
           implementation: azure.plugin.instance.stop
         delete:
           implementation: azure.plugin.instance.delete
+
+  cloudify.azure.nodes.WindowsInstance:
+    derived_from: cloudify.azure.nodes.Instance
+    properties:
+      windows_automatic_updates:
+        type: boolean
+        default: false
+      public_key:
+        type: string
+        default: ''
+    interfaces:
+      cloudify.interfaces.worker_installer:
+        install: windows_agent_installer.windows_agent_installer.tasks.install
+        start: windows_agent_installer.windows_agent_installer.tasks.start
+        stop: windows_agent_installer.windows_agent_installer.tasks.stop
+        uninstall: windows_agent_installer.windows_agent_installer.tasks.uninstall
+        restart: windows_agent_installer.windows_agent_installer.tasks.restart
+      cloudify.interfaces.plugin_installer:
+        install: windows_plugin_installer.windows_plugin_installer.tasks.install
 
 
 relationships:

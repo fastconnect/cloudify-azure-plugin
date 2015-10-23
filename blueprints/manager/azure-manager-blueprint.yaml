@@ -22,15 +22,8 @@ inputs:
   location:   
     default: 'westeurope'
     type: string
-  publisher_name:
-    type: string
-  offer:
-    type: string
-  sku:
-    type: string
-  version:
-    type: string
-    default: 'latest'
+  image:
+    default: {}
   flavor_id:
     type: string
   compute_name:
@@ -160,10 +153,7 @@ node_templates:
   manager_server:
     type: cloudify.azure.nodes.Instance
     properties:
-      publisher_name: { get_input: publisher_name }
-      offer: { get_input: offer }
-      sku: { get_input: sku }
-      version: { get_input: version }
+      image: { get_input: image }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: compute_name}
       compute_user: {get_input: compute_user}
