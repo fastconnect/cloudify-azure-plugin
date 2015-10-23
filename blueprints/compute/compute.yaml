@@ -25,7 +25,13 @@ inputs:
     type: string
  # availability_set_name:
  #   type: string
-  network_interface_name:
+  management_interface_name:
+    type: string
+  application_interface_name:
+    type: string
+  subnet_name:
+    type: string
+  subnet_address_prefix:
     type: string
   public_ip_name:
     type: string
@@ -73,21 +79,35 @@ node_templates:
       compute_password: {get_input: compute_password}
       public_key: { get_input: public_key }
     relationships:
-
       - target: compute_storage_account
         type: cloudify.azure.relationships.instance_depends_on_storage_account
 #      - target: compute_availability_set
 #        type: cloudify.azure.relationships.instance_contained_in_availability_set
-      - target: compute_nic
+      - target: management_nic
         type: cloudify.azure.relationships.instance_connected_to_nic
 
-  compute_nic:
+  management_nic:
     type: cloudify.azure.nodes.NetworkInterfaceCard
     properties:
-      network_interface_name: {get_input: network_interface_name}
+      network_interface_name: {get_input: management_interface_name}
+      primary: true
+
+  application_nic:
+    type: cloudify.azure.nodes.NetworkInterfaceCard
+    properties:
+      network_interface_name: {get_input: application_interface_name}
+      primary: false
     relationships:
+      - target: application_subnet
+        type: cloudify.azure.relationships.nic_connected_to_subnet
       - target: compute_public_ip
         type: cloudify.azure.relationships.nic_connected_to_public_ip
+
+  application_subnet:
+    type: cloudify.azure.nodes.Subnet
+    properties:
+      subnet_name: {get_input: subnet_name}
+      subnet_address_prefix: {get_input: subnet_address_prefix}
 
   compute_public_ip:
     type: cloudify.azure.nodes.PublicIP

@@ -57,7 +57,9 @@ class TestSubnet(testtools.TestCase):
                 constants.PASSWORD_KEY: test_utils.AZURE_PASSWORD,
                 constants.LOCATION_KEY: 'westeurope',
                 constants.RESOURCE_GROUP_KEY:\
-                    'subnetresource_group_test' + self.__random_id
+                    'subnetresource_group_test' + self.__random_id,
+                constants.VIRTUAL_NETWORK_KEY:\
+                    'subnetnetwork_test'+self.__random_id,
             },
             constants.RESOURCE_GROUP_KEY: 'subnetresource_group_test' + self.__random_id,
             constants.SUBNET_KEY: test_name + self.__random_id,

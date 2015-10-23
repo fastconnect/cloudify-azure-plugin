@@ -144,7 +144,7 @@ node_types:
         default: ''
       primary:
         type: boolean
-        default: true
+        default: false
       azure_config:
         default: {}
       deletable:

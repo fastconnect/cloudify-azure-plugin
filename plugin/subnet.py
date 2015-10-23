@@ -22,14 +22,14 @@ def create(**_):
                                  ctx.node.properties)
 
     azure_config = utils.get_azure_config(ctx)
-
     subscription_id = azure_config[constants.SUBSCRIPTION_KEY]
     resource_group_name = azure_config[constants.RESOURCE_GROUP_KEY]
-    virtual_network_name = utils.get_target_property(
-                                        ctx, 
-                                        constants.SUBNET_CONNECTED_TO_NETWORK,
-                                        constants.VIRTUAL_NETWORK_KEY
-                                        )
+    virtual_network_name = azure_config[constants.VIRTUAL_NETWORK_KEY]
+    # virtual_network_name = utils.get_target_property(
+    #                                     ctx,
+    #                                     constants.SUBNET_CONNECTED_TO_NETWORK,
+    #                                     constants.VIRTUAL_NETWORK_KEY
+    #                                     )
     subnet_name = ctx.node.properties[constants.SUBNET_KEY]
     subnet_address_prefix = ctx.node.properties[constants.SUBNET_ADDRESS_KEY]
     api_version = constants.AZURE_API_VERSION_05_preview
@@ -182,16 +182,6 @@ def get_id(**_):
     api_version = constants.AZURE_API_VERSION_05_preview
     virtual_network_name = azure_config[constants.VIRTUAL_NETWORK_KEY]
     subnet_name = azure_config[constants.SUBNET_KEY]
-    # virtual_network_name = utils.get_target_property(
-    #     ctx,
-    #     constants.NIC_CONNECTED_TO_SUBNET,
-    #     constants.VIRTUAL_NETWORK_KEY
-    # )
-    # subnet_name = utils.get_target_property(
-    #     ctx,
-    #     constants.NIC_CONNECTED_TO_SUBNET,
-    #     constants.SUBNET_KEY
-    # )
 
     response = connection.AzureConnectionClient().azure_get(
         ctx,
