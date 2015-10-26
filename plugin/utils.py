@@ -157,10 +157,16 @@ def wait_status(ctx, resource,
         sleep(constants.TIME_DELAY)
     
     if status != expected_status :
-        raise NonRecoverableError(
-            'Failed waiting {} for {}: {}.'.format(
-                            expected_status, resource, status)
-            )
+        if ttw >= timeout:
+            message = 'Timeout occurs while waiting status {} for {}.'.format(
+                                            expected_status, 
+                                            resource
+                                            )
+        else:
+            message = 'Failed waiting {} for {}: {}.'.format(expected_status,
+                                                             resource, 
+                                                             status)
+        raise NonRecoverableError(message)
 
 
 def get_azure_config(ctx):

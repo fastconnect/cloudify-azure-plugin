@@ -513,8 +513,7 @@ class TestInstance(testtools.TestCase):
                             ][constants.OFFER_KEY] = 'WindowsServer'
         ctx.node.properties[constants.IMAGE_KEY
                             ][constants.SKU_KEY] = '2012-R2-Datacenter'
-        ctx.node.properties[constants.IMAGE_KEY
-                            ][constants.WINDOWS_AUTOMATIC_UPDATES_KEY] = True
+        ctx.node.properties[constants.WINDOWS_AUTOMATIC_UPDATES_KEY] = True
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("BEGIN create windows VM test")
