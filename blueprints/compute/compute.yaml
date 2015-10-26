@@ -13,13 +13,7 @@ inputs:
   compute_name:
     default: ''
     type: string
-  management_interface_name:
-    type: string
-  application_interface_name:
-    type: string
-  subnet_name:
-    type: string
-  subnet_address_prefix:
+  network_interface_name:
     type: string
   public_ip_name:
     type: string
@@ -98,28 +92,13 @@ node_templates:
 #      - target: compute_nic
 #        type: cloudify.azure.relationships.instance_connected_to_nic
 
-  management_nic:
+  compute_nic:
     type: cloudify.azure.nodes.NetworkInterfaceCard
     properties:
-      network_interface_name: {get_input: management_interface_name}
-      primary: true
-
-  application_nic:
-    type: cloudify.azure.nodes.NetworkInterfaceCard
-    properties:
-      network_interface_name: { get_input: application_interface_name }
-      primary: false
+      network_interface_name: {get_input: network_interface_name}
     relationships:
-      - target: application_subnet
-        type: cloudify.azure.relationships.nic_connected_to_subnet
       - target: compute_public_ip
         type: cloudify.azure.relationships.nic_connected_to_public_ip
-
-  application_subnet:
-    type: cloudify.azure.nodes.Subnet
-    properties:
-      subnet_name: {get_input: subnet_name}
-      subnet_address_prefix: {get_input: subnet_address_prefix}
 
   compute_public_ip:
     type: cloudify.azure.nodes.PublicIP
@@ -130,14 +109,13 @@ node_templates:
     type: cloudify.azure.nodes.Datadisks
     properties:
       disks:  { get_input: compute_disks }
-
     relationships:
       - target: compute_instance
         type: cloudify.azure.relationships.disk_attach_to_instance
-      - target: compute_storage_account
+      - target: disk_storage_account
         type: cloudify.relationships.contained_in
 
-  compute_storage_account:
+  disk_storage_account:
      type: cloudify.azure.nodes.StorageAccount
      properties:
       storage_account_name: { get_input: custom_storage_account_name }
