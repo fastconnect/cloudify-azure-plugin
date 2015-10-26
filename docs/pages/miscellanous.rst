@@ -29,6 +29,10 @@ Known Limitations (sprint 7)
 * Only one PIP can be attached to one NIC.
 * You cannot choose the name of the OS disk, the chosen pattern is "vmname_storageaccountname.vhd".
 * You cannot choose the name of the container within the storage account, the chosen pattern is "vmname-vhds".
+* DO NOT USE multi-nic instance for now:
+    * You cannot set a multi-nic instance on 2 different virtual-network.
+    * You cannot set a public IP on a multi-nic instance.
+    * You cannot connect a nic to subnet other than the one give by the provider context.
 
 *******************
 Future improvements
