@@ -103,4 +103,7 @@ def create(**_):
                                             ),
                     json=json
                     )
+    
+    utils.wait_status(ctx, 'resource_group')
+
     return response.status_code

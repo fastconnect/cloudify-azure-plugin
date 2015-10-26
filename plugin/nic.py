@@ -182,6 +182,9 @@ def create(**_):
                                             ),
                     json=nic_json
                     )
+
+    utils.wait_status(ctx, 'nic')
+
     return response.status_code
 
 @operation

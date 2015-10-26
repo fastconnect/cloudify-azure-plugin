@@ -74,6 +74,9 @@ def create(**_):
         ),
         json=json
     )
+
+    utils.wait_status(ctx, 'subnet')
+
     return response.status_code
 
 
