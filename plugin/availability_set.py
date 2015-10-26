@@ -134,6 +134,8 @@ def create(**_):
     ctx.instance.runtime_properties[constants.AVAILABILITY_ID_KEY] = \
         response.json()['id']
 
+    utils.wait_status(ctx, 'availability_set')
+
     return response.status_code
 
 

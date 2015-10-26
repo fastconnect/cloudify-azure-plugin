@@ -124,6 +124,9 @@ def create(**_):
                                             ),
                     json=json
                     )
+
+    utils.wait_status(ctx, 'public_ip')
+
     return response.status_code
 
 

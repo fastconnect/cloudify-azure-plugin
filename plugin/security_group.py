@@ -164,4 +164,6 @@ def create(**_):
     ctx.instance.runtime_properties[constants.SECURITY_GROUP_ID_KEY] = \
         response.json()['id']
 
+    utils.wait_status(ctx, 'security_group')
+
     return response.status_code

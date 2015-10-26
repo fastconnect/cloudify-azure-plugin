@@ -381,6 +381,8 @@ def _create_os_profile(vm_name, admin_username, admin_password, properties):
 
     if constants.WINDOWS_AUTOMATIC_UPDATES_KEY in properties:
         # The machine is a Windows machine
+        windows_update = properties[
+                            constants.WINDOWS_AUTOMATIC_UPDATES_KEY]
         os_profile['windowsConfiguration'] = {
                         'provisionVMAgent': 'true',
                         'enableAutomaticUpdates': windows_update,
