@@ -34,7 +34,8 @@ class TestDatadisks(testtools.TestCase):
         ctx.logger.info("CREATE ressource_group")
         resource_group.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
-        utils.wait_status(ctx, "resource_group", constants.SUCCEEDED, timeout=600)
+        utils.wait_status(ctx, "resource_group", 
+                          constants.SUCCEEDED, timeout=600)
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("CREATE storage account")
@@ -45,7 +46,8 @@ class TestDatadisks(testtools.TestCase):
 
         ctx.logger.info("CREATE network")
         current_ctx.set(ctx=ctx)
-        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = "10.0.0.0/16"
+        ctx.node.properties[constants.VIRTUAL_NETWORK_ADDRESS_KEY] = \
+            "10.0.0.0/16"
         network.create(ctx=ctx) 
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "network",constants.SUCCEEDED, timeout=600)
@@ -99,10 +101,12 @@ class TestDatadisks(testtools.TestCase):
                 constants.STORAGE_ACCOUNT_KEY: 'diskstoaccounttest'+\
                                             self.__random_id
             },
-            constants.PUBLISHER_KEY: 'Canonical',
-            constants.OFFER_KEY: 'UbuntuServer',
-            constants.SKU_KEY: '12.04.5-LTS',
-            constants.SKU_VERSION_KEY: 'latest',
+            constants.IMAGE_KEY: {
+                constants.PUBLISHER_KEY: 'Canonical',
+                constants.OFFER_KEY: 'UbuntuServer',
+                constants.SKU_KEY: '12.04.5-LTS',
+                constants.SKU_VERSION_KEY: 'latest'
+            },
             constants.FLAVOR_KEY: 'Standard_A1',
             constants.COMPUTE_KEY: test_name + self.__random_id,
             constants.COMPUTE_USER_KEY: test_utils.COMPUTE_USER,
@@ -162,7 +166,8 @@ class TestDatadisks(testtools.TestCase):
                 'relationship_properties':\
                     {
                         constants.NETWORK_INTERFACE_KEY:\
-                            'disknic_test' + self.__random_id
+                            'disknic_test' + self.__random_id,
+                        constants.NIC_PRIMARY_KEY: False
                     }
             },
             {
@@ -179,7 +184,8 @@ class TestDatadisks(testtools.TestCase):
             }
         ]
 
-        return test_mockcontext.MockCloudifyContextRelationships(node_id='test',
+        return test_mockcontext.MockCloudifyContextRelationships(
+            node_id='test',
             properties=test_properties,
             runtime_properties=test_runtime,
             relationships=test_relationships
@@ -188,7 +194,7 @@ class TestDatadisks(testtools.TestCase):
     def test_create_datadisk(self):
         disk = [{'name': 'disk_1',
                  'size': 100,
-                 'attach': False,
+                 'deletable': False,
                  'caching': 'None'
                }]
 
@@ -209,7 +215,8 @@ class TestDatadisks(testtools.TestCase):
 
         ctx.logger.debug(json_VM)
 
-        self.assertIsNotNone(json_VM['properties']['storageProfile']['dataDisks'])
+        self.assertIsNotNone(json_VM['properties'][
+                                        'storageProfile']['dataDisks'])
         
         disks_vm = json_VM['properties']['storageProfile']['dataDisks']
 
@@ -225,18 +232,19 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
     def test_create_dataDisks(self):
         disks = [{'name': 'disks_1',
                   'size': 100,
-                  'attach': False,
+                  'deletable': False,
                   'caching': 'None'
                 },{'name': 'disks_2',
                    'size': 200,
-                   'attach': False,
+                   'deletable': False,
                    'caching': 'ReadWrite'
                 }]
 
@@ -255,7 +263,8 @@ class TestDatadisks(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         json_VM = instance.get_json_from_azure(ctx=ctx)
 
-        self.assertIsNotNone(json_VM['properties']['storageProfile']['dataDisks'])
+        self.assertIsNotNone(json_VM['properties'][
+                                        'storageProfile']['dataDisks'])
 
         disks_vm = json_VM['properties']['storageProfile']['dataDisks']
 
@@ -275,22 +284,23 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance',
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
     def test_create_too_much_datadisks(self):
         disks = [{'name': 'much_disks_1',
                   'size': 100,
-                  'attach': False,
+                  'deletable': False,
                   'caching': 'None'
                 },{'name': 'much_disks_2',
                    'size': 200,
-                   'attach': False,
+                   'deletable': False,
                    'caching': 'ReadWrite'
                 },{'name': 'much_disks_3',
                    'size': 200,
-                   'attach': False,
+                   'deletable': False,
                    'caching': 'ReadOnly'
                 }]
 
@@ -310,7 +320,8 @@ class TestDatadisks(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         json_VM = instance.get_json_from_azure(ctx=ctx)
 
-        self.assertIsNotNone(json_VM['properties']['storageProfile']['dataDisks'])
+        self.assertIsNotNone(json_VM['properties'][
+                                        'storageProfile']['dataDisks'])
 
         disks_vm = json_VM['properties']['storageProfile']['dataDisks']
 
@@ -332,15 +343,16 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
     def test_fail_create_datadisk(self):
-        #attach true trigger the test fail
+        # Disks are limited to a maximum of 1TB
         disk = [{'name': 'disk_fail_1',
-                 'size': 100,
-                 'attach': True,
+                 'size': 5000,
+                 'deletable': True,
                  'caching': 'None'
                }]
 
@@ -355,7 +367,7 @@ class TestDatadisks(testtools.TestCase):
         utils.wait_status(ctx, 'instance',timeout=900)
 
         current_ctx.set(ctx=ctx)
-        self.assertRaises(NonRecoverableError,
+        self.assertRaises(utils.WindowsAzureError,
                           datadisks.create,
                           ctx=ctx
                           )
@@ -366,7 +378,8 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
@@ -374,7 +387,7 @@ class TestDatadisks(testtools.TestCase):
     def test_attach_datadisk(self):
         disk = [{'name': 'attach_disk',
                   'size': 100,
-                  'attach': False,
+                  'deletable': False,
                   'caching': 'None'
                 }]
 
@@ -397,11 +410,10 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
-
-        disk[0]['attach'] = True
 
         test_name = 'test-attach-datadisk'
         ctx = self.mock_ctx(test_name, disk)
@@ -418,7 +430,8 @@ class TestDatadisks(testtools.TestCase):
 
         ctx.logger.debug(json_VM)
 
-        self.assertIsNotNone(json_VM['properties']['storageProfile']['dataDisks'])
+        self.assertIsNotNone(json_VM['properties'][
+                                        'storageProfile']['dataDisks'])
         
         disks_vm = json_VM['properties']['storageProfile']['dataDisks']
 
@@ -434,14 +447,15 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
     def test_datadisk_in_storage_account(self):
         disk = [{'name': 'attach_disk',
                   'size': 100,
-                  'attach': False,
+                  'deletable': False,
                   'caching': 'None'
                 }]
 
@@ -451,7 +465,8 @@ class TestDatadisks(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         ctx.logger.info("CREATE storage account")
         ctx.node.properties[constants.ACCOUNT_TYPE_KEY] = "Standard_LRS"
-        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = "storageaccountdisk" + self.__random_id
+        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = \
+            "storageaccountdisk" + self.__random_id
         storage.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "storage",constants.SUCCEEDED, timeout=600)
@@ -496,13 +511,72 @@ class TestDatadisks(testtools.TestCase):
 
         try:
             current_ctx.set(ctx=ctx)
-            utils.wait_status(ctx, 'instance', constants.DELETING, timeout=900)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
         except utils.WindowsAzureError:
             pass
 
         current_ctx.set(ctx=ctx)
         ctx.logger.info("DELETE storage account")
         ctx.node.properties[constants.ACCOUNT_TYPE_KEY] = "Standard_LRS"
-        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = "storageaccountdisk" + self.__random_id
+        ctx.node.properties[constants.STORAGE_ACCOUNT_KEY] = \
+            "storageaccountdisk" + self.__random_id
         storage.delete(ctx=ctx)
         
+
+    def test_delete_datadisk(self):
+        disk = [{'name': 'delete_disk',
+                  'size': 100,
+                  constants.DELETABLE_KEY: True,
+                  'caching': 'None'
+                },{'name': 'delete_disk_2',
+                  'size': 100,
+                  constants.DELETABLE_KEY: False,
+                  'caching': 'None'
+                }]
+
+        test_name = 'test-delete-datadisk'
+        ctx = self.mock_ctx(test_name, disk)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create VM test: {}".format(test_name))
+        instance.create(ctx=ctx)
+
+        current_ctx.set(ctx=ctx)
+        datadisks.create(ctx=ctx)
+        
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, 'instance',timeout=900)
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN delete VM test: {}".format(test_name))
+        instance.delete(ctx=ctx)
+
+        try:
+            current_ctx.set(ctx=ctx)
+            utils.wait_status(ctx, 'instance', 
+                              constants.DELETING, timeout=900)
+        except utils.WindowsAzureError:
+            pass
+
+        ctx.logger.info("BEGIN delete datadisk test: {}".format(
+                                        disk[0]['name']
+                                        )
+                        )
+        current_ctx.set(ctx=ctx)
+        datadisks.delete(ctx=ctx)
+        
+        list  = datadisks._get_datadisks_from_storage(ctx)
+        self.assertFalse(datadisks._is_datadisk_exists(
+                                        list,
+                                        disk[0]['name']
+                                        )
+                        )
+        ctx.logger.info("Disk {} has been deleted.".format(disk[0]['name']))
+
+        self.assertTrue(datadisks._is_datadisk_exists(
+                                        list, 
+                                        disk[1]['name']
+                                        )
+                        )
+        ctx.logger.info("Datadisk {} still exists.".format(disk[1]['name']))

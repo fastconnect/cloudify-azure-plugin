@@ -21,18 +21,8 @@ imports:
 #####################################################################################
 
 inputs:
-  publisher_name:
-    default: 'Canonical'
-    type: string
-  offer:
-    default: 'UbuntuServer'
-    type: string
-  sku:
-    default: '14.04.3-LTS'
-    type: string
-  version:
-    default: 'latest'
-    type: string
+  image:
+    default: {}
   flavor_id:
     default: 'Standard_A1'
     type: string
@@ -61,6 +51,7 @@ inputs:
     type: string
   storage_account_name:
     type: string
+    default: ''
   account_type:
     default: 'Standard_LRS'
     type: string
@@ -124,13 +115,8 @@ node_templates:
   mongod_host:
     type: nodecellar.nodes.MonitoredServer
     properties:
-      publisher_name: { get_input: publisher_name }
-      offer: { get_input: offer }
-      sku: { get_input: sku }
-      version: { get_input: version }
-      flavor_id: { get_input: flavor_id }
+      image: { get_input: image }
       compute_name: {get_input: mongod_compute_name}
-      storage_account_name: {get_input: mongod_storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: { get_input: public_key }
@@ -141,13 +127,9 @@ node_templates:
   nodejs_host:
     type: nodecellar.nodes.MonitoredServer
     properties:
-      publisher_name: { get_input: publisher_name }
-      offer: { get_input: offer }
-      sku: { get_input: sku }
-      version: { get_input: version }
+      image: { get_input: image }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: node_js_compute_name}
-      storage_account_name: {get_input: nodejs_storage_account_name}
       compute_user: {get_input: compute_user}
       compute_password: {get_input: compute_password}
       public_key: { get_input: public_key }
@@ -176,8 +158,6 @@ node_templates:
   mongod_disk:
     type: cloudify.azure.nodes.Datadisks
     properties:
-      storage_account_name: {get_input: storage_account_name}
-      compute_name: {get_input: mongod_compute_name}
       disks: { get_input: mongod_disks }
     relationships:
       - target: mongod_host
@@ -214,16 +194,16 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: mongod_host
-      - type: cloudify.azure.relationships.instance_connected_to_storage_account
-        target: mongod_storage_account
+      # - type: cloudify.azure.relationships.instance_connected_to_storage_account
+      #   target: mongod_storage_account
 
   nodejs:
     type: nodecellar.nodes.NodeJSServer
     relationships:
       - type: cloudify.relationships.contained_in
         target: nodejs_host
-      - type: cloudify.azure.relationships.instance_connected_to_storage_account
-        target: nodejs_storage_account
+     # - type: cloudify.azure.relationships.instance_connected_to_storage_account
+     #   target: nodejs_storage_account
 
   nodecellar:
     type: nodecellar.nodes.NodecellarApplicationModule

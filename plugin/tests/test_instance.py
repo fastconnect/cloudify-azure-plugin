@@ -24,6 +24,7 @@ from plugin import (utils,
 from cloudify.state import current_ctx
 from cloudify.mocks import MockCloudifyContext
 from cloudify.exceptions import NonRecoverableError
+from unittest import skip
 
 TIME_DELAY = 20
 
@@ -66,21 +67,8 @@ class TestInstance(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "subnet",constants.SUCCEEDED, 600)
       
-        # ctx.logger.info("CREATE public_ip")
-        # current_ctx.set(ctx=ctx)
-        # ctx.node.properties[constants.PUBLIC_IP_KEY] = "instance_public_ip_test"
-        # public_ip.create(ctx=ctx)
-        # current_ctx.set(ctx=ctx)
-        # utils.wait_status(ctx, "public_ip",constants.SUCCEEDED, 600)
-
         ctx.logger.info("CREATE NIC")
         current_ctx.set(ctx=ctx)
-        # ctx.node.properties[constants.NETWORK_INTERFACE_KEY] =\
-        #     "instance_nic_test" + self.__random_id
-        # ctx.instance.runtime_properties[constants.PUBLIC_IP_KEY] =\
-        #     "instance_public_ip_test" + self.__random_id
-        # ctx.instance.runtime_properties[constants.SUBNET_KEY] =\
-        #     "instancesubnet_test" + self.__random_id
         nic.create(ctx=ctx)
         current_ctx.set(ctx=ctx)
         utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
@@ -99,10 +87,8 @@ class TestInstance(testtools.TestCase):
         """
         if id != None:
             nic_name = 'instance_nic_test_{}_{}'.format(self.__random_id, id)
-            # public_ip_name = 'instance_public_ip_test_{}'.format(id)
         else:
             nic_name = 'instance_nic_test_{}'.format(self.__random_id)
-            # public_ip_name = 'instance_public_ip_test'
 
         test_properties = {
             constants.AZURE_CONFIG_KEY:{
@@ -119,10 +105,12 @@ class TestInstance(testtools.TestCase):
                 constants.SUBNET_KEY:\
                     'instancesubnet_test' + self.__random_id,
             },
+            constants.IMAGE_KEY: {
             constants.PUBLISHER_KEY: 'Canonical',
             constants.OFFER_KEY: 'UbuntuServer',
             constants.SKU_KEY: '12.04.5-LTS',
-            constants.SKU_VERSION_KEY: 'latest',
+                constants.SKU_VERSION_KEY: 'latest'
+            },
             constants.FLAVOR_KEY: 'Standard_A1',
             constants.COMPUTE_KEY: test_name + self.__random_id,
             constants.COMPUTE_USER_KEY: test_utils.COMPUTE_USER,
@@ -171,7 +159,8 @@ class TestInstance(testtools.TestCase):
                 'node_id': 'test',
                 'relationship_type': constants.INSTANCE_CONNECTED_TO_NIC,
                 'relationship_properties': {
-                        constants.NETWORK_INTERFACE_KEY: nic_name
+                        constants.NETWORK_INTERFACE_KEY: nic_name,
+                        constants.NIC_PRIMARY_KEY: False
                     }
             }
         ]
@@ -326,18 +315,6 @@ class TestInstance(testtools.TestCase):
         ctx1.logger.info("BEGIN concurrent create VM 1 test")
         ctx2.logger.info("BEGIN concurrent create VM 2 test")
 
-        # ctx1.logger.info("CREATE public_ip 1")
-        # current_ctx.set(ctx=ctx1)
-        # public_ip.create(ctx=ctx1)
-        # current_ctx.set(ctx=ctx1)
-        # utils.wait_status(ctx1, "public_ip",constants.SUCCEEDED, 600)
-        #
-        # ctx2.logger.info("CREATE public_ip 2")
-        # current_ctx.set(ctx=ctx2)
-        # public_ip.create(ctx=ctx2)
-        # current_ctx.set(ctx=ctx2)
-        # utils.wait_status(ctx2, "public_ip",constants.SUCCEEDED, 600)
-
         ctx1.logger.info("CREATE nic 1")
         current_ctx.set(ctx=ctx1)
         nic.create(ctx=ctx1)
@@ -396,14 +373,6 @@ class TestInstance(testtools.TestCase):
         ctx2.logger.info("DELETE nic 2")
         nic.delete(ctx=ctx2)
 
-        # current_ctx.set(ctx=ctx1)
-        # ctx1.logger.info("DELETE public_ip 1")
-        # public_ip.delete(ctx=ctx1)
-        #
-        # current_ctx.set(ctx=ctx2)
-        # ctx2.logger.info("DELETE public_ip 2")
-        # public_ip.delete(ctx=ctx2)
-
         ctx1.logger.info("END concurrent create VM 1 test")
         ctx2.logger.info("END concurrent create VM 2 test")
 
@@ -413,18 +382,6 @@ class TestInstance(testtools.TestCase):
 
         ctx1.logger.info("BEGIN concurrent delete VM 1 test")
         ctx2.logger.info("BEGIN concurrent delete VM 2 test")
-
-        # ctx1.logger.info("CREATE public_ip 1")
-        # current_ctx.set(ctx=ctx1)
-        # public_ip.create(ctx=ctx1)
-        # current_ctx.set(ctx=ctx1)
-        # utils.wait_status(ctx1, "public_ip",constants.SUCCEEDED, 600)
-        #
-        # ctx2.logger.info("CREATE public_ip 2")
-        # current_ctx.set(ctx=ctx2)
-        # public_ip.create(ctx=ctx2)
-        # current_ctx.set(ctx=ctx2)
-        # utils.wait_status(ctx2, "public_ip",constants.SUCCEEDED, 600)
 
         ctx1.logger.info("CREATE nic 1")
         current_ctx.set(ctx=ctx1)
@@ -489,14 +446,6 @@ class TestInstance(testtools.TestCase):
         ctx2.logger.info("DELETE nic 2")
         nic.delete(ctx=ctx2)
 
-        # current_ctx.set(ctx=ctx1)
-        # ctx1.logger.info("DELETE public_ip 1")
-        # public_ip.delete(ctx=ctx1)
-        #
-        # current_ctx.set(ctx=ctx2)
-        # ctx2.logger.info("DELETE public_ip 2")
-        # public_ip.delete(ctx=ctx2)
-
         ctx1.logger.info("END concurrent delete VM 1 test")
         ctx2.logger.info("END concurrent delete VM 2 test")
 
@@ -555,6 +504,133 @@ class TestInstance(testtools.TestCase):
         current_ctx.set(ctx=ctx)
         instance.delete(ctx=ctx)
    
+    def test_create_windows_instance(self):
+        ctx = self.mock_ctx('testwin')
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.PUBLISHER_KEY] = \
+            'MicrosoftWindowsServer'
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OFFER_KEY] = 'WindowsServer'
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.SKU_KEY] = '2012-R2-Datacenter'
+        ctx.node.properties[constants.WINDOWS_AUTOMATIC_UPDATES_KEY] = True
 
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create windows VM test")
 
+        ctx.logger.info("Creating VM...")
+        instance.create(ctx=ctx)
 
+        current_ctx.set(ctx=ctx)
+        jsonVM = instance.get_json_from_azure(ctx=ctx)
+
+        self.assertIsNotNone(jsonVM['properties']['osProfile'][
+                                    'windowsConfiguration'])
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("delete windows VM")
+        self.assertEqual(202, instance.delete(ctx=ctx))
+
+        ctx.logger.info("END create windows VM test")
+
+    @skip("Create test from VHD is not compliant with other instance tests.")
+    def test_create_instance_from_vhd(self):
+        '''To run this test, you need all the required resource to start a machine
+        (resource group, storage account, nic). You then have to upload a valid
+        bootable VHD on the storage account. Note the vhd's endpoint and replace 
+        MY_URI_VHD by this value.
+        Then, you can run the test.
+        Note the resource group will not be deleted by the class teardown.
+        '''
+        ctx = self.mock_ctx('testinstancevhd')
+        ctx.node.properties[constants.AZURE_CONFIG_KEY
+                            ][constants.RESOURCE_GROUP_KEY] = MY_RESOURCE_GROUP
+        ctx.node.properties[constants.AZURE_CONFIG_KEY
+                            ][constants.STORAGE_ACCOUNT_KEY] = MY_STORAGE_ACCOUNT
+        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] = MY_NIC
+        ctx.node.properties[constants.IMAGE_KEY] = {}
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OS_URI_KEY] = MY_URI_VHD
+        ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OS_TYPE_KEY] = 'Linux'
+
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create VM test: {}".format(ctx.instance.id))
+        ctx.logger.info("create VM") 
+
+        instance.create(ctx=ctx) 
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
+
+        current_ctx.set(ctx=ctx)
+        jsonVM = instance.get_json_from_azure(ctx=ctx)
+
+        self.assertEqual(jsonVM['properties']['storageProfile'
+                                              ]['osDisk']['osType'],  
+                         ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OS_TYPE_KEY]
+                         )
+
+        self.assertEqual(jsonVM['properties']['storageProfile'
+                                              ]['osDisk']['image']['uri'],
+                         ctx.node.properties[constants.IMAGE_KEY
+                            ][constants.OS_URI_KEY]
+                         )
+
+        ctx.logger.info("delete VM")
+        self.assertEqual(202, instance.delete(ctx=ctx))
+
+        ctx.logger.info("END create VM test")
+
+    def test_create_2nic_instance(self):
+        ctx = self.mock_ctx('testcreate2nicinstance')
+        current_ctx.set(ctx=ctx)
+        ctx.logger.info("BEGIN create 2 NIC VM test: {}".format(ctx.instance.id))
+
+        subnet_name = 'instancesubnet_test_2_' + self.__random_id
+        nic_name = 'instance_nic_test_2_' + self.__random_id
+
+        ctx.logger.info("create new subnet")
+        ctx.node.properties[constants.SUBNET_KEY] = subnet_name
+        ctx.node.properties[constants.SUBNET_ADDRESS_KEY] =\
+            "10.0.2.0/24"
+        current_ctx.set(ctx=ctx)
+        subnet.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "subnet",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("create second NIC")
+        ctx.node.properties[constants.NETWORK_INTERFACE_KEY] = nic_name
+        ctx.node.properties[constants.NIC_PRIMARY_KEY] = True
+        ctx.node.properties[constants.AZURE_CONFIG_KEY][constants.SUBNET_KEY] = subnet_name
+        for relationship in ctx.instance.relationships:
+            if relationship.type == constants.NIC_CONNECTED_TO_SUBNET:
+                relationship.target.instance.runtime_properties[constants.SUBNET_KEY] = subnet_name
+        current_ctx.set(ctx=ctx)
+        nic.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "nic",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("create VM")
+        ctx.node.properties[constants.FLAVOR_KEY] = 'Standard_A3'
+        ctx.instance.relationships.append(test_mockcontext.MockRelationshipContext(node_id='test',
+            runtime_properties={
+                constants.NETWORK_INTERFACE_KEY: nic_name,
+                constants.NIC_PRIMARY_KEY: True
+            },
+            type=constants.INSTANCE_CONNECTED_TO_NIC)
+        )
+        current_ctx.set(ctx=ctx)
+        instance.create(ctx=ctx)
+        current_ctx.set(ctx=ctx)
+        utils.wait_status(ctx, "instance",constants.SUCCEEDED, 600)
+
+        ctx.logger.info("verify the NIC's number of the instance")
+        json = instance.get_json_from_azure()
+        self.assertEqual(len(json['properties']['networkProfile']['networkInterfaces']),2)
+
+        ctx.logger.info("delete VM")
+        self.assertEqual(202, instance.delete(ctx=ctx))
+
+        ctx.logger.info("END create VM test")

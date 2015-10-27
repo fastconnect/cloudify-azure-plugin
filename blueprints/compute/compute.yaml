@@ -5,26 +5,14 @@ imports:
   - plugin.yaml
 
 inputs:
-  publisher_name:
-    default: 'Canonical'
-    type: string
-  offer:
-    default: 'UbuntuServer'
-    type: string
-  sku:
-    default: '14.04.3-LTS'
-    type: string
-  version:
-    default: 'latest'
-    type: string
+  image:
+    default: {}
   flavor_id:
     default: 'Standard_A1'
     type: string
   compute_name:
     default: ''
     type: string
- # availability_set_name:
- #   type: string
   network_interface_name:
     type: string
   public_ip_name:
@@ -46,6 +34,11 @@ inputs:
   custom_storage_account_name:
     default : ''
     type: string
+ # availability_set_name:
+ #   type: string
+ # windows_automatic_updates:
+ #   type: boolean
+
 node_templates:
 #  compute_availability_set:
 #    type: cloudify.azure.nodes.AvailabilitySet
@@ -55,7 +48,7 @@ node_templates:
   compute_storage_account:
     type: cloudify.azure.nodes.StorageAccount
     properties:
-      storage_account_name: {get_input: storage_account_name}
+      storage_account_name: { get_input: storage_account_name }
 
   compute_instance:
     type: cloudify.azure.nodes.Instance
@@ -63,23 +56,41 @@ node_templates:
       cloudify_agent:
         default:
           user: { get_input: compute_user }
-      publisher_name: { get_input: publisher_name }
-      offer: { get_input: offer }
-      sku: { get_input: sku }
-      version: { get_input: version }
+      image: { get_input: image }
       flavor_id: { get_input: flavor_id }
-      compute_name: {get_input: compute_name}
-      compute_user: {get_input: compute_user}
-      compute_password: {get_input: compute_password}
+      compute_name: { get_input: compute_name }
+      compute_user: { get_input: compute_user }
+      compute_password: { get_input: compute_password }
       public_key: { get_input: public_key }
     relationships:
-
       - target: compute_storage_account
         type: cloudify.azure.relationships.instance_depends_on_storage_account
+      - target: management_nic
+        type: cloudify.azure.relationships.instance_connected_to_nic
+      - target: application_nic
+        type: cloudify.azure.relationships.instance_connected_to_nic
+
+# For a Windows machine
+#  windows_compute_instance:
+#    type: cloudify.azure.nodes.WindowsInstance
+#    properties:
+#      cloudify_agent:
+#        default:
+#          user: { get_input: compute_user }
+#      image: { get_input: image}
+#      version: { get_input: version }
+#      flavor_id: { get_input: flavor_id }
+#      compute_name: { get_input: compute_name }
+#      compute_user: { get_input: compute_user }
+#      compute_password: { get_input: compute_password }
+#      windows_automatic_updates: { get_input: windows_automatic_updates }
+#    relationships:
+#      - target: compute_storage_account
+#        type: cloudify.azure.relationships.instance_depends_on_storage_account
 #      - target: compute_availability_set
 #        type: cloudify.azure.relationships.instance_contained_in_availability_set
-      - target: compute_nic
-        type: cloudify.azure.relationships.instance_connected_to_nic
+#      - target: compute_nic
+#        type: cloudify.azure.relationships.instance_connected_to_nic
 
   compute_nic:
     type: cloudify.azure.nodes.NetworkInterfaceCard
@@ -92,20 +103,19 @@ node_templates:
   compute_public_ip:
     type: cloudify.azure.nodes.PublicIP
     properties:
-      public_ip_name: {get_input: public_ip_name}
+      public_ip_name: { get_input: public_ip_name }
 
   compute_disk:
     type: cloudify.azure.nodes.Datadisks
     properties:
-      disks:  {get_input: compute_disks }
-
+      disks:  { get_input: compute_disks }
     relationships:
       - target: compute_instance
         type: cloudify.azure.relationships.disk_attach_to_instance
-      - target: compute_storage_account
+      - target: disk_storage_account
         type: cloudify.relationships.contained_in
 
-  compute_storage_account:
+  disk_storage_account:
      type: cloudify.azure.nodes.StorageAccount
      properties:
-      storage_account_name:  {get_input: custom_storage_account_name}
+      storage_account_name: { get_input: custom_storage_account_name }

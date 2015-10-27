@@ -71,6 +71,51 @@ Attributes:
 
 The storage account name is available in the runtime properties of the node.
 
+cloudify.azure.nodes.SecurityGroup
+----------------------------------
+
+Derived From: *cloudify.nodes.SecurityGroup*
+
+Properties:
+^^^^^^^^^^^
+
+* **security_group_name:** Indicates the name of the security group to create
+* **rules:** To add security rules to the security group, make a several rule with these properties:
+    * protocol, Possible values: '\*', 'Tcp' or 'Udp', Default: '\*'
+    * sourcePortRange and destinationPortRange,
+      Possible values: port or range between 0 and 65535 or '\*', Default: '\*'
+    * sourceAddressPrefix and destinationAddressPrefix,
+      Possible values: CIDR or source IP range or '\*',
+      tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used, Default: '\*'
+    * access, Possible values: 'Allow' or 'Deny', Default: 'Allow'
+    * direction, Possible values: 'Inbound' or 'Outbound', Default: 'Inbound'
+
+  All the properties are **optional**, and their order define their priority depending on their direction.
+  The first inbound one have the highest inbound priority, the second inbound one have the second inbound priority.
+  It is the same for outbound one and the outbound priority. Example of rules:
+
+  .. code-block:: yaml
+
+    security_group_rules:
+      http:
+        destinationPortRange: '80'
+        destinationAddressPrefix: {get_input: subnet_address_prefix}
+      ssh:
+        destinationPortRange: '22'
+        destinationAddressPrefix: {get_input: subnet_address_prefix}
+      deny_other_in:
+        access: 'Deny'
+      deny_other_out:
+        access: 'Deny'
+        direction: 'Outbound'
+* **azure_config:** describes the configuration to use to use the Azure API. Outside a blueprint manager, you do not need to set this.
+
+Mapped Operations:
+^^^^^^^^^^^^^^^^^^
+
+* cloudify.interfaces.lifecycle.create creates the security group.
+* cloudify.interfaces.lifecycle.delete deletes the security group.
+
 cloudify.azure.nodes.Network
 ----------------------------
 
@@ -126,6 +171,7 @@ Properties:
 ^^^^^^^^^^^
 
 * **network_interface_name:** Indicates the name of the network interface card to create.
+* **primary:** A boolean for specify the primary NIC on a multi-nic instance (Default: false).
 * **azure_config:** describes the configuration to use to use the Azure API. Outside a blueprint manager, you do not need to set this.
 
 Mapped Operations:
@@ -170,8 +216,9 @@ Derived From: *cloudify.nodes.Root*
 Properties:
 ^^^^^^^^^^^
 
-* **compute_name:** Indicates the name of the compute to create.
-* **storage_account_name:** the storage account name where the disks are stored.
+* **disks:** A list of disks to specify. The inputs are presented as a dictionnary. 
+You have to specify 'name', 'caching' (None, ReadOnly or ReadWrite), 'deletable' (True or False) and size (in GiB).
+Example: {name: 'my_datadisk', caching: 'None', deletable: False, size: 500}
 * **azure_config:** describes the configuration to use to use the Azure API. Outside a blueprint manager, you do not need to set this.
 
 Mapped Operations:
@@ -187,10 +234,7 @@ Derived From: *cloudify.nodes.Compute*
 Properties:
 ^^^^^^^^^^^
 
-* **publisher_name:** the editor of the machine to deploy (Canonical).
-* **offer:** the machine to deploy (UbuntuServer).
-* **sku:** the OS version (14.04.3-LTS).
-* **version:** the version build (default: latest).
+* **image:** specify the image to use. It can be an image from the azure marketplace, or a custom vhd. Examples: {publisher_name: 'Canonical', offer: 'UbuntuServer', sku: '14.04.3-LTS', version: 'latest'}, or {os_uri: 'https://my_storage_account.blob.core.windows.net/mycontainer/custom_image.vhd', os_type: 'Linux | Windows'}
 * **flavor_id:** the size of the machine (Standard-A1).
 * **compute_name:** the name of the machine.
 * **storage_account_name:** the name of the storage account.
@@ -245,6 +289,11 @@ cloudify.azure.relationships.availability_set_contained_in_resource_group
 
 The relationship to use to place an availability set within a resource group.
 
+cloudify.azure.relationships.security_group_contained_in_resource_group
+-----------------------------------------------------------------------
+
+The relationship to use to place a security group within a resource group.
+
 cloudify.azure.relationships.network_contained_in_resource_group
 ----------------------------------------------------------------
 
@@ -254,6 +303,11 @@ cloudify.azure.relationships.subnet_connected_to_network
 --------------------------------------------------------
 
 The relationship to use to place a subnet within a network.
+
+cloudify.azure.relationships.subnet_connected_to_security_group
+---------------------------------------------------------------
+
+The relationship to use to connect a subnet within a security group.
 
 cloudify.azure.relationships.nic_connected_to_subnet
 ----------------------------------------------------

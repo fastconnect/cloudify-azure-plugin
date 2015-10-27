@@ -1,6 +1,6 @@
-﻿##################################################################################
+##################################################################################
 # Cloudify Azure built in types and plugins definitions.
-# Version: 0.0.2
+# Version: 0.0.3
 ##################################################################################
 
 plugins:
@@ -71,6 +71,29 @@ node_types:
         delete:
           implementation: azure.plugin.storage.delete
 
+  cloudify.azure.nodes.SecurityGroup:
+    derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      security_group_name:
+        type: string
+        default: ''
+      rules:
+        description: >
+          A list of rules for the security group. The required input is 'name'.
+          http://getcloudify.org/guide/3.2/overview-components.html
+        default: {}
+      azure_config:
+        default: {}
+      deletable:
+        type: boolean
+        default: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: azure.plugin.security_group.create
+        delete:
+          implementation: azure.plugin.security_group.delete
+
   cloudify.azure.nodes.Network:
     derived_from: cloudify.nodes.Network
     properties:
@@ -119,6 +142,9 @@ node_types:
       network_interface_name:
         type: string
         default: ''
+      primary:
+        type: boolean
+        default: false
       azure_config:
         default: {}
       deletable:
@@ -159,7 +185,7 @@ node_types:
         default: {}
         description: >
           A list of disks to attache to the machine. The required inputs are
-          'name', 'caching' (None, ReadOnly or ReadWrite), 'attach' (True or False),
+          'name', 'caching' (None, ReadOnly or ReadWrite), 'deletable' (True or False),
           and size (in GB).
       azure_config:
         default: {}
@@ -167,18 +193,14 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: azure.plugin.datadisks.create
+        delete:
+            implementation: azure.plugin.datadisks.delete
 
   cloudify.azure.nodes.Instance:
     derived_from: cloudify.nodes.Compute
     properties:
-      publisher_name:
-        type: string
-      offer:
-        type: string
-      sku:
-        type: string
-      version:
-        type: string
+      image:
+        default: {}
       flavor_id:
         type: string
       compute_name:
@@ -202,6 +224,25 @@ node_types:
         delete:
           implementation: azure.plugin.instance.delete
 
+  cloudify.azure.nodes.WindowsInstance:
+    derived_from: cloudify.azure.nodes.Instance
+    properties:
+      windows_automatic_updates:
+        type: boolean
+        default: false
+      public_key:
+        type: string
+        default: ''
+    interfaces:
+      cloudify.interfaces.worker_installer:
+        install: windows_agent_installer.windows_agent_installer.tasks.install
+        start: windows_agent_installer.windows_agent_installer.tasks.start
+        stop: windows_agent_installer.windows_agent_installer.tasks.stop
+        uninstall: windows_agent_installer.windows_agent_installer.tasks.uninstall
+        restart: windows_agent_installer.windows_agent_installer.tasks.restart
+      cloudify.interfaces.plugin_installer:
+        install: windows_plugin_installer.windows_plugin_installer.tasks.install
+
 
 relationships:
   cloudify.azure.relationships.storage_account_contained_in_resource_group:
@@ -210,10 +251,16 @@ relationships:
   cloudify.azure.relationships.availability_set_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
+  cloudify.azure.relationships.security_group_contained_in_resource_group:
+    derived_from: cloudify.relationships.contained_in
+
   cloudify.azure.relationships.network_contained_in_resource_group:
     derived_from: cloudify.relationships.contained_in
 
   cloudify.azure.relationships.subnet_connected_to_network:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.azure.relationships.subnet_connected_to_security_group:
     derived_from: cloudify.relationships.connected_to
 
   cloudify.azure.relationships.nic_connected_to_subnet:

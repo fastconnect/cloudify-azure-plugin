@@ -2,9 +2,7 @@ subscription_id: ''
 username: ''
 password: ''
 flavor_id: ''
-publisher_name: ''
-offer: ''
-sku: ''
+
 compute_name: ''
 storage_account_name: ''
 compute_user: ''
@@ -14,6 +12,7 @@ public_key: |
 private_key: ''
 resource_group_name: ''
 availability_set_name: ''
+security_group_name: ''
 virtual_network_name: ''
 virtual_network_address_prefix: ''
 subnet_name: ''
@@ -21,9 +20,46 @@ subnet_address_prefix: ''
 network_interface_name: ''
 public_ip_name: ''
 
+# To add security rules to the security group, make a list of rule with these properties:
+# name, protocol (*, Tcp or Udp; Default: *),
+# sourcePortRange & destinationPortRange (port or range between 0 and 65535 or *; Default: *)
+# sourceAddressPrefix & destinationAddressPrefix (CIDR or source IP range or *, tags such as ‘VirtualNetwork’,
+# ‘AzureLoadBalancer’ and ‘Internet’ can also be used; Default: *)
+# access (Allow or Deny; Default: Allow), and direction (Inbound or Outbound; Default: Inbound)
+# Example for the manager:
+# security_group_rules:
+#   http:
+#     destinationPortRange: '80'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   https:
+#     destinationPortRange: '443'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   ssh:
+#     destinationPortRange: '22'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   rabbit:
+#     destinationPortRange: '5672'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   fileserver:
+#     destinationPortRange: '53229'
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   internal_in:
+#     sourceAddressPrefix: {get_input: virtual_network_address_prefix}
+#     destinationAddressPrefix: {get_input: subnet_address_prefix}
+#   deny_other_in:
+#     access: 'Deny'
+
+# Specify an image: use the image structure to give the image you want to instantiate.
+# You can specify an image from the Azure marketplace, or a VHD.
+# Marketplace image:
+# image: {publisher_name: 'Canonical', offer: 'UbuntuServer', sku: '14.04.3-LTS', version: 'latest'}
+# You need to put the VHD on the same storage account for custom image:
+# image: {os_uri: 'https://storage_account_name.core.windows.net/mycontainer/custom_image.vhd', 
+#		  os_type: 'Linux|Windows'}
+
 # To add disks to the machine, make a list of disk with these properties:
-# name, size (in GiB), attach (True or False) and caching (ReadWrite, ReadOnly, None)
+# name, size (in GiB), deletable (True or False) and caching (ReadWrite, ReadOnly, None)
 # Example:
 # disks:
-#   - { name: 'datadisk-1', size: 100, attach: False, caching: 'None' }
-#   - { name: 'datadisk-2', size: 500, attach: False, caching: 'ReadWrite' }
+#   - { name: 'datadisk-1', size: 100, deletable: False, caching: 'None' }
+#   - { name: 'datadisk-2', size: 500, deletable: False, caching: 'ReadWrite' }

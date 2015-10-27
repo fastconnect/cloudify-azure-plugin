@@ -86,7 +86,19 @@ VIRTUAL_NETWORK_ADDRESS_KEY = 'virtual_network_address_prefix'
 SUBNET_KEY = 'subnet_name'
 SUBNET_ADDRESS_KEY = 'subnet_address_prefix'
 
+SECURITY_GROUP_KEY = 'security_group_name'
+SECURITY_GROUP_ID_KEY = 'security_group_id'
+RULES_KEY = 'rules'
+PROTOCOL_KEY = 'protocol'
+SOURCE_PORT_KEY = 'sourcePortRange'
+DEST_PORT_KEY = 'destinationPortRange'
+SOURCE_ADDRESS_KEY = 'sourceAddressPrefix'
+DEST_ADDRESS_KEY = 'destinationAddressPrefix'
+ACCESS_KEY = 'access'
+DIRECTION_KEY = 'direction'
+
 NETWORK_INTERFACE_KEY = 'network_interface_name'
+NIC_PRIMARY_KEY = 'primary'
 
 PUBLIC_IP_KEY = 'public_ip_name'
 
@@ -96,12 +108,16 @@ COMPUTE_PASSWORD_KEY = 'compute_password'
 PUBLIC_KEY_KEY = 'public_key'
 PRIVATE_KEY_KEY = 'private_key'
 FLAVOR_KEY = 'flavor_id'
+IMAGE_KEY = 'image'
 PUBLISHER_KEY = 'publisher_name'
 OFFER_KEY = 'offer'
 SKU_KEY = 'sku'
 SKU_VERSION_KEY = 'version'
 CREATE_OPTION_KEY = 'create_option'
+OS_URI_KEY = 'os_uri'
+OS_TYPE_KEY = 'os_type'
 DISKS_KEY = 'disks'
+WINDOWS_AUTOMATIC_UPDATES_KEY = 'windows_automatic_updates'
 
 AVAILABILITY_SET_KEY = 'availability_set_name'
 AVAILABILITY_ID_KEY = 'availability_set_id'
@@ -113,10 +129,14 @@ STORAGE_ACCOUNT_CONTAINED_IN_RESOURCE_GROUP = \
     'cloudify.azure.relationships.storage_account_contained_in_resource_group'
 AVAILABILITY_SET_CONTAINED_IN_RESOURCE_GROUP = \
     'cloudify.azure.relationships.availability_set_contained_in_resource_group'
+SECURITY_GROUP_CONTAINED_IN_RESOURCE_GROUP = \
+    'cloudify.azure.relationships.security_group_contained_in_resource_group'
 NETWORK_CONTAINED_IN_RESOURCE_GROUP = \
     'cloudify.azure.relationships.network_contained_in_resource_group'
 SUBNET_CONNECTED_TO_NETWORK = \
     'cloudify.azure.relationships.subnet_connected_to_network'
+SUBNET_CONNECTED_TO_SECURITY_GROUP = \
+    'cloudify.azure.relationships.subnet_connected_to_security_group'
 NIC_CONNECTED_TO_SUBNET = \
     'cloudify.azure.relationships.nic_connected_to_subnet'
 NIC_CONNECTED_TO_PUBLIC_IP = \

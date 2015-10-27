@@ -7,6 +7,10 @@ from cloudify.mocks import (MockCloudifyContext,
 
 
 class MockNodeInstanceContextRelationships(MockNodeInstanceContext):
+    '''
+    This class is used to mock the ctx.instance by adding a relationships
+    property.
+    '''
 
     def __init__(self, id=None, runtime_properties=None, relationships=None):
         super(MockNodeInstanceContextRelationships, self).__init__(
@@ -32,6 +36,29 @@ class MockNodeInstanceContextRelationships(MockNodeInstanceContext):
     
 
 class MockRelationshipSubjectContext(object):
+    '''
+    This class is a mock for the ctx.source and ctx.target, it is used to fully
+    mock a relationship context in Cloudify.
+    To use this class you need to provide the properties and/or the runtime_
+    properties of the source/target with dict:
+
+        source = MockRelationshipSubjectContext(
+                            properties={'prop_1_source': 'value_1'},
+                            runtime_properties={'runtime_prop_1': value} 
+                            )
+    
+        target = MockRelationshipSubjectContext(
+                            properties={'prop_target_1': value}
+                            )
+    
+    Then, place them in the MockCloudifyContextRelationship:
+
+        mock_ctx = MockCloudifyContextRelationships(
+                                 node_id='test',
+                                 source=source,
+                                 target=target
+                                )
+    '''
 
     def __init__(self, context=None, properties=None, runtime_properties=None):
         self.context = MockContext()
@@ -40,6 +67,10 @@ class MockRelationshipSubjectContext(object):
 
 
 class MockRelationshipContext(object):
+    '''
+    This class mock the context placed within ctx.instance to add
+    the target property.
+    '''
 
     def __init__(self, node_id=None, runtime_properties=None, type=None):
         self._target = MockNodeInstanceContextRelationships(node_id, runtime_properties)
@@ -55,7 +86,34 @@ class MockRelationshipContext(object):
 
 
 class MockCloudifyContextRelationships(MockCloudifyContext):
-    
+    '''
+    This class is used to complete the Cloudify's mock context with
+    relationships.
+    New Property: relationships, Mandatory: No
+    Required inputs: 
+        - 'node_id': the id of the node (str),
+        - 'relationship_type': the type of the relationship (str),
+        - 'relationship_properties': a dict of properties
+
+        ctx = MockCloudifyContextRelationships(
+				node_id='id_nod',
+                node_name='mock',
+                blueprint_id='id_blue',
+                properties={'prop_1': 'prop_1'},
+                runtime_properties={'run_prop_1': 'run_prop_1'},
+                relationships=[ {'node_id': 'id_nod',
+                				 'relationship_type': 'type',
+                				 'relationship_properties': 
+                				 	{'runtime_relation': 'runtime_relation'}
+                				 },
+                				 {'node_id': 'id_nod_2',
+                				 'relationship_type': 'type_2',
+                				 'relationship_properties': 
+                				 	{'runtime_relation': 'runtime_relation_2'}
+                				 }
+                                ]
+                )
+    '''
     def __init__(self,
                  node_id=None,
                  node_name=None,
@@ -93,32 +151,3 @@ class MockCloudifyContextRelationships(MockCloudifyContext):
                                                 node_id,
                                                 runtime_properties, 
                                                 relationships)
-
-
-''' How to use the MockCloudifyContextRelationships :
-
-    New Property: relationships, Mandatory: No
-    Required inputs: 
-        - 'node_id': the id of the node (str),
-        - 'relationship_type': the type of the relationship (str),
-        - 'relationship_properties': a dict of properties
-
-    ctx = MockCloudifyContextRelationships(
-				node_id='id_nod',
-                node_name='mock',
-                blueprint_id='id_blue',
-                properties={'prop_1': 'prop_1'},
-                runtime_properties={'run_prop_1': 'run_prop_1'},
-                relationships=[ {'node_id': 'id_nod',
-                				 'relationship_type': 'type',
-                				 'relationship_properties': 
-                				 	{'runtime_relation': 'runtime_relation'}
-                				 },
-                				 {'node_id': 'id_nod_2',
-                				 'relationship_type': 'type_2',
-                				 'relationship_properties': 
-                				 	{'runtime_relation': 'runtime_relation_2'}
-                				 }
-                                ]
-                )
-'''

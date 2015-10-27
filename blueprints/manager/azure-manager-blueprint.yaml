@@ -22,15 +22,8 @@ inputs:
   location:   
     default: 'westeurope'
     type: string
-  publisher_name:
-    type: string
-  offer:
-    type: string
-  sku:
-    type: string
-  version:
-    type: string
-    default: 'latest'
+  image:
+    default: {}
   flavor_id:
     type: string
   compute_name:
@@ -49,6 +42,10 @@ inputs:
     type: string
 #  availability_set_name:
 #    type: string
+#  security_group_name:
+#    type: string
+#  security_group_rules:
+#    default: {}
   virtual_network_name:
     type: string
   virtual_network_address_prefix:
@@ -88,6 +85,16 @@ node_templates:
       - target: manager_resource_group
         type: cloudify.azure.relationships.storage_account_contained_in_resource_group
 
+#  manager_security_group:
+#    type: cloudify.azure.nodes.SecurityGroup
+#    properties:
+#      security_group_name: {get_input: security_group_name}
+#      rules: {get_input: security_group_rules}
+#      azure_config: { get_property: [azure_configuration, azure_config] }
+#    relationships:
+#      - target: manager_resource_group
+#        type: cloudify.azure.relationships.security_group_contained_in_resource_group
+
   manager_network:
     type: cloudify.azure.nodes.Network
     properties:
@@ -107,6 +114,8 @@ node_templates:
     relationships:
       - target: manager_network
         type: cloudify.azure.relationships.subnet_connected_to_network
+#      - target: manager_security_group
+#        type: cloudify.azure.relationships.subnet_connected_to_security_group
 
   manager_nic:
     type: cloudify.azure.nodes.NetworkInterfaceCard
@@ -144,10 +153,7 @@ node_templates:
   manager_server:
     type: cloudify.azure.nodes.Instance
     properties:
-      publisher_name: { get_input: publisher_name }
-      offer: { get_input: offer }
-      sku: { get_input: sku }
-      version: { get_input: version }
+      image: { get_input: image }
       flavor_id: { get_input: flavor_id }
       compute_name: {get_input: compute_name}
       compute_user: {get_input: compute_user}
