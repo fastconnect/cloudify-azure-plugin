@@ -171,6 +171,7 @@ Properties:
 ^^^^^^^^^^^
 
 * **network_interface_name:** Indicates the name of the network interface card to create.
+* **primary:** A boolean for specify the primary NIC on a multi-nic instance (Default: false).
 * **azure_config:** describes the configuration to use to use the Azure API. Outside a blueprint manager, you do not need to set this.
 
 Mapped Operations:

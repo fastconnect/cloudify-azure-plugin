@@ -185,9 +185,9 @@ def availability_account_name(**_):
         "type": "Microsoft.Storage/storageAccounts"
     }
 
-    connect = connection.AzureConnectionClient()
+    ctx.logger.debug('JSON: {}'.format(json))
 
-    response = connect.azure_post(ctx,
+    response = connection.AzureConnectionClient().azure_post(ctx,
         ("subscriptions/{}/" +
             "providers/Microsoft.Storage" +
             "/checkNameAvailability" +
