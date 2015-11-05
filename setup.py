@@ -1,5 +1,5 @@
-########
-# Copyright (c) 2014 GigaSpaces Technologies Ltd. All rights reserved
+﻿########
+# Copyright (c) 2014 Fastconnect - Atos. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ setup(
 
     version='0.0.2',
     author='fastconnect',
-    author_email='ENTER-AUTHOR-EMAIL-HERE',
+    author_email='gauvain@fastconnect.fr',
     description='The plugin designed to execute Cloudify 3 on Azure',
 
     # This must correspond to the actual packages in the plugin.
